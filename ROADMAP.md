@@ -15,11 +15,17 @@
 - **Storage** bucket `kita-media`, ditulis per folder household.
 - Skema database untuk seluruh modul kehidupan bersama sudah dibuat (lihat di bawah), tinggal UI-nya.
 
+- **Kartu Total Saldo baru** di dashboard: saldo asli sebagai fokus, perubahan bulan ini (+/−), ringkasan
+  pemasukan/pengeluaran, deretan penanda akun, dan grafik riwayat saldo yang halus dengan pemilih 7D / 1M / 3M / 1Y.
+  Riwayat saldo **dihitung mundur** dari saldo akun sekarang + transaksi (aturannya sama dengan trigger SQL),
+  jadi tidak perlu tabel baru. Logikanya ada di `src/lib/balance-history.ts` dan sudah diuji terhadap simulasi acak.
+- **Tugas, Belanja, Wishlist**: tiga layar pertama dari modul kehidupan bersama (`tasks`, `shopping_items`,
+  `wishlist_items`), lengkap dengan aksi server, saringan Eki/Dinda/Bersama, dan navigasinya.
+
 ## Tabel yang sudah ada tapi belum ada layarnya
 
-`wishlist_items`, `life_goals`, `trips`, `trip_items`, `places`, `calendar_events`,
-`date_ideas`, `gift_ideas`, `tasks`, `shopping_items`, `notes`, `memories`,
-`dashboard_widgets`.
+`life_goals`, `trips`, `trip_items`, `places`, `calendar_events`, `date_ideas`, `gift_ideas`,
+`notes`, `memories`, `dashboard_widgets`.
 
 Semuanya sudah ber-RLS household, sudah punya kolom `owner` (Eki/Dinda/Bersama), dan sudah
 punya foreign key penghubung: `trips.savings_goal_id`, `wishlist_items.savings_goal_id`,
@@ -31,7 +37,7 @@ kejutan), dan `notes` bisa ditandai privat.
 
 ## Belum dikerjakan
 
-1. Layar untuk 12 modul di atas.
+1. Layar untuk 10 modul di atas (Trip → Target tabungan → Anggaran → Transaksi adalah yang paling bernilai).
 2. Dashboard yang widgetnya bisa ditambah/dikurangi dan diatur ukurannya (tabel `dashboard_widgets` sudah siap).
 3. KITA AI — panel asisten. Tempat pasang model menyusul.
 4. Ekspor laporan ke Excel dan Google Sheets.
