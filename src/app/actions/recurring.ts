@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fail, getUserClient, num, optionalStr, str, UNAUTH, type ActionResult } from "./_shared";
+import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 import type { RecurringFrequency, TransactionType } from "@/lib/types";
 
 function nextDate(from: string, frequency: RecurringFrequency) {
@@ -45,13 +45,14 @@ function parse(formData: FormData) {
 }
 
 export async function createRecurring(formData: FormData): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const parsed = parse(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
 
-  const { error } = await supabase.from("recurring_transactions").insert({ ...parsed.values, user_id: user.id });
+  const { error } = await supabase.from("recurring_transactions").insert({ ...parsed.values, user_id: user.id, household_id: householdId });
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");
@@ -59,8 +60,9 @@ export async function createRecurring(formData: FormData): Promise<ActionResult>
 }
 
 export async function updateRecurring(id: string, formData: FormData): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const parsed = parse(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
@@ -69,7 +71,7 @@ export async function updateRecurring(id: string, formData: FormData): Promise<A
     .from("recurring_transactions")
     .update(parsed.values)
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");
@@ -77,14 +79,15 @@ export async function updateRecurring(id: string, formData: FormData): Promise<A
 }
 
 export async function toggleRecurring(id: string, isActive: boolean): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const { error } = await supabase
     .from("recurring_transactions")
     .update({ is_active: isActive })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");
@@ -92,10 +95,11 @@ export async function toggleRecurring(id: string, isActive: boolean): Promise<Ac
 }
 
 export async function deleteRecurring(id: string): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
-  const { error } = await supabase.from("recurring_transactions").delete().eq("id", id).eq("user_id", user.id);
+  const { error } = await supabase.from("recurring_transactions").delete().eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");
@@ -104,19 +108,21 @@ export async function deleteRecurring(id: string): Promise<ActionResult> {
 
 /** Catat tagihan berulang jadi transaksi nyata, lalu majukan tanggal berikutnya. */
 export async function runRecurringNow(id: string): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const { data: row, error: readError } = await supabase
     .from("recurring_transactions")
     .select("*")
     .eq("id", id)
-    .eq("user_id", user.id)
+    .eq("household_id", householdId)
     .single();
   if (readError || !row) return fail("Transaksi berulang tidak ditemukan.");
 
   const { error: insertError } = await supabase.from("transactions").insert({
     user_id: user.id,
+    household_id: householdId,
     type: row.type,
     amount: row.amount,
     occurred_on: row.next_run_on,
@@ -132,7 +138,7 @@ export async function runRecurringNow(id: string): Promise<ActionResult> {
     .from("recurring_transactions")
     .update({ next_run_on: nextDate(row.next_run_on, row.frequency) })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("household_id", householdId);
   if (updateError) return fail(updateError.message);
 
   revalidatePath("/dashboard", "layout");

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { changePassword, updateProfile } from "@/app/actions/profile";
 import { signOut } from "@/app/actions/auth";
+import { HouseholdCard } from "@/components/views/household-card";
 import { PageHeader } from "@/components/page-header";
 import { ThemePicker } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -20,12 +21,20 @@ export function SettingsClient({
   defaultOwner,
   accountCount,
   transactionCount,
+  householdName,
+  inviteCode,
+  memberKey,
+  members,
 }: {
   email: string;
   fullName: string;
   defaultOwner: MemberOwner;
   accountCount: number;
   transactionCount: number;
+  householdName: string;
+  inviteCode: string | null;
+  memberKey: MemberOwner;
+  members: { user_id: string; member_key: MemberOwner; full_name: string | null; email: string | null }[];
 }) {
   const router = useRouter();
   const [profileState, setProfileState] = useState<{ ok?: boolean; message?: string }>({});
@@ -38,6 +47,14 @@ export function SettingsClient({
       <PageHeader title="Pengaturan" description="Profil, preferensi, dan keamanan akun." />
 
       <div className="grid gap-4 lg:grid-cols-2">
+        <div className="space-y-4">
+        <HouseholdCard
+          householdName={householdName}
+          inviteCode={inviteCode}
+          memberKey={memberKey}
+          members={members}
+        />
+
         <Card>
           <CardHeader>
             <CardTitle>Profil</CardTitle>
@@ -97,6 +114,7 @@ export function SettingsClient({
             </form>
           </CardContent>
         </Card>
+        </div>
 
         <div className="space-y-4">
           <Card>

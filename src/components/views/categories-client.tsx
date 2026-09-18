@@ -4,7 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { createCategory, deleteCategory, updateCategory } from "@/app/actions/categories";
+import { CategoryIconTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { CategoryIconPicker } from "@/components/icon-picker";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,6 +76,8 @@ function CategoryDialog({ category, trigger }: { category?: Category; trigger: R
             </div>
           </div>
 
+          <CategoryIconPicker name="icon_key" defaultValue={category?.icon_key} color={category?.color ?? "#3F5540"} />
+
           {error ? <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
 
           <div className="flex justify-end gap-2 pt-2">
@@ -106,7 +110,12 @@ function CategoryList({ title, items }: { title: string; items: Category[] }) {
             {items.map((category) => (
               <li key={category.id} className="flex items-center justify-between gap-3 py-2.5">
                 <span className="flex min-w-0 items-center gap-3 text-sm">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: category.color }} />
+                  <CategoryIconTile
+                    iconKey={category.icon_key}
+                    name={category.name}
+                    color={category.color}
+                    size="sm"
+                  />
                   <span className="truncate">{category.name}</span>
                 </span>
                 <span className="flex shrink-0 gap-1">

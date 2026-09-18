@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fail, getUserClient, num, optionalStr, str, UNAUTH, type ActionResult } from "./_shared";
+import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 import type { TransactionType } from "@/lib/types";
 
 const TYPES: TransactionType[] = ["income", "expense", "transfer"];
@@ -44,13 +44,14 @@ function parseTransaction(formData: FormData) {
 }
 
 export async function createTransaction(formData: FormData): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
 
-  const { error } = await supabase.from("transactions").insert({ ...parsed.values, user_id: user.id });
+  const { error } = await supabase.from("transactions").insert({ ...parsed.values, user_id: user.id, household_id: householdId });
   if (error) return fail(error.message);
 
   revalidateAll();
@@ -58,13 +59,14 @@ export async function createTransaction(formData: FormData): Promise<ActionResul
 }
 
 export async function updateTransaction(id: string, formData: FormData): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
 
-  const { error } = await supabase.from("transactions").update(parsed.values).eq("id", id).eq("user_id", user.id);
+  const { error } = await supabase.from("transactions").update(parsed.values).eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidateAll();
@@ -72,10 +74,11 @@ export async function updateTransaction(id: string, formData: FormData): Promise
 }
 
 export async function deleteTransaction(id: string): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
-  const { error } = await supabase.from("transactions").delete().eq("id", id).eq("user_id", user.id);
+  const { error } = await supabase.from("transactions").delete().eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidateAll();

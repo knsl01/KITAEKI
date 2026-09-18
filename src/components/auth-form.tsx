@@ -15,7 +15,7 @@ export function AuthForm() {
   const [state, formAction, pending] = useActionState<AuthResult | null, FormData>(action, null);
 
   return (
-    <div className="w-full max-w-md rounded-lg border border-border bg-card p-8">
+    <div className="page-enter w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-[0_24px_60px_-40px_hsl(var(--foreground)/0.4)]">
       <div className="mb-8 text-center">
         <p className="font-serif text-xl tracking-tight">EKI &amp; DINDA</p>
         <p className="mt-1 text-[10px] tracking-[0.3em] text-muted-foreground">PERSONAL LIFE HUB</p>

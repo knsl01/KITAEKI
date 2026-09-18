@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Pencil, Search, Trash2 } from "lucide-react";
+import { CategoryIconTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { PageHeader } from "@/components/page-header";
 import { TransactionAmount } from "@/components/transaction-amount";
@@ -189,9 +190,11 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
                   <TableCell>
                     {t.category ? (
                       <span className="inline-flex items-center gap-2 text-sm">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: t.category.color }}
+                        <CategoryIconTile
+                          iconKey={t.category.icon_key}
+                          name={t.category.name}
+                          color={t.category.color}
+                          size="sm"
                         />
                         {t.category.name}
                       </span>

@@ -19,6 +19,8 @@ export type Account = {
   owner: MemberOwner;
   initial_balance: number;
   balance: number;
+  icon_key: string | null;
+  household_id?: string | null;
   is_active: boolean;
   created_at: string;
 };
@@ -29,6 +31,8 @@ export type Category = {
   name: string;
   kind: CategoryKind;
   color: string;
+  icon_key: string | null;
+  household_id?: string | null;
   created_at: string;
 };
 
@@ -49,7 +53,7 @@ export type Transaction = {
 export type TransactionWithRelations = Transaction & {
   account: Pick<Account, "id" | "name"> | null;
   to_account: Pick<Account, "id" | "name"> | null;
-  category: Pick<Category, "id" | "name" | "color" | "kind"> | null;
+  category: Pick<Category, "id" | "name" | "color" | "kind" | "icon_key"> | null;
 };
 
 export type Budget = {

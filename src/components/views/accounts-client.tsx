@@ -4,7 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { createAccount, deleteAccount, updateAccount } from "@/app/actions/accounts";
+import { BrandMarkTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
+import { BrandPicker } from "@/components/icon-picker";
 import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,6 +91,8 @@ function AccountDialog({ account, trigger }: { account?: Account; trigger: React
             </div>
           </div>
 
+          <BrandPicker name="icon_key" defaultValue={account?.icon_key} />
+
           <div className="space-y-2">
             <Label htmlFor="initial_balance">Saldo awal</Label>
             <Input
@@ -168,11 +172,14 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
           {accounts.map((account) => (
             <Card key={account.id} className="p-5">
               <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
+                <div className="flex min-w-0 items-start gap-3">
+                  <BrandMarkTile iconKey={account.icon_key} name={account.name} />
+                  <div className="min-w-0">
                   <p className="truncate font-medium">{account.name}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {ACCOUNT_TYPE_LABEL[account.type]} · {OWNER_LABEL[account.owner]}
                   </p>
+                  </div>
                 </div>
                 {account.is_active ? null : <Badge>Nonaktif</Badge>}
               </div>

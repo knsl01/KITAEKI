@@ -3,128 +3,238 @@
 @tailwind utilities;
 
 @layer base {
-  /* ── Sage (default) ───────────────────────────────── */
   :root,
   [data-theme="sage"] {
     --background: 40 12% 97%;
     --foreground: 150 10% 12%;
-
     --card: 0 0% 100%;
     --card-foreground: 150 10% 12%;
-
     --muted: 40 10% 94%;
     --muted-foreground: 150 6% 45%;
-
     --accent: 140 12% 92%;
     --accent-foreground: 150 10% 12%;
-
     --primary: 148 17% 22%;
     --primary-foreground: 40 20% 97%;
-
     --secondary: 40 10% 94%;
     --secondary-foreground: 150 10% 12%;
-
-    --destructive: 0 62% 47%;
+    --destructive: 352 62% 48%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 40 8% 89%;
     --input: 40 8% 89%;
     --ring: 148 17% 30%;
-
     --sidebar: 155 14% 13%;
     --sidebar-foreground: 40 14% 88%;
-
     --positive: 152 38% 34%;
     --negative: 352 62% 48%;
-
     --chart-income: hsl(148 26% 34%);
     --chart-expense: hsl(352 45% 55%);
     --chart-grid: hsl(40 8% 89%);
     --chart-axis: hsl(150 6% 45%);
-
-    --radius: 0.625rem;
+    --radius: 0.75rem;
   }
 
-  /* ── Deep purple ──────────────────────────────────── */
   [data-theme="deep-purple"] {
     --background: 270 20% 98%;
     --foreground: 268 25% 13%;
-
     --card: 0 0% 100%;
     --card-foreground: 268 25% 13%;
-
     --muted: 268 22% 95%;
     --muted-foreground: 268 10% 46%;
-
     --accent: 268 30% 93%;
     --accent-foreground: 268 25% 13%;
-
     --primary: 266 42% 30%;
     --primary-foreground: 270 30% 98%;
-
     --secondary: 268 22% 95%;
     --secondary-foreground: 268 25% 13%;
-
-    --destructive: 350 62% 47%;
+    --destructive: 348 62% 52%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 268 18% 90%;
     --input: 268 18% 90%;
     --ring: 266 45% 42%;
-
     --sidebar: 268 38% 16%;
     --sidebar-foreground: 270 26% 90%;
-
     --positive: 160 40% 33%;
     --negative: 348 62% 52%;
-
     --chart-income: hsl(266 38% 46%);
     --chart-expense: hsl(330 45% 58%);
     --chart-grid: hsl(268 18% 90%);
     --chart-axis: hsl(268 10% 46%);
-
-    --radius: 0.625rem;
+    --radius: 0.75rem;
   }
 
-  /* ── Deep blue ────────────────────────────────────── */
   [data-theme="deep-blue"] {
     --background: 215 28% 98%;
     --foreground: 217 30% 14%;
-
     --card: 0 0% 100%;
     --card-foreground: 217 30% 14%;
-
     --muted: 214 24% 95%;
     --muted-foreground: 215 12% 45%;
-
     --accent: 214 34% 93%;
     --accent-foreground: 217 30% 14%;
-
     --primary: 218 48% 28%;
     --primary-foreground: 215 30% 98%;
-
     --secondary: 214 24% 95%;
     --secondary-foreground: 217 30% 14%;
-
-    --destructive: 356 62% 48%;
+    --destructive: 356 62% 52%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 214 20% 90%;
     --input: 214 20% 90%;
     --ring: 218 50% 40%;
-
     --sidebar: 219 42% 15%;
     --sidebar-foreground: 214 28% 90%;
-
     --positive: 172 44% 30%;
     --negative: 356 62% 52%;
-
     --chart-income: hsl(214 46% 42%);
     --chart-expense: hsl(356 48% 58%);
     --chart-grid: hsl(214 20% 90%);
     --chart-axis: hsl(215 12% 45%);
+    --radius: 0.75rem;
+  }
 
-    --radius: 0.625rem;
+  [data-theme="burgundy"] {
+    --background: 20 24% 98%;
+    --foreground: 345 22% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 345 22% 14%;
+    --muted: 12 20% 95%;
+    --muted-foreground: 345 8% 45%;
+    --accent: 350 30% 94%;
+    --accent-foreground: 345 22% 14%;
+    --primary: 345 48% 27%;
+    --primary-foreground: 20 30% 98%;
+    --secondary: 12 20% 95%;
+    --secondary-foreground: 345 22% 14%;
+    --destructive: 4 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 14 18% 90%;
+    --input: 14 18% 90%;
+    --ring: 345 45% 40%;
+    --sidebar: 345 40% 15%;
+    --sidebar-foreground: 20 22% 90%;
+    --positive: 150 36% 32%;
+    --negative: 4 62% 50%;
+    --chart-income: hsl(345 40% 42%);
+    --chart-expense: hsl(24 58% 54%);
+    --chart-grid: hsl(14 18% 90%);
+    --chart-axis: hsl(345 8% 45%);
+    --radius: 0.75rem;
+  }
+
+  [data-mode="dark"],
+  [data-theme="sage"][data-mode="dark"] {
+    --background: 155 12% 8%;
+    --foreground: 40 14% 92%;
+    --card: 155 12% 11%;
+    --card-foreground: 40 14% 92%;
+    --muted: 155 10% 16%;
+    --muted-foreground: 150 6% 62%;
+    --accent: 152 14% 18%;
+    --accent-foreground: 40 14% 92%;
+    --primary: 146 24% 62%;
+    --primary-foreground: 155 20% 10%;
+    --secondary: 155 10% 16%;
+    --secondary-foreground: 40 14% 92%;
+    --destructive: 352 62% 64%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 155 10% 19%;
+    --input: 155 10% 19%;
+    --ring: 146 26% 50%;
+    --sidebar: 155 14% 10%;
+    --sidebar-foreground: 40 14% 88%;
+    --positive: 150 42% 58%;
+    --negative: 352 62% 64%;
+    --chart-income: hsl(146 32% 52%);
+    --chart-expense: hsl(352 52% 62%);
+    --chart-grid: hsl(155 10% 19%);
+    --chart-axis: hsl(150 6% 62%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="deep-purple"][data-mode="dark"] {
+    --background: 268 26% 9%;
+    --foreground: 270 20% 93%;
+    --card: 268 24% 12%;
+    --card-foreground: 270 20% 93%;
+    --muted: 268 20% 17%;
+    --muted-foreground: 268 10% 64%;
+    --accent: 268 24% 20%;
+    --accent-foreground: 270 20% 93%;
+    --primary: 266 46% 70%;
+    --primary-foreground: 268 35% 12%;
+    --secondary: 268 20% 17%;
+    --secondary-foreground: 270 20% 93%;
+    --destructive: 344 62% 66%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 268 18% 21%;
+    --input: 268 18% 21%;
+    --ring: 266 45% 58%;
+    --sidebar: 268 32% 11%;
+    --sidebar-foreground: 270 22% 90%;
+    --positive: 158 42% 56%;
+    --negative: 344 62% 66%;
+    --chart-income: hsl(266 44% 62%);
+    --chart-expense: hsl(330 52% 66%);
+    --chart-grid: hsl(268 18% 21%);
+    --chart-axis: hsl(268 10% 64%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="deep-blue"][data-mode="dark"] {
+    --background: 219 32% 9%;
+    --foreground: 214 24% 93%;
+    --card: 219 30% 12%;
+    --card-foreground: 214 24% 93%;
+    --muted: 217 24% 17%;
+    --muted-foreground: 215 12% 64%;
+    --accent: 217 28% 20%;
+    --accent-foreground: 214 24% 93%;
+    --primary: 212 60% 68%;
+    --primary-foreground: 219 40% 12%;
+    --secondary: 217 24% 17%;
+    --secondary-foreground: 214 24% 93%;
+    --destructive: 356 62% 66%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 20% 21%;
+    --input: 217 20% 21%;
+    --ring: 212 55% 56%;
+    --sidebar: 219 36% 11%;
+    --sidebar-foreground: 214 24% 90%;
+    --positive: 170 46% 52%;
+    --negative: 356 62% 66%;
+    --chart-income: hsl(212 56% 60%);
+    --chart-expense: hsl(356 54% 66%);
+    --chart-grid: hsl(217 20% 21%);
+    --chart-axis: hsl(215 12% 64%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="burgundy"][data-mode="dark"] {
+    --background: 345 24% 8%;
+    --foreground: 20 20% 93%;
+    --card: 345 22% 11%;
+    --card-foreground: 20 20% 93%;
+    --muted: 345 16% 17%;
+    --muted-foreground: 345 8% 63%;
+    --accent: 348 20% 20%;
+    --accent-foreground: 20 20% 93%;
+    --primary: 348 52% 68%;
+    --primary-foreground: 345 34% 11%;
+    --secondary: 345 16% 17%;
+    --secondary-foreground: 20 20% 93%;
+    --destructive: 6 62% 64%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 345 16% 21%;
+    --input: 345 16% 21%;
+    --ring: 348 48% 55%;
+    --sidebar: 345 32% 10%;
+    --sidebar-foreground: 20 20% 90%;
+    --positive: 150 40% 55%;
+    --negative: 6 62% 64%;
+    --chart-income: hsl(348 48% 60%);
+    --chart-expense: hsl(26 58% 62%);
+    --chart-grid: hsl(345 16% 21%);
+    --chart-axis: hsl(345 8% 63%);
+    --radius: 0.75rem;
   }
 
   * {
@@ -147,6 +257,22 @@
 
   :focus-visible {
     outline: none;
+  }
+}
+
+@layer components {
+  /* Konten mengikuti lebar sidebar yang bisa diciutkan */
+  .app-shell {
+    padding-left: 0;
+  }
+  @media (min-width: 1024px) {
+    .app-shell {
+      padding-left: 16rem;
+      transition: padding-left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    html[data-sidebar="collapsed"] .app-shell {
+      padding-left: 76px;
+    }
   }
 }
 

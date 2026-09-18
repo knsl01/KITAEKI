@@ -12,21 +12,38 @@ const serif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "KITA — Eki & Dinda",
-  description: "Satu tempat untuk mencatat keuangan dan merencanakan hidup bersama.",
+  title: { default: "KITA — Eki & Dinda", template: "%s · KITA" },
+  description: "Keuangan dan rencana hidup bersama dalam satu tempat.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "KITA",
+  appleWebApp: { capable: true, title: "KITA", statusBarStyle: "black-translucent" },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1F2A24",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F7F6F3" },
+    { media: "(prefers-color-scheme: dark)", color: "#14201A" },
+  ],
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
 };
+
+const sidebarBootstrap = `(function(){try{document.documentElement.dataset.sidebar=localStorage.getItem("kita-sidebar-collapsed")==="1"?"collapsed":"expanded";}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={`${inter.variable} ${serif.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript + sidebarBootstrap }} />
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>

@@ -1,11 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fail, getUserClient, num, str, UNAUTH, type ActionResult } from "./_shared";
+import { fail, getUserClient, num, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 
 export async function upsertBudget(formData: FormData): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
   const category_id = str(formData, "category_id");
   const amount = num(formData, "amount");
@@ -18,8 +19,8 @@ export async function upsertBudget(formData: FormData): Promise<ActionResult> {
   const { error } = await supabase
     .from("budgets")
     .upsert(
-      { user_id: user.id, category_id, amount, period_month: `${month}-01` },
-      { onConflict: "user_id,category_id,period_month" }
+      { user_id: user.id, household_id: householdId, category_id, amount, period_month: `${month}-01` },
+      { onConflict: "household_id,category_id,period_month" }
     );
   if (error) return fail(error.message);
 
@@ -28,10 +29,11 @@ export async function upsertBudget(formData: FormData): Promise<ActionResult> {
 }
 
 export async function deleteBudget(id: string): Promise<ActionResult> {
-  const { supabase, user } = await getUserClient();
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
 
-  const { error } = await supabase.from("budgets").delete().eq("id", id).eq("user_id", user.id);
+  const { error } = await supabase.from("budgets").delete().eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");

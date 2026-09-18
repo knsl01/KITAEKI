@@ -1,5 +1,6 @@
 import { SettingsClient } from "@/components/views/settings-client";
 import { createClient } from "@/lib/supabase/server";
+import { getWorkspace } from "@/lib/workspace";
 import type { MemberOwner } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +11,8 @@ export default async function SettingsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const workspace = await getWorkspace();
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -29,6 +32,10 @@ export default async function SettingsPage() {
       defaultOwner={(profile?.default_owner as MemberOwner) ?? "shared"}
       accountCount={accountCount ?? 0}
       transactionCount={transactionCount ?? 0}
+      householdName={workspace?.householdName ?? "KITA"}
+      inviteCode={workspace?.inviteCode ?? null}
+      memberKey={workspace?.memberKey ?? "eki"}
+      members={workspace?.members ?? []}
     />
   );
 }

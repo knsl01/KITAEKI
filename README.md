@@ -27,7 +27,7 @@ Service-role key tidak dipakai di mana pun dan tidak boleh ditaruh di project in
 ## Setup Supabase
 
 1. Buat project baru di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan isi `supabase/migrations/0001_init.sql`.
+2. Buka **SQL Editor**, jalankan `supabase/migrations/0001_init.sql`, lalu `supabase/migrations/0002_household.sql` (urut).
 3. **Authentication → Providers → Email**: aktifkan. Untuk pemakaian pribadi, matikan "Confirm email" supaya akun langsung bisa dipakai.
 4. **Authentication → URL Configuration**: isi Site URL dengan domain Vercel kamu.
 5. Salin Project URL dan anon key ke `.env`.
@@ -66,7 +66,9 @@ Saldo akun dihitung di database lewat trigger, jadi tetap sinkron saat transaksi
 
 ## Tema
 
-Tersedia tiga tema: **Sage** (default), **Deep purple**, dan **Deep blue**. Ganti lewat ikon palet di header atau kartu Tema di halaman Pengaturan.
+Tersedia empat tema: **Sage** (default), **Deep purple**, **Deep blue**, dan **Burgundy** — masing-masing punya versi terang dan gelap, plus mode mengikuti sistem. Ganti lewat ikon palet di header atau kartu Tema di halaman Pengaturan.
+
+Status fitur dan apa yang belum dikerjakan ada di `ROADMAP.md`.
 
 Semua warna didefinisikan sebagai CSS variable di `src/app/globals.css`, termasuk warna grafik, jadi menambah tema baru cukup menambah satu blok `[data-theme="..."]` dan satu entri di `THEMES` pada `src/components/theme-provider.tsx`.
 
