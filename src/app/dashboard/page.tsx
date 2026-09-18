@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Plus, Wallet } from "lucide-react";
+import { BalanceHero, BalanceHeroSkeleton } from "@/components/dashboard/balance-hero";
 import { DashboardBanner, type BannerSettings } from "@/components/dashboard/banner";
 import { BrandMarkTile, CategoryIconTile } from "@/components/brand-mark";
 import { CategoryDonut } from "@/components/charts/category-donut";
@@ -116,8 +118,17 @@ export default async function DashboardPage({
         />
       ) : null}
 
-      <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Total saldo" value={totalBalance} hint={`${accountList.length} akun aktif`} />
+      <Suspense fallback={<BalanceHeroSkeleton />}>
+        <BalanceHero
+          accounts={accountList}
+          total={totalBalance}
+          income={current.income}
+          expense={current.expense}
+          viewLabel={view === "bersama" ? "Bersama" : memberName(view)}
+        />
+      </Suspense>
+
+      <div className="stagger grid gap-4 md:grid-cols-3">
         <StatCard
           label="Pemasukan bulan ini"
           value={current.income}

@@ -57,6 +57,28 @@ export function bool(form: FormData, key: string) {
   return v === "true" || v === "on" || v === "1";
 }
 
+/** Nilai enum dari form; kalau tidak dikenal, pakai fallback. */
+export function pick<T extends string>(form: FormData, key: string, allowed: readonly T[], fallback: T): T {
+  const v = str(form, key);
+  return (allowed as readonly string[]).includes(v) ? (v as T) : fallback;
+}
+
+/** Hanya http/https, supaya tautan tersimpan tidak bisa berisi javascript: dan sejenisnya. */
+export function safeUrl(form: FormData, key: string): string | null {
+  const raw = str(form, key);
+  if (!raw) return null;
+  // Ada skema selain http/https (ftp://, file://, ...): tolak, jangan ditempeli https://.
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(raw) && !/^https?:\/\//i.test(raw)) return null;
+  try {
+    const url = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export const OWNER_KEYS = ["eki", "dinda", "shared"] as const;
+
 export function fail(error: string): ActionResult {
   return { ok: false, error };
 }

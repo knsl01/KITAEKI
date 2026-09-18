@@ -2,6 +2,7 @@ export type MemberOwner = "eki" | "dinda" | "shared";
 export type TransactionType = "income" | "expense" | "transfer";
 export type CategoryKind = "income" | "expense";
 export type AccountType = "bank" | "ewallet" | "cash" | "other";
+export type ItemPriority = "low" | "medium" | "high";
 export type RecurringFrequency = "daily" | "weekly" | "monthly" | "yearly";
 
 export type Profile = {
@@ -117,4 +118,44 @@ export const FREQUENCY_LABEL: Record<RecurringFrequency, string> = {
   weekly: "Mingguan",
   monthly: "Bulanan",
   yearly: "Tahunan",
+};
+
+export type Task = {
+  id: string;
+  assigned_to: MemberOwner;
+  title: string;
+  detail: string | null;
+  due_on: string | null;
+  is_done: boolean;
+  done_at: string | null;
+  created_at: string;
+};
+
+export type ShoppingItem = {
+  id: string;
+  assigned_to: MemberOwner;
+  name: string;
+  quantity: string | null;
+  estimated_price: number | null;
+  is_bought: boolean;
+  created_at: string;
+};
+
+export type WishlistItem = {
+  id: string;
+  owner: MemberOwner;
+  name: string;
+  price: number | null;
+  url: string | null;
+  priority: ItemPriority;
+  is_purchased: boolean;
+  purchased_on: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
+export const PRIORITY_LABEL: Record<ItemPriority, string> = {
+  high: "Prioritas tinggi",
+  medium: "Prioritas sedang",
+  low: "Prioritas rendah",
 };

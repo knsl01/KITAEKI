@@ -1,8 +1,11 @@
 import {
   ArrowLeftRight,
+  Gift,
+  ListChecks,
   LayoutDashboard,
   PiggyBank,
   Receipt,
+  ShoppingCart,
   Repeat,
   Settings,
   Tags,
@@ -20,6 +23,9 @@ export const NAV_ITEMS = [
   { href: "/dashboard/savings", label: "Tabungan & Target", icon: PiggyBank },
   { href: "/dashboard/recurring", label: "Berulang", icon: Repeat },
   { href: "/dashboard/reports", label: "Laporan", icon: BarChart3 },
+  { href: "/dashboard/tasks", label: "Tugas", icon: ListChecks },
+  { href: "/dashboard/shopping", label: "Belanja", icon: ShoppingCart },
+  { href: "/dashboard/wishlist", label: "Wishlist", icon: Gift },
   { href: "/dashboard/categories", label: "Kategori", icon: Tags },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ] as const;
