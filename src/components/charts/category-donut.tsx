@@ -20,7 +20,7 @@ export function CategoryDonut({ data }: { data: CategorySlice[] }) {
             </Pie>
             <Tooltip
               formatter={(value: number, name) => [formatCurrency(value), name]}
-              contentStyle={{ borderRadius: 8, border: "1px solid hsl(40 8% 89%)", fontSize: 12 }}
+              contentStyle={{ borderRadius: 8, border: "1px solid var(--chart-grid)", fontSize: 12 }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -32,8 +32,11 @@ export function CategoryDonut({ data }: { data: CategorySlice[] }) {
 
       <ul className="w-full space-y-2.5">
         {data.map((slice) => (
-          <li key={slice.name} className="flex items-center gap-3 text-sm">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: slice.color }} />
+          <li key={slice.name} className="group flex items-center gap-3 text-sm">
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full transition-transform duration-200 group-hover:scale-150"
+              style={{ backgroundColor: slice.color }}
+            />
             <span className="flex-1 truncate">{slice.name}</span>
             <span className="tabular text-muted-foreground">{percent(slice.value, total)}%</span>
           </li>

@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total saldo" value={totalBalance} hint={`${accountList.length} akun tercatat`} />
         <StatCard
           label="Pemasukan bulan ini"

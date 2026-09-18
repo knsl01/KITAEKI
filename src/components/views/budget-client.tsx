@@ -166,7 +166,7 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
           />
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {budgets.map((budget) => {
             const spent = spentByCategory.get(budget.category_id) ?? 0;
             const pct = percent(spent, Number(budget.amount));

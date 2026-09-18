@@ -19,11 +19,16 @@ export function MobileNav() {
               <Link
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px]",
+                  "flex flex-col items-center gap-1 py-2.5 text-[11px] transition-colors duration-200 active:scale-95",
                   active ? "text-foreground" : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-5 w-5" />
+                <Icon
+                  className={cn(
+                    "h-5 w-5 transition-transform duration-200",
+                    active ? "scale-110" : "scale-100"
+                  )}
+                />
                 {item.label}
               </Link>
             </li>

@@ -164,7 +164,7 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
           />
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {accounts.map((account) => (
             <Card key={account.id} className="p-5">
               <div className="flex items-start justify-between gap-2">

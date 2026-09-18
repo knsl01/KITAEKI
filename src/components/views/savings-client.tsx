@@ -233,7 +233,7 @@ export function SavingsClient({ goals }: { goals: SavingsGoal[] }) {
           <EmptyState title="Belum ada target" description="Buat target pertama, misalnya dana darurat." />
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {goals.map((goal) => {
             const pct = percent(Number(goal.current_amount), Number(goal.target_amount));
             return (

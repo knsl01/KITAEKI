@@ -6,6 +6,7 @@ import { Loader2 } from "lucide-react";
 import { changePassword, updateProfile } from "@/app/actions/profile";
 import { signOut } from "@/app/actions/auth";
 import { PageHeader } from "@/components/page-header";
+import { ThemePicker } from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -138,6 +139,18 @@ export function SettingsClient({
                   Perbarui password
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tema</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Pilihan warna tersimpan di browser ini, jadi Eki dan Dinda bisa pakai tema berbeda.
+              </p>
+              <ThemePicker />
             </CardContent>
           </Card>
 

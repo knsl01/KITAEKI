@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { MobileNav } from "@/components/mobile-nav";
+import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +31,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           defaultOwner={(profile?.default_owner as MemberOwner) ?? "shared"}
           name={name}
         />
-        <main className="px-4 pb-24 pt-6 lg:px-8 lg:pb-10">{children}</main>
+        <main className="px-4 pb-24 pt-6 lg:px-8 lg:pb-10">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
       <MobileNav />
     </div>
