@@ -1,1 +1,75 @@
-# KITAEKI
+# KITA — Eki & Dinda
+
+Aplikasi keuangan bersama: catat pemasukan, pengeluaran, dan transfer antar akun; atur anggaran per kategori; kejar target tabungan; lihat laporan arus kas.
+
+Stack: Next.js (App Router) · TypeScript · Tailwind CSS · Supabase (Auth + Postgres) · Recharts · Lucide.
+
+## Jalankan lokal
+
+```bash
+npm install
+cp .env.example .env
+# isi kredensial Supabase di .env
+npm run dev
+```
+
+Buka http://localhost:3000.
+
+## Environment
+
+| Variabel | Keterangan |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL project Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon/publishable key |
+
+Service-role key tidak dipakai di mana pun dan tidak boleh ditaruh di project ini. Semua akses data lewat anon key + Row Level Security.
+
+## Setup Supabase
+
+1. Buat project baru di [supabase.com](https://supabase.com).
+2. Buka **SQL Editor**, jalankan isi `supabase/migrations/0001_init.sql`.
+3. **Authentication → Providers → Email**: aktifkan. Untuk pemakaian pribadi, matikan "Confirm email" supaya akun langsung bisa dipakai.
+4. **Authentication → URL Configuration**: isi Site URL dengan domain Vercel kamu.
+5. Salin Project URL dan anon key ke `.env`.
+
+Migrasi tersebut membuat tabel, index, trigger sinkronisasi saldo, dan policy RLS. Setiap user baru otomatis dapat profil dan satu set kategori awal.
+
+## Deploy ke Vercel
+
+1. Push repo ini ke GitHub.
+2. Import repo di Vercel (framework terdeteksi otomatis sebagai Next.js).
+3. Tambahkan dua environment variable di atas untuk Production, Preview, dan Development.
+4. Deploy.
+
+## Model data
+
+| Tabel | Isi |
+| --- | --- |
+| `profiles` | Nama tampilan dan pemilik default transaksi |
+| `accounts` | Rekening, e-wallet, tunai, beserta saldonya |
+| `categories` | Kategori pemasukan dan pengeluaran |
+| `transactions` | Pemasukan, pengeluaran, transfer |
+| `budgets` | Batas belanja per kategori per bulan |
+| `savings_goals` | Target tabungan dan progresnya |
+| `recurring_transactions` | Tagihan atau pemasukan rutin |
+
+Semua tabel memakai UUID, timestamp, foreign key, index, dan RLS berbasis `auth.uid()`.
+
+## Aturan perhitungan
+
+- Pemasukan menambah saldo akun.
+- Pengeluaran mengurangi saldo akun.
+- Transfer memindahkan dana antar akun dan tidak dihitung sebagai pemasukan maupun pengeluaran.
+- Tabungan bulan ini = pemasukan − pengeluaran.
+
+Saldo akun dihitung di database lewat trigger, jadi tetap sinkron saat transaksi ditambah, diubah, atau dihapus — termasuk kalau datanya diedit langsung dari Supabase.
+
+## Struktur
+
+```
+src/app/actions      server actions (CRUD + auth)
+src/app/dashboard    halaman aplikasi
+src/components       komponen UI dan tampilan per halaman
+src/lib              supabase client, helper format, agregasi
+supabase/migrations  skema database
+```

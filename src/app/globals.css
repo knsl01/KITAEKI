@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 12% 97%;
+    --foreground: 150 10% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 10% 12%;
+
+    --muted: 40 10% 94%;
+    --muted-foreground: 150 6% 45%;
+
+    --accent: 140 12% 92%;
+    --accent-foreground: 150 10% 12%;
+
+    --primary: 148 17% 22%;
+    --primary-foreground: 40 20% 97%;
+
+    --secondary: 40 10% 94%;
+    --secondary-foreground: 150 10% 12%;
+
+    --destructive: 0 62% 47%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 8% 89%;
+    --input: 40 8% 89%;
+    --ring: 148 17% 30%;
+
+    --sidebar: 155 14% 13%;
+    --sidebar-foreground: 40 14% 88%;
+
+    --positive: 152 38% 34%;
+    --negative: 352 62% 48%;
+
+    --radius: 0.625rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "tnum" 0;
+  }
+
+  ::selection {
+    @apply bg-primary/15;
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
