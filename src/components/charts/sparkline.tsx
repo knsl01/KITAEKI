@@ -6,10 +6,11 @@ import { cn } from "@/lib/utils";
 
 export type SparklineTone = "primary" | "positive" | "negative";
 
+// Warna garis lewat token khusus grafik (bawaan = warna tema; Black Pink = pink neon)
 const TONE_TEXT: Record<SparklineTone, string> = {
-  primary: "text-primary",
-  positive: "text-positive",
-  negative: "text-negative",
+  primary: "text-[hsl(var(--chart-line))]",
+  positive: "text-[hsl(var(--line-positive))]",
+  negative: "text-[hsl(var(--line-negative))]",
 };
 
 const W = 100;
@@ -89,6 +90,25 @@ export function Sparkline({
           </linearGradient>
         </defs>
         <path d={area} fill={`url(#${gradientId})`} />
+        {/* Cahaya neon: tiga lapis garis yang makin lebar dan makin pudar (hanya tampil di tema Black Pink) */}
+        {[
+          [13, 0.07],
+          [8, 0.13],
+          [4.5, 0.26],
+        ].map(([width, opacity]) => (
+          <path
+            key={width}
+            className="chart-glow"
+            d={line}
+            fill="none"
+            stroke="currentColor"
+            strokeOpacity={opacity}
+            strokeWidth={width}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
         <path
           d={line}
           fill="none"
@@ -110,7 +130,7 @@ export function Sparkline({
       <span
         aria-hidden
         className={cn(
-          "pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-current ring-[3px] ring-card transition-[width,height] duration-150",
+          "chart-dot pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-current ring-[3px] ring-card transition-[width,height] duration-150",
           active !== null ? "h-3 w-3" : "h-2.5 w-2.5"
         )}
         style={{ left: `${(focus.x / W) * 100}%`, top: `${(focus.y / H) * 100}%` }}

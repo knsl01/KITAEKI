@@ -88,6 +88,7 @@ const IMAGE_TOKENS = {
   "--muted-foreground": "0 0% 100% / 0.74",
   "--muted": "0 0% 100% / 0.16",
   "--primary": "0 0% 100%",
+  "--chart-line": "0 0% 100%",
   "--positive": "146 62% 74%",
   "--negative": "6 100% 82%",
   "--border": "0 0% 100% / 0.22",
@@ -547,7 +548,7 @@ export function BalanceHeroCard({
             key={periodKey}
             viewBox={`0 0 ${W} ${H}`}
             preserveAspectRatio="none"
-            className="chart-reveal absolute inset-0 h-full w-full text-primary"
+            className="chart-reveal absolute inset-0 h-full w-full text-[hsl(var(--chart-line))]"
             aria-hidden
           >
             <defs>
@@ -570,6 +571,25 @@ export function BalanceHeroCard({
                 vectorEffect="non-scaling-stroke"
               />
             ) : null}
+            {/* Cahaya neon: lapisan garis lebar yang pudar (hanya tampil di tema Black Pink) */}
+            {[
+              [14, 0.07],
+              [9, 0.13],
+              [5, 0.26],
+            ].map(([width, opacity]) => (
+              <path
+                key={width}
+                className="chart-glow"
+                d={chart.line}
+                fill="none"
+                stroke="currentColor"
+                strokeOpacity={opacity}
+                strokeWidth={width}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
             <path
               d={chart.line}
               fill="none"
@@ -585,13 +605,13 @@ export function BalanceHeroCard({
             <>
               <span
                 aria-hidden
-                className="pointer-events-none absolute top-0 bottom-0 w-px bg-primary opacity-30"
+                className="pointer-events-none absolute top-0 bottom-0 w-px bg-[hsl(var(--chart-line))] opacity-30"
                 style={{ left: `${(hoveredPoint.x / W) * 100}%` }}
               />
               <span
                 aria-hidden
                 className={cn(
-                  "pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary ring-4",
+                  "chart-dot pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(var(--chart-line))] ring-4",
                   onImage ? "ring-black/30" : "ring-card"
                 )}
                 style={{ left: `${(hoveredPoint.x / W) * 100}%`, top: `${(hoveredPoint.y / H) * 100}%` }}
@@ -603,9 +623,12 @@ export function BalanceHeroCard({
               className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2"
               style={{ left: `${(endPoint.x / W) * 100}%`, top: `${(endPoint.y / H) * 100}%` }}
             >
-              <span className="dot-ping absolute inset-0 rounded-full bg-primary" />
+              <span className="dot-ping absolute inset-0 rounded-full bg-[hsl(var(--chart-line))]" />
               <span
-                className={cn("relative block h-2.5 w-2.5 rounded-full bg-primary ring-[3px]", onImage ? "ring-black/30" : "ring-card")}
+                className={cn(
+                  "chart-dot relative block h-2.5 w-2.5 rounded-full bg-[hsl(var(--chart-line))] ring-[3px]",
+                  onImage ? "ring-black/30" : "ring-card"
+                )}
               />
             </span>
           )}

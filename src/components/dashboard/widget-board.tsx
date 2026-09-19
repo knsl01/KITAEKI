@@ -598,7 +598,7 @@ export function WidgetBoard({
         <div
           role="toolbar"
           aria-label="Mengatur widget"
-          className="sticky top-[4.5rem] z-30 mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card/95 p-2 pl-4 shadow-[0_12px_32px_-16px_hsl(var(--foreground)/0.35)] backdrop-blur"
+          className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-30 mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card/95 p-2 pl-4 shadow-[0_12px_32px_-16px_hsl(var(--foreground)/0.35)] backdrop-blur"
         >
           <p className="mr-auto min-w-0 text-sm">
             <span className="font-medium">Mengatur widget</span>

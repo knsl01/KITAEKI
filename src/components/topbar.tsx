@@ -26,7 +26,11 @@ export function Topbar({
   }).format(new Date());
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur lg:px-8">
+    <header className="sticky top-0 z-30 flex h-[calc(4rem+env(safe-area-inset-top))] items-center justify-between gap-3 border-b border-border bg-background/95 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)] backdrop-blur lg:px-8">
+      {/* Saat dibuka dari layar utama iPhone, status bar transparan dan ikonnya putih. Area di bawah
+          notch diberi warna gelap (sama dengan sidebar) supaya jam dan baterai tetap terbaca.
+          Di Safari tingginya 0, jadi tidak terlihat. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-sidebar" />
       <div className="flex items-center gap-2">
         <MobileMenu householdName={householdName} variant="topbar" />
         <ThemeSwitcher />

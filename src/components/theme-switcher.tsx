@@ -43,6 +43,7 @@ export function ThemePicker() {
         <div className="grid grid-cols-3 gap-2.5" role="radiogroup" aria-label="Warna tema">
           {THEMES.map((option) => {
             const active = theme === option.id;
+            const accent = "accent" in option ? (option.accent as string) : null;
             return (
               <button
                 key={option.id}
@@ -60,12 +61,18 @@ export function ThemePicker() {
                   <span className="relative w-1/2 bg-[#F7F6F3]">
                     <span className="absolute left-2 top-2.5 h-2 w-7 rounded-full" style={{ backgroundColor: option.swatch }} />
                     <span className="absolute left-2 top-6 h-1.5 w-10 rounded-full opacity-25" style={{ backgroundColor: option.swatch }} />
-                    <span className="absolute bottom-2 left-2 h-4 w-4 rounded-full" style={{ backgroundColor: option.swatch }} />
+                    <span className="absolute bottom-2 left-2 h-4 w-4 rounded-full" style={{ backgroundColor: accent ?? option.swatch }} />
                   </span>
                   <span className="relative w-1/2" style={{ backgroundColor: option.dark }}>
-                    <span className="absolute right-2 top-2.5 h-2 w-7 rounded-full bg-white/70" />
+                    <span
+                      className={cn("absolute right-2 top-2.5 h-2 w-7 rounded-full", !accent && "bg-white/70")}
+                      style={accent ? { backgroundColor: accent } : undefined}
+                    />
                     <span className="absolute right-2 top-6 h-1.5 w-10 rounded-full bg-white/20" />
-                    <span className="absolute bottom-2 right-2 h-4 w-4 rounded-full bg-white/55" />
+                    <span
+                      className={cn("absolute bottom-2 right-2 h-4 w-4 rounded-full", !accent && "bg-white/55")}
+                      style={accent ? { backgroundColor: accent, boxShadow: `0 0 10px ${accent}` } : undefined}
+                    />
                   </span>
                 </span>
                 <span className="mt-1.5 flex items-center justify-between gap-1 px-1 pb-0.5 text-sm">

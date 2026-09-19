@@ -10,6 +10,8 @@ export const THEMES = [
   { id: "ocean", label: "Ocean", swatch: "#196978", dark: "#0C1719" },
   { id: "honey", label: "Honey", swatch: "#8D5311", dark: "#16110D" },
   { id: "graphite", label: "Graphite", swatch: "#272B35", dark: "#111319" },
+  // accent = warna sorotan di separuh gelap pratinjau (tema lain memakai putih)
+  { id: "blackpink", label: "Black Pink", swatch: "#0A0A0A", dark: "#0A0A0A", accent: "#FF2E93" },
 ] as const;
 
 export const RADII = [
