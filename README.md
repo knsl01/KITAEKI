@@ -27,7 +27,7 @@ Service-role key tidak dipakai di mana pun dan tidak boleh ditaruh di project in
 ## Setup Supabase
 
 1. Buat project baru di [supabase.com](https://supabase.com).
-2. Buka **SQL Editor**, jalankan `supabase/migrations/0001_init.sql`, lalu `supabase/migrations/0002_household.sql` (urut).
+2. Buka **SQL Editor**, jalankan `supabase/migrations/0001_init.sql`, lalu `supabase/migrations/0002_household.sql` dan `supabase/migrations/0003_dashboard_widgets.sql` (urut).
 3. **Authentication → Providers → Email**: aktifkan. Untuk pemakaian pribadi, matikan "Confirm email" supaya akun langsung bisa dipakai.
 4. **Authentication → URL Configuration**: isi Site URL dengan domain Vercel kamu.
 5. Salin Project URL dan anon key ke `.env`.

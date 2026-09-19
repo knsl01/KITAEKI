@@ -22,6 +22,24 @@
 - **Tugas, Belanja, Wishlist**: tiga layar pertama dari modul kehidupan bersama (`tasks`, `shopping_items`,
   `wishlist_items`), lengkap dengan aksi server, saringan Eki/Dinda/Bersama, dan navigasinya.
 
+- **Dashboard widget yang bisa diatur** (`0003_dashboard_widgets.sql`). Tombol **Atur widget** di banner membuka mode atur:
+  - **Tambah / sembunyikan** widget dari daftar 12 widget (Total saldo, Pemasukan, Pengeluaran, Tabungan, Pemasukan vs
+    pengeluaran, Saldo per akun, Kategori, Target tabungan, Tugas, Transaksi terbaru, Daftar belanja, Wishlist).
+  - **Ukuran**: lebar ¼ / ⅓ / ½ / ⅔ / penuh dan tinggi 1–3 baris, lewat tombol atau dengan menarik pojok widget.
+    Pilihan yang boleh dipakai berbeda per widget (`src/lib/widgets.ts`).
+  - **Geser** untuk menukar tempat (mouse, sentuh, atau tombol panah di keyboard); widget lain meluncur ke tempat barunya.
+  - Susunan tersimpan **per user** di `dashboard_widgets`, jadi Eki dan Dinda boleh punya susunan sendiri.
+  - Isi widget menyesuaikan ukurannya (jumlah baris daftar, tata letak grafik), bukan sekadar terpotong.
+  - Layar tablet memakai dua kolom, ponsel satu kolom (ukuran ¼ berdampingan dua-dua).
+- **Kartu Total saldo**: latar bisa diganti foto sendiri (ikon gambar di kepala kartu, dengan pengatur kegelapan foto),
+  tanpa foto latarnya cahaya lembut mengikuti tema. Saat dikecilkan jadi kartu ringkas (angka + lengkung tipis) sehingga
+  2–3 widget lain muat di sebelahnya. Foto disimpan di `dashboard_widgets.config` milik user.
+- **Grafik baru** (SVG buatan sendiri, tanpa Recharts di dashboard): batang pemasukan/pengeluaran dengan sorotan bulan,
+  legenda yang bisa dimatikan, donut kategori yang saling terhubung dengan daftarnya, sparkline yang bisa disentuh,
+  cincin persentase tabungan, dan grafik saldo dengan garis acuan awal periode.
+- **Gaya tampilan** (ikon palet di topbar dan di Pengaturan): 7 tema (tambahan Ocean, Honey, Graphite), 3 pasangan huruf
+  (Hangat, Modern, Klasik), dan 3 tingkat kebulatan sudut. Semua berlaku langsung dan tersimpan per browser.
+
 ## Tabel yang sudah ada tapi belum ada layarnya
 
 `life_goals`, `trips`, `trip_items`, `places`, `calendar_events`, `date_ideas`, `gift_ideas`,
@@ -38,7 +56,8 @@ kejutan), dan `notes` bisa ditandai privat.
 ## Belum dikerjakan
 
 1. Layar untuk 10 modul di atas (Trip → Target tabungan → Anggaran → Transaksi adalah yang paling bernilai).
-2. Dashboard yang widgetnya bisa ditambah/dikurangi dan diatur ukurannya (tabel `dashboard_widgets` sudah siap).
+2. Widget untuk modul yang belum punya layar (Trip, Kalender, Catatan, Kenangan) — cukup tambah entri di
+   `src/lib/widgets.ts` dan satu komponen; papan, penyimpanan, dan mode atur otomatis ikut.
 3. KITA AI — panel asisten. Tempat pasang model menyusul.
 4. Ekspor laporan ke Excel dan Google Sheets.
 5. Merapikan halaman Keuangan, Anggaran, Laporan mengikuti tampilan dashboard yang baru.
@@ -48,7 +67,9 @@ kejutan), dan `notes` bisa ditandai privat.
 ```
 supabase/migrations/0001_init.sql      -- skema awal
 supabase/migrations/0002_household.sql -- workspace bersama + modul baru
+supabase/migrations/0003_dashboard_widgets.sql -- kolom ukuran dan konfigurasi widget
 ```
 
-Jalankan `0002` di SQL Editor Supabase. Aman dijalankan berulang, dan otomatis membuatkan
-household untuk akun yang sudah ada.
+Jalankan `0002` lalu `0003` di SQL Editor Supabase. Keduanya aman dijalankan berulang; `0002` otomatis
+membuatkan household untuk akun yang sudah ada. Tanpa `0003`, dashboard tetap tampil dengan susunan bawaan,
+tetapi menyimpan susunan dan latar kartu akan menampilkan pesan agar migrasi dijalankan.
