@@ -37,8 +37,17 @@
 - **Grafik baru** (SVG buatan sendiri, tanpa Recharts di dashboard): batang pemasukan/pengeluaran dengan sorotan bulan,
   legenda yang bisa dimatikan, donut kategori yang saling terhubung dengan daftarnya, sparkline yang bisa disentuh,
   cincin persentase tabungan, dan grafik saldo dengan garis acuan awal periode.
-- **Gaya tampilan** (ikon palet di topbar dan di Pengaturan): 7 tema (tambahan Ocean, Honey, Graphite), 3 pasangan huruf
-  (Hangat, Modern, Klasik), dan 3 tingkat kebulatan sudut. Semua berlaku langsung dan tersimpan per browser.
+- **Gaya tampilan** (ikon palet di topbar dan di Pengaturan): 7 tema (tambahan Ocean, Honey, Graphite) dan 3 tingkat
+  kebulatan sudut. Berlaku langsung dan tersimpan per browser.
+- **Tipografi satu keluarga**: seluruh aplikasi memakai **Plus Jakarta Sans** lewat `next/font/google` (bobot 400–800,
+  tanpa file huruf manual). Judul 700–800 dan rapat, tombol 600, angka uang 600–700 dengan angka lurus dan sama lebar
+  (`.tabular`, `.numeral` di `globals.css`). Kelas lama `font-serif` tetap ada tetapi kini berarti "judul" dalam huruf yang sama.
+- **Warna angka** hijau (pemasukan) dan merah (pengeluaran) dibuat lebih pekat di semua tema, terang maupun gelap.
+- **Menu di HP**: tombol **Menu** di topbar dan ikon menu di bar bawah membuka sidebar yang meluncur dari kiri
+  (isinya sama dengan sidebar desktop, termasuk Keluar). Sebelumnya 9 halaman tidak terjangkau dari HP.
+- **Kolom nominal berformat titik ribuan** (`MoneyInput`): mengetik 2000000 tampil "Rp 2.000.000". Server tetap menerima
+  angka polos, jadi validasi dan penyimpanan tidak berubah. Dipakai di transaksi, akun, anggaran, berulang,
+  target/tabungan, wishlist, dan belanja.
 
 ## Tabel yang sudah ada tapi belum ada layarnya
 
