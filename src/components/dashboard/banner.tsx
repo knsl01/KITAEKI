@@ -33,6 +33,7 @@ export function DashboardBanner({
   view,
   labels,
   monthLabel,
+  actions,
 }: {
   settings: BannerSettings;
   householdId: string;
@@ -40,6 +41,8 @@ export function DashboardBanner({
   view: ViewKey;
   labels: { eki: string; dinda: string };
   monthLabel: string;
+  /** Tombol tambahan di sebelah tombol ubah banner. */
+  actions?: React.ReactNode;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -62,7 +65,7 @@ export function DashboardBanner({
   }
 
   return (
-    <section className="relative isolate overflow-hidden rounded-2xl bg-sidebar text-white">
+    <section className="relative isolate overflow-hidden rounded-[var(--widget-radius)] bg-sidebar text-white">
       {settings.banner_image_url ? (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -96,6 +99,7 @@ export function DashboardBanner({
           )}
           <div className="flex items-center gap-3">
             <span className="text-xs text-white/60">{monthLabel}</span>
+            {actions}
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button

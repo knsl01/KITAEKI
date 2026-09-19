@@ -7,40 +7,89 @@ export const THEMES = [
   { id: "deep-purple", label: "Deep purple", swatch: "#4B2E70", dark: "#1B1226" },
   { id: "deep-blue", label: "Deep blue", swatch: "#24406B", dark: "#0F1724" },
   { id: "burgundy", label: "Burgundy", swatch: "#6B2036", dark: "#1F0F15" },
+  { id: "ocean", label: "Ocean", swatch: "#196978", dark: "#0C1719" },
+  { id: "honey", label: "Honey", swatch: "#8D5311", dark: "#16110D" },
+  { id: "graphite", label: "Graphite", swatch: "#272B35", dark: "#111319" },
+] as const;
+
+/** Pasangan huruf: judul + angka besar (display) dan teks biasa (body). Variabel dari next/font di layout. */
+export const FONTS = [
+  {
+    id: "hangat",
+    label: "Hangat",
+    note: "Fraunces + Plus Jakarta Sans",
+    display: 'var(--f-fraunces), Georgia, serif',
+    body: 'var(--f-jakarta), system-ui, sans-serif',
+  },
+  {
+    id: "modern",
+    label: "Modern",
+    note: "Bricolage Grotesque + Figtree",
+    display: 'var(--f-bricolage), system-ui, sans-serif',
+    body: 'var(--f-figtree), system-ui, sans-serif',
+  },
+  {
+    id: "klasik",
+    label: "Klasik",
+    note: "Instrument Serif + Inter",
+    display: 'var(--f-instrument), Georgia, serif',
+    body: 'var(--f-inter), system-ui, sans-serif',
+  },
+] as const;
+
+export const RADII = [
+  { id: "sharp", label: "Tegas" },
+  { id: "soft", label: "Lembut" },
+  { id: "round", label: "Bulat" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];
+export type FontId = (typeof FONTS)[number]["id"];
+export type RadiusId = (typeof RADII)[number]["id"];
 export type ModeId = "light" | "dark" | "system";
 
 export const DEFAULT_THEME: ThemeId = "sage";
+export const DEFAULT_FONT: FontId = "hangat";
+export const DEFAULT_RADIUS: RadiusId = "soft";
 export const THEME_KEY = "kita-theme";
 export const MODE_KEY = "kita-mode";
+export const FONT_KEY = "kita-font";
+export const RADIUS_KEY = "kita-radius";
 
-/** Dijalankan sebelum halaman digambar supaya tidak ada kedip warna. */
+/** Dijalankan sebelum halaman digambar supaya tidak ada kedip warna atau huruf. */
 export const themeBootstrapScript = `(function(){try{
 var el=document.documentElement;
-var t=localStorage.getItem("${THEME_KEY}");
-var v=["sage","deep-purple","deep-blue","burgundy"];
-el.dataset.theme=v.indexOf(t)>-1?t:"${DEFAULT_THEME}";
+var ok=function(list,v,d){return list.indexOf(v)>-1?v:d;};
+el.dataset.theme=ok(${JSON.stringify(THEMES.map((t) => t.id))},localStorage.getItem("${THEME_KEY}"),"${DEFAULT_THEME}");
+el.dataset.font=ok(${JSON.stringify(FONTS.map((f) => f.id))},localStorage.getItem("${FONT_KEY}"),"${DEFAULT_FONT}");
+el.dataset.radius=ok(${JSON.stringify(RADII.map((r) => r.id))},localStorage.getItem("${RADIUS_KEY}"),"${DEFAULT_RADIUS}");
 var m=localStorage.getItem("${MODE_KEY}")||"system";
 var dark=m==="dark"||(m==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);
 el.dataset.mode=dark?"dark":"light";
-}catch(e){document.documentElement.dataset.theme="${DEFAULT_THEME}";document.documentElement.dataset.mode="light";}})();`;
+}catch(e){var d=document.documentElement;d.dataset.theme="${DEFAULT_THEME}";d.dataset.font="${DEFAULT_FONT}";d.dataset.radius="${DEFAULT_RADIUS}";d.dataset.mode="light";}})();`;
 
 type ThemeContextValue = {
   theme: ThemeId;
   mode: ModeId;
+  font: FontId;
+  radius: RadiusId;
   resolvedMode: "light" | "dark";
   setTheme: (theme: ThemeId) => void;
   setMode: (mode: ModeId) => void;
+  setFont: (font: FontId) => void;
+  setRadius: (radius: RadiusId) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: DEFAULT_THEME,
   mode: "system",
+  font: DEFAULT_FONT,
+  radius: DEFAULT_RADIUS,
   resolvedMode: "light",
   setTheme: () => {},
   setMode: () => {},
+  setFont: () => {},
+  setRadius: () => {},
 });
 
 function resolve(mode: ModeId): "light" | "dark" {
@@ -49,15 +98,31 @@ function resolve(mode: ModeId): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+function remember(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // penyimpanan browser diblokir — pilihan berlaku sampai tab ditutup
+  }
+}
+
+function pickFrom<T extends { id: string }>(list: readonly T[], value: string | undefined, fallback: T["id"]) {
+  return (list.some((item) => item.id === value) ? value : fallback) as T["id"];
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME);
+  const [font, setFontState] = useState<FontId>(DEFAULT_FONT);
+  const [radius, setRadiusState] = useState<RadiusId>(DEFAULT_RADIUS);
   const [mode, setModeState] = useState<ModeId>("system");
   const [resolvedMode, setResolved] = useState<"light" | "dark">("light");
 
   useEffect(() => {
+    // Skrip bootstrap sudah memasang atribut; state React tinggal menyamakan diri.
     const el = document.documentElement;
-    const current = el.dataset.theme as ThemeId | undefined;
-    if (current && THEMES.some((t) => t.id === current)) setThemeState(current);
+    setThemeState(pickFrom(THEMES, el.dataset.theme, DEFAULT_THEME) as ThemeId);
+    setFontState(pickFrom(FONTS, el.dataset.font, DEFAULT_FONT) as FontId);
+    setRadiusState(pickFrom(RADII, el.dataset.radius, DEFAULT_RADIUS) as RadiusId);
 
     let storedMode: ModeId = "system";
     try {
@@ -85,11 +150,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = useCallback((next: ThemeId) => {
     setThemeState(next);
     document.documentElement.dataset.theme = next;
-    try {
-      localStorage.setItem(THEME_KEY, next);
-    } catch {
-      // penyimpanan browser diblokir — tema berlaku sampai tab ditutup
-    }
+    remember(THEME_KEY, next);
+  }, []);
+
+  const setFont = useCallback((next: FontId) => {
+    setFontState(next);
+    document.documentElement.dataset.font = next;
+    remember(FONT_KEY, next);
+  }, []);
+
+  const setRadius = useCallback((next: RadiusId) => {
+    setRadiusState(next);
+    document.documentElement.dataset.radius = next;
+    remember(RADIUS_KEY, next);
   }, []);
 
   const setMode = useCallback((next: ModeId) => {
@@ -97,15 +170,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const actual = resolve(next);
     document.documentElement.dataset.mode = actual;
     setResolved(actual);
-    try {
-      localStorage.setItem(MODE_KEY, next);
-    } catch {
-      // idem
-    }
+    remember(MODE_KEY, next);
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, mode, resolvedMode, setTheme, setMode }}>
+    <ThemeContext.Provider value={{ theme, mode, font, radius, resolvedMode, setTheme, setMode, setFont, setRadius }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -162,11 +162,11 @@ export function SettingsClient({
 
           <Card>
             <CardHeader>
-              <CardTitle>Tema</CardTitle>
+              <CardTitle>Gaya tampilan</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Pilihan warna tersimpan di browser ini, jadi Eki dan Dinda bisa pakai tema berbeda.
+                Warna, huruf, dan sudut tersimpan di browser ini, jadi Eki dan Dinda bisa punya gaya sendiri-sendiri.
               </p>
               <ThemePicker />
             </CardContent>

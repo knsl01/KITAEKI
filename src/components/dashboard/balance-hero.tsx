@@ -11,6 +11,7 @@ import {
 } from "@/lib/balance-history";
 import { createClient } from "@/lib/supabase/server";
 import type { Account } from "@/lib/types";
+import type { BalanceStyle } from "@/lib/widgets";
 
 const PAGE_SIZE = 1000;
 const MAX_PAGES = 20;
@@ -58,12 +59,16 @@ export async function BalanceHero({
   income,
   expense,
   viewLabel,
+  style,
+  householdId,
 }: {
   accounts: Account[];
   total: number;
   income: number;
   expense: number;
   viewLabel: string;
+  style: BalanceStyle;
+  householdId: string | null;
 }) {
   const today = isoDateInZone(new Date());
 
@@ -85,25 +90,22 @@ export async function BalanceHero({
       expense={expense}
       accounts={accounts.map((a) => ({ id: a.id, name: a.name, icon_key: a.icon_key }))}
       viewLabel={viewLabel}
+      style={style}
+      householdId={householdId}
     />
   );
 }
 
 export function BalanceHeroSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card">
-      <div className="space-y-6 px-5 pt-5 sm:px-8 sm:pt-7">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-28" />
-          <Skeleton className="h-8 w-44 rounded-full" />
-        </div>
-        <Skeleton className="h-14 w-72 max-w-full" />
-        <div className="grid grid-cols-2 gap-3 lg:max-w-[23rem]">
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-        </div>
+    <div className="widget-card flex h-full flex-col p-5 sm:p-7">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-6 w-28" />
+        <Skeleton className="h-7 w-40 rounded-full" />
       </div>
-      <Skeleton className="mt-6 h-[150px] rounded-none sm:h-[180px] lg:h-[200px]" />
+      <Skeleton className="mt-5 h-12 w-64 max-w-full" />
+      <Skeleton className="mt-3 h-7 w-44 rounded-full" />
+      <Skeleton className="mt-auto h-24 w-full" />
     </div>
   );
 }

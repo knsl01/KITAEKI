@@ -237,6 +237,217 @@
     --radius: 0.75rem;
   }
 
+
+  /* ── Tema tambahan ─────────────────────────────────────── */
+  [data-theme="ocean"] {
+    --background: 180 20% 97%;
+    --foreground: 190 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 190 30% 12%;
+    --muted: 180 16% 94%;
+    --muted-foreground: 190 10% 42%;
+    --accent: 180 24% 92%;
+    --accent-foreground: 190 30% 12%;
+    --primary: 187 62% 26%;
+    --primary-foreground: 180 30% 98%;
+    --secondary: 180 16% 94%;
+    --secondary-foreground: 190 30% 12%;
+    --destructive: 356 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 185 14% 89%;
+    --input: 185 14% 89%;
+    --ring: 187 55% 36%;
+    --sidebar: 190 44% 13%;
+    --sidebar-foreground: 180 22% 90%;
+    --positive: 158 44% 30%;
+    --negative: 356 62% 50%;
+    --chart-income: hsl(186 52% 36%);
+    --chart-expense: hsl(12 60% 58%);
+    --chart-grid: hsl(185 14% 89%);
+    --chart-axis: hsl(190 10% 42%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="honey"] {
+    --background: 42 40% 97%;
+    --foreground: 30 30% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 30% 13%;
+    --muted: 40 30% 94%;
+    --muted-foreground: 32 12% 43%;
+    --accent: 42 55% 92%;
+    --accent-foreground: 30 30% 13%;
+    --primary: 32 78% 31%;
+    --primary-foreground: 42 60% 97%;
+    --secondary: 40 30% 94%;
+    --secondary-foreground: 30 30% 13%;
+    --destructive: 8 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 24% 88%;
+    --input: 40 24% 88%;
+    --ring: 34 70% 40%;
+    --sidebar: 30 36% 13%;
+    --sidebar-foreground: 40 30% 90%;
+    --positive: 150 38% 30%;
+    --negative: 8 62% 48%;
+    --chart-income: hsl(36 70% 40%);
+    --chart-expense: hsl(352 48% 54%);
+    --chart-grid: hsl(40 24% 88%);
+    --chart-axis: hsl(32 12% 43%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="graphite"] {
+    --background: 220 12% 97%;
+    --foreground: 222 14% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 14% 12%;
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 6% 44%;
+    --accent: 220 12% 92%;
+    --accent-foreground: 222 14% 12%;
+    --primary: 222 16% 18%;
+    --primary-foreground: 220 14% 97%;
+    --secondary: 220 10% 94%;
+    --secondary-foreground: 222 14% 12%;
+    --destructive: 356 58% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 10% 89%;
+    --input: 220 10% 89%;
+    --ring: 222 14% 30%;
+    --sidebar: 222 16% 11%;
+    --sidebar-foreground: 220 12% 88%;
+    --positive: 158 36% 32%;
+    --negative: 356 58% 50%;
+    --chart-income: hsl(222 18% 32%);
+    --chart-expense: hsl(356 46% 56%);
+    --chart-grid: hsl(220 10% 89%);
+    --chart-axis: hsl(220 6% 44%);
+    --radius: 0.75rem;
+  }
+
+  [data-theme="ocean"][data-mode="dark"] {
+    --background: 190 30% 7%;
+    --foreground: 180 20% 93%;
+    --card: 190 26% 10%;
+    --card-foreground: 180 20% 93%;
+    --muted: 190 20% 15%;
+    --muted-foreground: 185 10% 62%;
+    --accent: 188 24% 18%;
+    --accent-foreground: 180 20% 93%;
+    --primary: 184 55% 58%;
+    --primary-foreground: 190 40% 9%;
+    --secondary: 190 20% 15%;
+    --secondary-foreground: 180 20% 93%;
+    --destructive: 356 62% 66%;
+    --border: 190 18% 19%;
+    --input: 190 18% 19%;
+    --ring: 186 50% 46%;
+    --sidebar: 192 34% 9%;
+    --sidebar-foreground: 180 20% 90%;
+    --positive: 160 46% 56%;
+    --negative: 356 62% 66%;
+    --chart-income: hsl(184 50% 52%);
+    --chart-expense: hsl(14 62% 64%);
+    --chart-grid: hsl(190 18% 19%);
+    --chart-axis: hsl(185 10% 62%);
+  }
+
+  [data-theme="honey"][data-mode="dark"] {
+    --background: 30 26% 7%;
+    --foreground: 40 30% 93%;
+    --card: 30 22% 10%;
+    --card-foreground: 40 30% 93%;
+    --muted: 30 16% 15%;
+    --muted-foreground: 36 10% 62%;
+    --accent: 34 30% 18%;
+    --accent-foreground: 40 30% 93%;
+    --primary: 38 84% 60%;
+    --primary-foreground: 30 40% 9%;
+    --secondary: 30 16% 15%;
+    --secondary-foreground: 40 30% 93%;
+    --destructive: 6 62% 64%;
+    --border: 30 16% 19%;
+    --input: 30 16% 19%;
+    --ring: 36 72% 48%;
+    --sidebar: 30 30% 9%;
+    --sidebar-foreground: 40 24% 90%;
+    --positive: 150 42% 56%;
+    --negative: 6 62% 64%;
+    --chart-income: hsl(38 78% 56%);
+    --chart-expense: hsl(352 52% 64%);
+    --chart-grid: hsl(30 16% 19%);
+    --chart-axis: hsl(36 10% 62%);
+  }
+
+  [data-theme="graphite"][data-mode="dark"] {
+    --background: 222 16% 8%;
+    --foreground: 220 12% 92%;
+    --card: 222 14% 11%;
+    --card-foreground: 220 12% 92%;
+    --muted: 222 12% 16%;
+    --muted-foreground: 220 6% 62%;
+    --accent: 222 14% 19%;
+    --accent-foreground: 220 12% 92%;
+    --primary: 220 22% 78%;
+    --primary-foreground: 222 20% 10%;
+    --secondary: 222 12% 16%;
+    --secondary-foreground: 220 12% 92%;
+    --destructive: 356 58% 66%;
+    --border: 222 12% 20%;
+    --input: 222 12% 20%;
+    --ring: 220 20% 56%;
+    --sidebar: 222 18% 9%;
+    --sidebar-foreground: 220 12% 88%;
+    --positive: 158 42% 56%;
+    --negative: 356 58% 66%;
+    --chart-income: hsl(220 24% 68%);
+    --chart-expense: hsl(356 50% 66%);
+    --chart-grid: hsl(222 12% 20%);
+    --chart-axis: hsl(220 6% 62%);
+  }
+
+  /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
+  :root,
+  [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
+  [data-theme="deep-purple"] { --glow-1: 266 50% 62%; --glow-2: 322 46% 68%; }
+  [data-theme="deep-blue"] { --glow-1: 214 60% 58%; --glow-2: 190 50% 62%; }
+  [data-theme="burgundy"] { --glow-1: 345 54% 55%; --glow-2: 22 60% 64%; }
+  [data-theme="ocean"] { --glow-1: 186 58% 50%; --glow-2: 160 46% 60%; }
+  [data-theme="honey"] { --glow-1: 40 92% 56%; --glow-2: 22 78% 62%; }
+  [data-theme="graphite"] { --glow-1: 220 22% 56%; --glow-2: 250 20% 66%; }
+
+  [data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
+  [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
+  [data-theme="deep-purple"][data-mode="dark"] { --glow-1: 266 50% 46%; --glow-2: 322 44% 44%; }
+  [data-theme="deep-blue"][data-mode="dark"] { --glow-1: 214 62% 44%; --glow-2: 190 50% 38%; }
+  [data-theme="burgundy"][data-mode="dark"] { --glow-1: 345 54% 42%; --glow-2: 22 56% 42%; }
+  [data-theme="ocean"][data-mode="dark"] { --glow-1: 186 60% 34%; --glow-2: 160 46% 34%; }
+  [data-theme="honey"][data-mode="dark"] { --glow-1: 40 90% 40%; --glow-2: 22 70% 40%; }
+  [data-theme="graphite"][data-mode="dark"] { --glow-1: 220 22% 40%; --glow-2: 250 20% 44%; }
+
+  /* ── Pasangan huruf: dipilih dari menu Gaya ── */
+  :root {
+    --font-sans: var(--f-jakarta), ui-sans-serif, system-ui, sans-serif;
+    --font-serif: var(--f-fraunces), Georgia, "Times New Roman", serif;
+    --font-numeral: var(--f-fraunces), Georgia, "Times New Roman", serif;
+    --widget-radius: calc(var(--radius) + 0.5rem);
+  }
+  [data-font="modern"] {
+    --font-sans: var(--f-figtree), ui-sans-serif, system-ui, sans-serif;
+    --font-serif: var(--f-bricolage), ui-sans-serif, system-ui, sans-serif;
+    --font-numeral: var(--f-bricolage), ui-sans-serif, system-ui, sans-serif;
+  }
+  [data-font="klasik"] {
+    --font-sans: var(--f-inter), ui-sans-serif, system-ui, sans-serif;
+    --font-serif: var(--f-instrument), Georgia, "Times New Roman", serif;
+    --font-numeral: var(--f-inter), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* ── Kebulatan sudut ── */
+  html[data-radius="sharp"] { --radius: 0.375rem; }
+  html[data-radius="round"] { --radius: 1.125rem; }
+
   * {
     @apply border-border;
   }
@@ -274,9 +485,105 @@
       padding-left: 76px;
     }
   }
+
+  /* ── Papan widget ───────────────────────────────────────────
+     Layar kecil 2 kolom, tablet 6 kolom (dipakai sebagai dua kolom), lebar 12 kolom. Nama ukuran
+     (xs–xl) dipetakan ulang per lebar layar; tinggi selalu kelipatan baris. */
+  .widget-grid {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 184px;
+  }
+  .widget-slot {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    border-radius: var(--widget-radius);
+    grid-column: span 2;
+    grid-row: span 1;
+    animation: slot-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+  .widget-slot[data-span="xs"] { grid-column: span 1; }
+  .widget-slot[data-rows="2"] { grid-row: span 2; }
+  .widget-slot[data-rows="3"] { grid-row: span 3; }
+
+  @media (min-width: 768px) {
+    .widget-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    /* Tablet: dua kolom. Yang kecil berdampingan, yang ≥ ½ selebar layar. */
+    .widget-slot[data-span="xs"] { grid-column: span 3; }
+    .widget-slot[data-span="sm"] { grid-column: span 3; }
+    .widget-slot[data-span="md"] { grid-column: span 6; }
+    .widget-slot[data-span="lg"] { grid-column: span 6; }
+    .widget-slot[data-span="xl"] { grid-column: span 6; }
+  }
+  @media (min-width: 1280px) {
+    .widget-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .widget-slot[data-span="xs"] { grid-column: span 3; }
+    .widget-slot[data-span="sm"] { grid-column: span 4; }
+    .widget-slot[data-span="md"] { grid-column: span 6; }
+    .widget-slot[data-span="lg"] { grid-column: span 8; }
+    .widget-slot[data-span="xl"] { grid-column: span 12; }
+  }
+
+  .widget-slot[data-dragging] {
+    z-index: 40;
+    scale: 1.015;
+    animation: none;
+    box-shadow: 0 28px 64px -24px hsl(var(--foreground) / 0.45);
+  }
+  .widget-slot[data-editing] .edit-overlay:active { cursor: grabbing; }
+
+  .widget-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--widget-radius);
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.03);
+  }
+
+  /* Latar kartu Total saldo tanpa foto: dua cahaya lembut mengikuti tema */
+  .balance-aurora {
+    background-image:
+      radial-gradient(120% 100% at 100% 0%, hsl(var(--glow-1) / 0.34) 0%, transparent 58%),
+      radial-gradient(90% 90% at 0% 100%, hsl(var(--glow-2) / 0.28) 0%, transparent 62%);
+  }
 }
 
 @layer utilities {
+  /* Angka besar memakai huruf display; angka selalu lurus (lining) dan sama lebar bila ada */
+  .numeral,
+  .numeral.tabular {
+    font-family: var(--font-numeral);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .chart-reveal {
+    animation: chart-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .bar-grow {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+  }
+  .grow-x {
+    transform-origin: left center;
+    animation: grow-x 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .ring-fill {
+    animation: ring-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .donut-slice {
+    transition: stroke-width 0.2s ease, opacity 0.2s ease;
+  }
+  .dot-ping {
+    animation: dot-ping 1.8s cubic-bezier(0, 0, 0.2, 1) 3;
+  }
   .tabular {
     font-variant-numeric: tabular-nums;
   }
@@ -342,6 +649,51 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes slot-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes chart-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes ring-in {
+  from {
+    stroke-dashoffset: var(--ring-c);
+  }
+}
+
+@keyframes dot-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
   }
 }
 
