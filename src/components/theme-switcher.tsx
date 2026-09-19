@@ -2,11 +2,9 @@
 
 import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
 import {
-  FONTS,
   RADII,
   THEMES,
   useTheme,
-  type FontId,
   type ModeId,
   type RadiusId,
   type ThemeId,
@@ -33,11 +31,11 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /**
- * Semua pilihan tampilan dalam satu panel: warna, terang/gelap, huruf, sudut.
+ * Pilihan tampilan dalam satu panel: warna, terang/gelap, dan sudut. Hurufnya tetap Plus Jakarta Sans.
  * Setiap pilihan langsung berlaku dan tersimpan di browser ini.
  */
 export function ThemePicker() {
-  const { theme, mode, font, radius, setTheme, setMode, setFont, setRadius } = useTheme();
+  const { theme, mode, radius, setTheme, setMode, setRadius } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -99,37 +97,6 @@ export function ThemePicker() {
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden />
                 <span className="truncate">{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </Section>
-
-      <Section title="Huruf">
-        <div className="grid gap-2" role="radiogroup" aria-label="Pasangan huruf">
-          {FONTS.map((option) => {
-            const active = font === option.id;
-            return (
-              <button
-                key={option.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => setFont(option.id as FontId)}
-                className={cn(
-                  "flex items-center gap-4 rounded-xl border px-4 py-3 text-left transition-[border-color,background-color] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  active ? "border-primary bg-primary/5" : "border-border hover:bg-muted/60"
-                )}
-                style={{ fontFamily: option.body }}
-              >
-                <span className="w-[5.5rem] shrink-0 whitespace-nowrap text-[1.65rem] leading-none tracking-tight" style={{ fontFamily: option.display }}>
-                  12.500
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium">{option.label}</span>
-                  <span className="block truncate text-xs text-muted-foreground">{option.note}</span>
-                </span>
-                {active ? <Check className="h-4 w-4 shrink-0 text-primary" aria-hidden /> : null}
               </button>
             );
           })}

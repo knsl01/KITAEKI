@@ -91,7 +91,7 @@ export function DashboardBanner({
 
         <div className="flex items-end justify-between gap-4 lg:flex-col lg:items-end">
           {settings.banner_quote ? (
-            <p className="max-w-[16rem] font-serif text-lg italic leading-snug text-white/85">
+            <p className="max-w-[16rem] font-serif text-lg font-medium italic leading-snug text-white/85">
               {settings.banner_quote}
             </p>
           ) : (

@@ -6,7 +6,7 @@ import { MOBILE_NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 /** Bar melayang di bawah, khusus layar kecil. */
-export function MobileNav({ action }: { action?: React.ReactNode }) {
+export function MobileNav({ action, menu }: { action?: React.ReactNode; menu?: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -21,7 +21,7 @@ export function MobileNav({ action }: { action?: React.ReactNode }) {
               href={item.href}
               aria-label={item.label}
               className={cn(
-                "relative flex h-11 items-center gap-2 rounded-full px-3 text-[11px] font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95",
+                "relative flex h-11 items-center gap-2 rounded-full px-2.5 text-[11px] font-semibold transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-95",
                 active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
               )}
             >
@@ -37,6 +37,7 @@ export function MobileNav({ action }: { action?: React.ReactNode }) {
             </Link>
           );
         })}
+        {menu}
         {action ? <span className="pl-0.5">{action}</span> : null}
       </nav>
     </div>

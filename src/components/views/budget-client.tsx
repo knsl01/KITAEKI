@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
@@ -83,7 +83,7 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
 
           <div className="space-y-2">
             <Label htmlFor="amount">Batas bulan ini</Label>
-            <Input id="amount" name="amount" type="number" min={1} step="1" placeholder="1500000" required />
+            <MoneyInput id="amount" name="amount" min={1} placeholder="1.500.000" required />
           </div>
 
           {error ? <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
@@ -145,15 +145,15 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
             <p className="text-sm text-muted-foreground">Total anggaran</p>
-            <p className="tabular mt-1 text-xl font-medium">{formatCurrency(totalBudget)}</p>
+            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Terpakai</p>
-            <p className="tabular mt-1 text-xl font-medium">{formatCurrency(totalSpent)}</p>
+            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalSpent)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Sisa</p>
-            <p className="tabular mt-1 text-xl font-medium">{formatCurrency(totalBudget - totalSpent)}</p>
+            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget - totalSpent)}</p>
           </div>
         </CardContent>
       </Card>
@@ -193,7 +193,7 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
                   />
                 </div>
 
-                <p className="tabular mt-4 text-lg font-medium">{formatCurrency(spent)}</p>
+                <p className="tabular mt-4 text-lg font-bold">{formatCurrency(spent)}</p>
                 <p className="tabular text-xs text-muted-foreground">dari {formatCurrency(Number(budget.amount))}</p>
 
                 <Progress

@@ -15,7 +15,7 @@ export function TransactionAmount({
   return (
     <span
       className={cn(
-        "tabular font-medium",
+        "tabular font-semibold",
         type === "income" && "text-[hsl(var(--positive))]",
         type === "expense" && "text-[hsl(var(--negative))]",
         type === "transfer" && "text-muted-foreground",

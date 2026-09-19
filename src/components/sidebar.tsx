@@ -72,7 +72,7 @@ export function Sidebar({ householdName }: { householdName: string }) {
                 "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200",
                 collapsed && "justify-center px-0",
                 active
-                  ? "bg-white/10 font-medium text-white"
+                  ? "bg-white/10 font-semibold text-white"
                   : "text-sidebar-foreground/70 hover:bg-white/5 hover:text-sidebar-foreground"
               )}
             >

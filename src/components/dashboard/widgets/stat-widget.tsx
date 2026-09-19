@@ -45,7 +45,7 @@ function SavingsRing({ rate }: { rate: number }) {
           style={{ "--ring-c": c } as React.CSSProperties}
         />
       </svg>
-      <span className="tabular absolute inset-0 flex items-center justify-center text-[13px] font-medium">{rate}%</span>
+      <span className="tabular absolute inset-0 flex items-center justify-center text-[13px] font-semibold">{rate}%</span>
     </div>
   );
 }
@@ -84,7 +84,7 @@ export function StatWidget({
 
   const showRing = kind === "net" && typeof rate === "number" && box.width >= 300 && box.height >= 170;
   const text = formatCurrency(shown);
-  const numberSize = fitFontSize(text.length, box.width - 40 - (showRing ? 84 : 0), box.width >= 420 ? 36 : 30, 17);
+  const numberSize = fitFontSize(text.length, box.width - 40 - (showRing ? 84 : 0), box.width >= 420 ? 36 : 30, 17, 0.64);
 
   const up = (changePercent ?? 0) >= 0;
   const good = up === meta.goodWhenUp;
@@ -104,7 +104,7 @@ export function StatWidget({
         <div className="min-w-0">
           <p
             className={cn(
-              "numeral whitespace-nowrap font-medium leading-none tracking-[-0.03em]",
+              "numeral whitespace-nowrap font-bold leading-none tracking-[-0.035em]",
               kind === "expense" && "text-negative",
               kind === "income" && "text-positive"
             )}

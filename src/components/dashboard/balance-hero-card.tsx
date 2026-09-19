@@ -142,7 +142,7 @@ function FlowTile({
         </span>
         {label}
       </span>
-      <span className="tabular mt-2 block whitespace-nowrap text-sm font-medium tracking-tight sm:text-[15px]">
+      <span className="tabular mt-2 block whitespace-nowrap text-sm font-semibold tracking-tight sm:text-[15px]">
         {formatCurrency(value)}
       </span>
     </div>
@@ -291,7 +291,7 @@ function BackgroundDialog({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={image} alt="" className="absolute inset-0 h-full w-full object-cover" />
                 <div className="absolute inset-0 bg-black" style={{ opacity: dim / 100 }} />
-                <p className="tabular relative flex h-full items-end p-4 text-2xl font-medium tracking-tight text-white">
+                <p className="tabular relative flex h-full items-end p-4 text-2xl font-bold tracking-tight text-white">
                   {formatCurrency(total)}
                 </p>
               </div>
@@ -377,7 +377,7 @@ export function BalanceHeroCard({
   const negative = counted < 0;
   const digits = formatNumber(Math.abs(counted));
   const figureWidth = box.width - (narrow ? 40 : 56) - (tilesBeside ? 330 : 0);
-  const numberSize = fitFontSize(digits.length + 3, figureWidth, wide ? 60 : 46, 24, 0.6);
+  const numberSize = fitFontSize(digits.length + 3, figureWidth, wide ? 60 : 46, 24, 0.64);
 
   function onPointer(event: React.PointerEvent<HTMLDivElement>) {
     if (!chart) return;
@@ -440,7 +440,7 @@ export function BalanceHeroCard({
         {/* Angka + ringkasan */}
         <div className={cn("mt-3 flex gap-6", wide ? "flex-row items-end justify-between" : "flex-col")}>
           <div className="min-w-0">
-            <p className="numeral tabular flex items-baseline whitespace-nowrap font-medium leading-none tracking-[-0.035em]" style={{ fontSize: numberSize }}>
+            <p className="numeral tabular flex items-baseline whitespace-nowrap font-bold leading-none tracking-[-0.035em]" style={{ fontSize: numberSize }}>
               <span className="mr-[0.25em] font-normal tracking-normal text-muted-foreground" style={{ fontSize: "0.5em" }}>
                 Rp
               </span>
@@ -502,7 +502,7 @@ export function BalanceHeroCard({
             {hovered ? (
               <>
                 <span className="text-muted-foreground">{formatDay(hovered.date)}</span>
-                <span className="tabular font-medium">{formatCurrency(hovered.value)}</span>
+                <span className="tabular font-semibold">{formatCurrency(hovered.value)}</span>
               </>
             ) : (
               <>
@@ -510,7 +510,7 @@ export function BalanceHeroCard({
                 {periodDelta !== null ? (
                   <span
                     className={cn(
-                      "tabular font-medium",
+                      "tabular font-semibold",
                       periodDelta > 0 && "text-positive",
                       periodDelta < 0 && "text-negative",
                       periodDelta === 0 && "text-muted-foreground"

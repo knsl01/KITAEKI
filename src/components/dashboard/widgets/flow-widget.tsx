@@ -120,14 +120,14 @@ export function FlowWidget({ data }: { data: FlowPoint[] }) {
                 <div key={s.key} className="flex items-baseline gap-1.5">
                   <dt className="sr-only">{s.label}</dt>
                   <span className={cn("h-2 w-2 translate-y-[-1px] rounded-full", s.dot)} aria-hidden />
-                  <dd className="tabular text-sm font-medium">{formatCurrency(shown[s.key])}</dd>
+                  <dd className="tabular text-sm font-semibold">{formatCurrency(shown[s.key])}</dd>
                 </div>
               )
             )}
             {!hidden.income && !hidden.expense && box.width >= 460 ? (
               <div className="flex items-baseline gap-1.5 text-xs text-muted-foreground">
                 <dt>Selisih</dt>
-                <dd className={cn("tabular font-medium", net >= 0 ? "text-positive" : "text-negative")}>
+                <dd className={cn("tabular font-semibold", net >= 0 ? "text-positive" : "text-negative")}>
                   {net >= 0 ? "+" : "−"}
                   {formatCurrency(Math.abs(net))}
                 </dd>

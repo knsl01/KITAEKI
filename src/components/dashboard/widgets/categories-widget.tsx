@@ -62,7 +62,7 @@ function Donut({
 
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-[18%] text-center">
         <span className="max-w-full truncate text-xs text-muted-foreground">{focus ? focus.name : "Total"}</span>
-        <span className="numeral tabular mt-0.5 max-w-full truncate font-medium leading-tight" style={{ fontSize: clamp(size / 10, 12, 18) }}>
+        <span className="numeral tabular mt-0.5 max-w-full truncate font-bold leading-tight" style={{ fontSize: clamp(size / 10, 12, 18) }}>
           {formatCurrency(focus ? focus.value : total)}
         </span>
         {focus ? <span className="tabular mt-0.5 text-xs text-muted-foreground">{percent(focus.value, total)}%</span> : null}

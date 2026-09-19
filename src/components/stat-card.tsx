@@ -23,7 +23,7 @@ export function StatCard({
       <p className="text-sm text-muted-foreground">{label}</p>
       <p
         className={cn(
-          "tabular mt-2 text-2xl font-medium tracking-tight",
+          "tabular mt-2 text-2xl font-bold tracking-tight",
           tone === "positive" && "text-[hsl(var(--positive))]",
           tone === "negative" && "text-[hsl(var(--negative))]"
         )}

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Select } from "@/components/ui/select";
 import { CheckButton, FormError, matchesOwner, OwnerFilterTabs, useAction, type OwnerFilter } from "@/components/views/life-shared";
 import { formatCurrency } from "@/lib/format";
@@ -48,7 +49,7 @@ export function ShoppingClient({ items }: { items: ShoppingItem[] }) {
             <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_8rem_10rem_9rem_auto]">
               <Input name="name" placeholder="Tambah barang" aria-label="Nama barang" required />
               <Input name="quantity" placeholder="Jumlah" aria-label="Jumlah" />
-              <Input name="estimated_price" inputMode="numeric" placeholder="Perkiraan harga" aria-label="Perkiraan harga" />
+              <MoneyInput name="estimated_price" placeholder="Perkiraan harga" aria-label="Perkiraan harga" />
               <Select name="assigned_to" defaultValue="shared" aria-label="Siapa yang beli">
                 <option value="shared">{OWNER_LABEL.shared}</option>
                 <option value="eki">{OWNER_LABEL.eki}</option>

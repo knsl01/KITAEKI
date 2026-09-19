@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,14 +129,11 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
 
             <div className="space-y-2">
               <Label htmlFor="amount">Nominal</Label>
-              <Input
+              <MoneyInput
                 id="amount"
                 name="amount"
-                type="number"
                 min={1}
-                step="1"
-                inputMode="numeric"
-                placeholder="50000"
+                placeholder="50.000"
                 defaultValue={transaction?.amount ?? ""}
                 required
                 autoFocus

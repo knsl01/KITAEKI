@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
@@ -95,12 +96,10 @@ function AccountDialog({ account, trigger }: { account?: Account; trigger: React
 
           <div className="space-y-2">
             <Label htmlFor="initial_balance">Saldo awal</Label>
-            <Input
+            <MoneyInput
               id="initial_balance"
               name="initial_balance"
-              type="number"
-              step="1"
-              inputMode="numeric"
+              allowNegative
               defaultValue={account?.initial_balance ?? 0}
               required
             />
@@ -156,7 +155,7 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
       <Card className="mb-4">
         <CardContent className="flex items-baseline justify-between">
           <span className="text-sm text-muted-foreground">Total saldo akun aktif</span>
-          <span className="tabular text-2xl font-medium tracking-tight">{formatCurrency(total)}</span>
+          <span className="tabular text-2xl font-bold tracking-tight">{formatCurrency(total)}</span>
         </CardContent>
       </Card>
 
@@ -184,7 +183,7 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
                 {account.is_active ? null : <Badge>Nonaktif</Badge>}
               </div>
 
-              <p className="tabular mt-5 text-xl font-medium tracking-tight">
+              <p className="tabular mt-5 text-xl font-bold tracking-tight">
                 {formatCurrency(Number(account.balance))}
               </p>
               <p className="tabular mt-1 text-xs text-muted-foreground">

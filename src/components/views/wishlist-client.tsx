@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
@@ -65,11 +66,10 @@ function WishlistDialog({ item, trigger }: { item?: WishlistItem; trigger: React
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="wl-price">Harga</Label>
-              <Input
+              <MoneyInput
                 id="wl-price"
                 name="price"
-                inputMode="numeric"
-                placeholder="1500000"
+                placeholder="1.500.000"
                 defaultValue={item?.price ?? ""}
               />
             </div>

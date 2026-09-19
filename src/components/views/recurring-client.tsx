@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { formatDate } from "@/lib/format";
@@ -117,7 +118,7 @@ function RecurringDialog({ item, accounts, categories, trigger }: RecurringDialo
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="amount">Nominal</Label>
-              <Input id="amount" name="amount" type="number" min={1} step="1" defaultValue={item?.amount ?? ""} required />
+              <MoneyInput id="amount" name="amount" min={1} placeholder="150.000" defaultValue={item?.amount ?? ""} required />
             </div>
             <div className="space-y-2">
               <Label htmlFor="frequency">Frekuensi</Label>

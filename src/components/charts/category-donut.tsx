@@ -26,7 +26,7 @@ export function CategoryDonut({ data }: { data: CategorySlice[] }) {
         </ResponsiveContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-xs text-muted-foreground">Total</span>
-          <span className="tabular text-sm font-medium">{formatCurrency(total, { compact: true })}</span>
+          <span className="tabular text-sm font-semibold">{formatCurrency(total, { compact: true })}</span>
         </div>
       </div>
 

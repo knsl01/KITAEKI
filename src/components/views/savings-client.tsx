@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
@@ -67,24 +68,21 @@ function GoalDialog({ goal, trigger }: { goal?: SavingsGoal; trigger: React.Reac
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="target_amount">Target dana</Label>
-              <Input
+              <MoneyInput
                 id="target_amount"
                 name="target_amount"
-                type="number"
                 min={1}
-                step="1"
+                placeholder="40.000.000"
                 defaultValue={goal?.target_amount ?? ""}
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="current_amount">Sudah terkumpul</Label>
-              <Input
+              <MoneyInput
                 id="current_amount"
                 name="current_amount"
-                type="number"
                 min={0}
-                step="1"
                 defaultValue={goal?.current_amount ?? 0}
               />
             </div>
@@ -148,13 +146,12 @@ function ContributionDialog({ goal }: { goal: SavingsGoal }) {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor={`amount-${goal.id}`}>Nominal</Label>
-            <Input
+            <MoneyInput
               id={`amount-${goal.id}`}
-              type="number"
-              step="1"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="500000"
+              onValueChange={setAmount}
+              allowNegative
+              placeholder="500.000"
             />
           </div>
 
@@ -215,15 +212,15 @@ export function SavingsClient({ goals }: { goals: SavingsGoal[] }) {
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
             <p className="text-sm text-muted-foreground">Total terkumpul</p>
-            <p className="tabular mt-1 text-xl font-medium">{formatCurrency(totalSaved)}</p>
+            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalSaved)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Total target</p>
-            <p className="tabular mt-1 text-xl font-medium">{formatCurrency(totalTarget)}</p>
+            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalTarget)}</p>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">Progres keseluruhan</p>
-            <p className="tabular mt-1 text-xl font-medium">{percent(totalSaved, totalTarget)}%</p>
+            <p className="tabular mt-1 text-xl font-bold">{percent(totalSaved, totalTarget)}%</p>
           </div>
         </CardContent>
       </Card>
@@ -249,7 +246,7 @@ export function SavingsClient({ goals }: { goals: SavingsGoal[] }) {
                   {pct >= 100 ? <Badge tone="positive">Tercapai</Badge> : null}
                 </div>
 
-                <p className="tabular mt-4 text-lg font-medium">{formatCurrency(Number(goal.current_amount))}</p>
+                <p className="tabular mt-4 text-lg font-bold">{formatCurrency(Number(goal.current_amount))}</p>
                 <p className="tabular text-xs text-muted-foreground">
                   dari {formatCurrency(Number(goal.target_amount))} · {pct}%
                 </p>

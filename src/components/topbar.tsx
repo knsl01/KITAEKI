@@ -10,11 +10,13 @@ export function Topbar({
   categories,
   defaultOwner,
   name,
+  householdName,
 }: {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
   defaultOwner: MemberOwner;
   name: string;
+  householdName: string;
 }) {
   const today = new Intl.DateTimeFormat("id-ID", {
     weekday: "long",
@@ -26,6 +28,7 @@ export function Topbar({
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/95 px-4 backdrop-blur lg:px-8">
       <div className="flex items-center gap-2">
+        <MobileMenu householdName={householdName} variant="topbar" />
         <ThemeSwitcher />
         <TransactionDialog
           accounts={accounts}

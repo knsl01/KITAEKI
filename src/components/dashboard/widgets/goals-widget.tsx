@@ -46,7 +46,7 @@ export function GoalsWidget({ goals, today }: { goals: GoalRow[]; today: string 
                     ) : null}
                     <span className="truncate">{goal.name}</span>
                   </span>
-                  <span className={cn("tabular shrink-0 text-xs font-medium", done ? "text-positive" : "text-foreground")}>{progress}%</span>
+                  <span className={cn("tabular shrink-0 text-xs font-semibold", done ? "text-positive" : "text-foreground")}>{progress}%</span>
                 </div>
 
                 <div className="relative h-2 overflow-hidden rounded-full bg-muted">
