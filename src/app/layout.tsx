@@ -1,30 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Bricolage_Grotesque,
-  Figtree,
-  Fraunces,
-  Inter,
-  Instrument_Serif,
-  Plus_Jakarta_Sans,
-} from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider, themeBootstrapScript } from "@/components/theme-provider";
 import "./globals.css";
 
-// Pasangan bawaan ("Hangat") dimuat di awal. Dua pasangan lain baru diunduh saat dipilih (preload: false).
-const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--f-jakarta", display: "swap" });
-const fraunces = Fraunces({ subsets: ["latin"], variable: "--f-fraunces", display: "swap", axes: ["opsz"] });
-const figtree = Figtree({ subsets: ["latin"], variable: "--f-figtree", display: "swap", preload: false });
-const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--f-bricolage", display: "swap", preload: false });
-const inter = Inter({ subsets: ["latin"], variable: "--f-inter", display: "swap", preload: false });
-const instrument = Instrument_Serif({
+// Satu-satunya keluarga huruf aplikasi. Bobot 400–800 untuk hierarki teks; miring dipakai untuk kutipan.
+// next/font mengunduh dan menyajikannya dari domain sendiri (tanpa file huruf manual, tanpa permintaan ke Google saat runtime).
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--f-instrument",
+  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-jakarta",
   display: "swap",
-  preload: false,
 });
-
-const fontVariables = [jakarta, fraunces, figtree, bricolage, inter, instrument].map((f) => f.variable).join(" ");
 
 export const metadata: Metadata = {
   title: { default: "KITA — Eki & Dinda", template: "%s · KITA" },
@@ -56,7 +43,7 @@ const sidebarBootstrap = `(function(){try{document.documentElement.dataset.sideb
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={fontVariables} suppressHydrationWarning>
+    <html lang="id" className={jakarta.variable} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript + sidebarBootstrap }} />
       </head>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Plus } from "lucide-react";
+import { MobileMenu } from "@/components/mobile-menu";
 import { MobileNav } from "@/components/mobile-nav";
 import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
@@ -32,6 +33,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           categories={categories ?? []}
           defaultOwner={workspace?.memberKey ?? "shared"}
           name={workspace?.displayName ?? "Kita"}
+          householdName={workspace?.householdName ?? "KITA"}
         />
         <main className="px-4 pb-32 pt-6 lg:px-8 lg:pb-12">
           <PageTransition>{children}</PageTransition>
@@ -39,6 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
 
       <MobileNav
+        menu={<MobileMenu householdName={workspace?.householdName ?? "KITA"} variant="nav" />}
         action={
           <TransactionDialog
             accounts={accounts ?? []}

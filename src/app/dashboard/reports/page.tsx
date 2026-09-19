@@ -72,19 +72,19 @@ export default async function ReportsPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Total pemasukan</p>
-              <p className="tabular mt-2 text-2xl font-medium text-[hsl(var(--positive))]">
+              <p className="tabular mt-2 text-2xl font-bold text-[hsl(var(--positive))]">
                 {formatCurrency(totals.income)}
               </p>
             </Card>
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Total pengeluaran</p>
-              <p className="tabular mt-2 text-2xl font-medium text-[hsl(var(--negative))]">
+              <p className="tabular mt-2 text-2xl font-bold text-[hsl(var(--negative))]">
                 {formatCurrency(totals.expense)}
               </p>
             </Card>
             <Card className="p-5">
               <p className="text-sm text-muted-foreground">Selisih</p>
-              <p className="tabular mt-2 text-2xl font-medium">{formatCurrency(totals.net)}</p>
+              <p className="tabular mt-2 text-2xl font-bold">{formatCurrency(totals.net)}</p>
             </Card>
           </div>
 

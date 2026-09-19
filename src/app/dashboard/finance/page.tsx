@@ -49,23 +49,23 @@ export default async function FinancePage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Total saldo</p>
-          <p className="tabular mt-2 text-2xl font-medium">{formatCurrency(totalBalance)}</p>
+          <p className="tabular mt-2 text-2xl font-bold">{formatCurrency(totalBalance)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Pemasukan</p>
-          <p className="tabular mt-2 text-2xl font-medium text-[hsl(var(--positive))]">
+          <p className="tabular mt-2 text-2xl font-bold text-[hsl(var(--positive))]">
             {formatCurrency(totals.income)}
           </p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Pengeluaran</p>
-          <p className="tabular mt-2 text-2xl font-medium text-[hsl(var(--negative))]">
+          <p className="tabular mt-2 text-2xl font-bold text-[hsl(var(--negative))]">
             {formatCurrency(totals.expense)}
           </p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Tabungan bulan ini</p>
-          <p className="tabular mt-2 text-2xl font-medium">{formatCurrency(totals.net)}</p>
+          <p className="tabular mt-2 text-2xl font-bold">{formatCurrency(totals.net)}</p>
         </Card>
       </div>
 
