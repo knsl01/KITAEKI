@@ -35,7 +35,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           name={workspace?.displayName ?? "Kita"}
           householdName={workspace?.householdName ?? "KITA"}
         />
-        <main className="px-4 pb-32 pt-6 lg:px-8 lg:pb-12">
+        <main className="pb-32 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-6 lg:px-8 lg:pb-12">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

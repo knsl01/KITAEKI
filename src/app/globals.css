@@ -238,6 +238,14 @@
   }
 
 
+  /* Warna garis grafik dan lampu neon. Bawaan mengikuti tema; Black Pink menimpanya. */
+  :root {
+    --chart-line: var(--primary);
+    --line-positive: var(--positive);
+    --line-negative: var(--negative);
+    --neon: var(--primary);
+  }
+
   /* ── Tema tambahan ─────────────────────────────────────── */
   [data-theme="ocean"] {
     --background: 180 20% 97%;
@@ -407,6 +415,71 @@
     --chart-axis: hsl(220 6% 62%);
   }
 
+  /* Black Pink: hitam dan merah muda neon. Angka hijau → hitam (putih di mode gelap), merah → pink. */
+  [data-theme="blackpink"] {
+    --background: 330 30% 97%;
+    --foreground: 0 0% 6%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 6%;
+    --muted: 330 18% 94%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 330 62% 94%;
+    --accent-foreground: 0 0% 6%;
+    --primary: 0 0% 7%;
+    --primary-foreground: 330 100% 96%;
+    --secondary: 330 18% 94%;
+    --secondary-foreground: 0 0% 6%;
+    --destructive: 329 100% 44%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 330 14% 89%;
+    --input: 330 14% 89%;
+    --ring: 328 100% 55%;
+    --sidebar: 0 0% 5%;
+    --sidebar-foreground: 330 18% 92%;
+    --positive: 0 0% 8%;
+    --negative: 329 100% 44%;
+    --chart-income: hsl(0 0% 10%);
+    --chart-expense: hsl(329 100% 55%);
+    --chart-grid: hsl(330 14% 89%);
+    --chart-axis: hsl(0 0% 40%);
+    --chart-line: 328 100% 58%;
+    --line-positive: 328 100% 58%;
+    --line-negative: 340 100% 64%;
+    --neon: 328 100% 58%;
+    --radius: 0.75rem;
+  }
+
+  [data-theme="blackpink"][data-mode="dark"] {
+    --background: 0 0% 4%;
+    --foreground: 330 20% 96%;
+    --card: 0 0% 7%;
+    --card-foreground: 330 20% 96%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 330 8% 62%;
+    --accent: 330 42% 14%;
+    --accent-foreground: 330 20% 96%;
+    --primary: 328 100% 62%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 330 20% 96%;
+    --destructive: 340 92% 60%;
+    --border: 330 12% 17%;
+    --input: 330 12% 17%;
+    --ring: 328 100% 60%;
+    --sidebar: 328 34% 9%;
+    --sidebar-foreground: 330 14% 88%;
+    --positive: 0 0% 96%;
+    --negative: 328 100% 68%;
+    --chart-income: hsl(0 0% 94%);
+    --chart-expense: hsl(328 100% 62%);
+    --chart-grid: hsl(0 0% 16%);
+    --chart-axis: hsl(330 8% 62%);
+    --chart-line: 328 100% 64%;
+    --line-positive: 328 100% 66%;
+    --line-negative: 340 100% 70%;
+    --neon: 328 100% 64%;
+  }
+
   /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
   :root,
   [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
@@ -416,6 +489,7 @@
   [data-theme="ocean"] { --glow-1: 186 58% 50%; --glow-2: 160 46% 60%; }
   [data-theme="honey"] { --glow-1: 40 92% 56%; --glow-2: 22 78% 62%; }
   [data-theme="graphite"] { --glow-1: 220 22% 56%; --glow-2: 250 20% 66%; }
+  [data-theme="blackpink"] { --glow-1: 328 100% 68%; --glow-2: 300 70% 60%; }
 
   [data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
   [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
@@ -425,6 +499,7 @@
   [data-theme="ocean"][data-mode="dark"] { --glow-1: 186 60% 34%; --glow-2: 160 46% 34%; }
   [data-theme="honey"][data-mode="dark"] { --glow-1: 40 90% 40%; --glow-2: 22 70% 40%; }
   [data-theme="graphite"][data-mode="dark"] { --glow-1: 220 22% 40%; --glow-2: 250 20% 44%; }
+  [data-theme="blackpink"][data-mode="dark"] { --glow-1: 328 100% 46%; --glow-2: 292 80% 34%; }
 
   /* ── Huruf: satu keluarga untuk seluruh aplikasi (Plus Jakarta Sans lewat next/font) ── */
   :root {
@@ -627,8 +702,28 @@
   }
 
   .chart-reveal {
+    overflow: visible;
     animation: chart-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+  /* Lapisan cahaya di bawah garis grafik: tersembunyi kecuali di tema Black Pink */
+  .chart-glow {
+    display: none;
+  }
+  [data-theme="blackpink"] .chart-glow {
+    display: inline;
+  }
+  /* Titik di ujung grafik berkedip halus bersama cahayanya */
+  [data-theme="blackpink"] .chart-dot {
+    animation: neon-blink 2.2s ease-in-out infinite;
+    box-shadow: 0 0 6px 1px hsl(var(--neon) / 0.95), 0 0 18px 6px hsl(var(--neon) / 0.55);
+  }
+  [data-theme="blackpink"] .dot-ping {
+    animation-iteration-count: infinite;
+  }
+  [data-theme="blackpink"] .bar-grow {
+    filter: drop-shadow(0 0 5px hsl(var(--neon) / 0.5));
+  }
+
   .bar-grow {
     transform-box: fill-box;
     transform-origin: 50% 100%;
@@ -727,10 +822,22 @@
 
 @keyframes chart-reveal {
   from {
-    clip-path: inset(0 100% 0 0);
+    clip-path: inset(-24px 100% -24px 0);
   }
   to {
-    clip-path: inset(0 0 0 0);
+    clip-path: inset(-24px -24px -24px 0);
+  }
+}
+
+@keyframes neon-blink {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px 1px hsl(var(--neon) / 0.95), 0 0 18px 6px hsl(var(--neon) / 0.55);
+  }
+  50% {
+    opacity: 0.4;
+    box-shadow: 0 0 3px 0 hsl(var(--neon) / 0.6), 0 0 8px 2px hsl(var(--neon) / 0.25);
   }
 }
 
@@ -764,6 +871,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-theme="blackpink"] .chart-dot,
+  [data-theme="blackpink"] .dot-ping {
+    animation: none !important;
+  }
   *,
   *::before,
   *::after {
