@@ -37,8 +37,14 @@
 - **Grafik baru** (SVG buatan sendiri, tanpa Recharts di dashboard): batang pemasukan/pengeluaran dengan sorotan bulan,
   legenda yang bisa dimatikan, donut kategori yang saling terhubung dengan daftarnya, sparkline yang bisa disentuh,
   cincin persentase tabungan, dan grafik saldo dengan garis acuan awal periode.
-- **Gaya tampilan** (ikon palet di topbar dan di Pengaturan): 7 tema (tambahan Ocean, Honey, Graphite) dan 3 tingkat
-  kebulatan sudut. Berlaku langsung dan tersimpan per browser.
+- **Gaya tampilan** (ikon palet di topbar dan di Pengaturan): 8 tema (tambahan Ocean, Honey, Graphite, Black Pink) dan
+  3 tingkat kebulatan sudut. Berlaku langsung dan tersimpan per browser.
+- **Tema Black Pink**: hitam dan pink neon. Angka pemasukan (hijau di tema lain) jadi hitam di mode terang dan putih di
+  mode gelap; angka pengeluaran (merah) jadi pink. Semua garis grafik pink neon dengan cahaya berlapis, dan titik di
+  ujung grafik berkedip halus. Efeknya hanya aktif di tema ini (`.chart-glow`, `.chart-dot` di `globals.css`) dan
+  berhenti kalau perangkat memakai "kurangi gerakan".
+- **Area aman iPhone**: saat dibuka dari layar utama (layar penuh), topbar turun di bawah notch/Dynamic Island dan area
+  status bar diberi warna gelap supaya jam dan baterai terbaca. Di Safari biasa tampilannya tidak berubah.
 - **Tipografi satu keluarga**: seluruh aplikasi memakai **Plus Jakarta Sans** lewat `next/font/google` (bobot 400–800,
   tanpa file huruf manual). Judul 700–800 dan rapat, tombol 600, angka uang 600–700 dengan angka lurus dan sama lebar
   (`.tabular`, `.numeral` di `globals.css`). Kelas lama `font-serif` tetap ada tetapi kini berarti "judul" dalam huruf yang sama.
