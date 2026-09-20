@@ -19,13 +19,11 @@ export const NAV_ITEMS = [
   { href: "/dashboard/transactions", label: "Transaksi", icon: ArrowLeftRight },
   { href: "/dashboard/accounts", label: "Akun & Saldo", icon: Wallet },
   { href: "/dashboard/finance", label: "Keuangan", icon: Receipt },
-  { href: "/dashboard/budget", label: "Anggaran", icon: Target },
+  { href: "/dashboard/budget", label: "Alokasi", icon: Target },
   { href: "/dashboard/savings", label: "Tabungan & Target", icon: PiggyBank },
-  { href: "/dashboard/recurring", label: "Berulang", icon: Repeat },
-  { href: "/dashboard/reports", label: "Laporan", icon: BarChart3 },
-  { href: "/dashboard/tasks", label: "Tugas", icon: ListChecks },
+  { href: "/dashboard/recurring", label: "Berlangganan", icon: Repeat },
+  { href: "/dashboard/tasks", label: "Calendar KITA", icon: ListChecks },
   { href: "/dashboard/shopping", label: "Belanja", icon: ShoppingCart },
-  { href: "/dashboard/wishlist", label: "Wishlist", icon: Gift },
   { href: "/dashboard/categories", label: "Kategori", icon: Tags },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ] as const;
@@ -33,6 +31,6 @@ export const NAV_ITEMS = [
 export const MOBILE_NAV_ITEMS = [
   { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
   { href: "/dashboard/transactions", label: "Transaksi", icon: ArrowLeftRight },
-  { href: "/dashboard/budget", label: "Anggaran", icon: Target },
+  { href: "/dashboard/budget", label: "Alokasi", icon: Target },
   { href: "/dashboard/savings", label: "Target", icon: PiggyBank },
 ] as const;

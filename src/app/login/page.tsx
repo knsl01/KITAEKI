@@ -6,7 +6,7 @@ export const metadata = { title: "Masuk" };
 const HIGHLIGHTS = [
   { title: "Keuangan", body: "Pemasukan, pengeluaran, dan transfer antar akun dalam satu catatan." },
   { title: "Rencana", body: "Anggaran bulanan, target tabungan, dan tagihan rutin yang tak terlewat." },
-  { title: "Bersama", body: "Satu workspace untuk berdua, dengan catatan milik siapa yang jelas." },
+  { title: "KITA", body: "Satu workspace untuk berdua, dengan catatan milik siapa yang jelas." },
 ];
 
 export default function LoginPage() {

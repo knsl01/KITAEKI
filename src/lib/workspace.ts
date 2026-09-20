@@ -18,7 +18,17 @@ export type Workspace = {
   displayName: string;
   /** Nama gabungan untuk sapaan, misalnya "Eki & Dinda". */
   coupleName: string;
+  member1Name: string;
+  member2Name: string;
 };
+
+import { cookies } from "next/headers";
+import type { ViewKey } from "@/components/member-switcher";
+
+export async function getView(): Promise<ViewKey> {
+  const cookieStore = await cookies();
+  return (cookieStore.get("kita_view")?.value as ViewKey) || "bersama";
+}
 
 /**
  * Dipakai banyak komponen dalam satu render, jadi hasilnya di-cache per request.
@@ -66,6 +76,9 @@ export const getWorkspace = cache(async (): Promise<Workspace | null> => {
     .filter(Boolean)
     .map((m) => m!.full_name || (m!.member_key === "eki" ? "Eki" : "Dinda"));
 
+  const member1Name = members.find((m) => m.member_key === "eki")?.full_name || "Eki";
+  const member2Name = members.find((m) => m.member_key === "dinda")?.full_name || "Dinda";
+
   return {
     householdId,
     householdName: (household?.name as string | undefined) ?? "KITA",
@@ -74,5 +87,7 @@ export const getWorkspace = cache(async (): Promise<Workspace | null> => {
     members,
     displayName,
     coupleName: names.length ? names.join(" & ") : displayName,
+    member1Name,
+    member2Name,
   };
 });

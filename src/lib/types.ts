@@ -75,6 +75,10 @@ export type SavingsGoal = {
   target_date: string | null;
   owner: MemberOwner;
   is_archived: boolean;
+  image_url?: string | null;
+  item_url?: string | null;
+  item_price?: number | null;
+  priority?: ItemPriority;
 };
 
 export type RecurringTransaction = {
@@ -90,6 +94,7 @@ export type RecurringTransaction = {
   frequency: RecurringFrequency;
   next_run_on: string;
   is_active: boolean;
+  is_manual: boolean;
   account?: Pick<Account, "id" | "name"> | null;
   category?: Pick<Category, "id" | "name" | "color"> | null;
 };
@@ -97,7 +102,7 @@ export type RecurringTransaction = {
 export const OWNER_LABEL: Record<MemberOwner, string> = {
   eki: "Eki",
   dinda: "Dinda",
-  shared: "Bersama",
+  shared: "KITA",
 };
 
 export const TYPE_LABEL: Record<TransactionType, string> = {

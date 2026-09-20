@@ -9,6 +9,9 @@ import { TransactionDialog } from "@/components/transaction-dialog";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspace } from "@/lib/workspace";
 
+import { cookies } from "next/headers";
+import type { ViewKey } from "@/components/member-switcher";
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
@@ -23,6 +26,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
     supabase.from("categories").select("id, name, kind, icon_key, color").order("name"),
   ]);
 
+  const cookieStore = await cookies();
+  const currentView = (cookieStore.get("kita_view")?.value as ViewKey) || "bersama";
+  const memberLabels = {
+    eki: workspace?.member1Name || "Eki",
+    dinda: workspace?.member2Name || "Dinda",
+  };
+
   return (
     <div className="min-h-screen">
       <Sidebar householdName={workspace?.householdName ?? "KITA"} />
@@ -34,6 +44,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
           defaultOwner={workspace?.memberKey ?? "shared"}
           name={workspace?.displayName ?? "Kita"}
           householdName={workspace?.householdName ?? "KITA"}
+          currentView={currentView}
+          memberLabels={memberLabels}
         />
         <main className="pb-32 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-6 lg:px-8 lg:pb-12">
           <PageTransition>{children}</PageTransition>
@@ -41,7 +53,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </div>
 
       <MobileNav
-        menu={<MobileMenu householdName={workspace?.householdName ?? "KITA"} variant="nav" />}
+        menu={
+          <MobileMenu 
+            householdName={workspace?.householdName ?? "KITA"} 
+            variant="nav"
+            currentView={currentView}
+            memberLabels={memberLabels}
+          />
+        }
         action={
           <TransactionDialog
             accounts={accounts ?? []}

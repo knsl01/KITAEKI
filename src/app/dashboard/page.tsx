@@ -35,13 +35,10 @@ export const dynamic = "force-dynamic";
 
 const PRIORITY_ORDER: Record<ItemPriority, number> = { high: 0, medium: 1, low: 2 };
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ view?: string }>;
-}) {
-  const params = await searchParams;
-  const view: ViewKey = params.view === "eki" || params.view === "dinda" ? params.view : "bersama";
+import { getView } from "@/lib/workspace";
+
+export default async function DashboardPage() {
+  const view: ViewKey = await getView();
 
   const supabase = await createClient();
   const workspace = await getWorkspace();

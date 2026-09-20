@@ -1,5 +1,6 @@
 import { TransactionsClient } from "@/components/views/transactions-client";
 import { createClient } from "@/lib/supabase/server";
+import { getView } from "@/lib/workspace";
 import type { Account, Category, TransactionWithRelations } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +8,7 @@ export const metadata = { title: "Transaksi — KITA" };
 
 export default async function TransactionsPage() {
   const supabase = await createClient();
+  const currentView = await getView();
 
   const [{ data: transactions }, { data: accounts }, { data: categories }] = await Promise.all([
     supabase
@@ -21,9 +23,14 @@ export default async function TransactionsPage() {
     supabase.from("categories").select("id, name, kind, color").order("name"),
   ]);
 
+  const filteredTxs = (transactions ?? []).filter((t) => {
+    if (currentView === "bersama") return true;
+    return t.owner === currentView || t.owner === "shared";
+  }) as unknown as TransactionWithRelations[];
+
   return (
     <TransactionsClient
-      transactions={(transactions ?? []) as unknown as TransactionWithRelations[]}
+      transactions={filteredTxs}
       accounts={(accounts ?? []) as Pick<Account, "id" | "name">[]}
       categories={(categories ?? []) as Pick<Category, "id" | "name" | "kind" | "color">[]}
     />
