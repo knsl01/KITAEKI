@@ -47,23 +47,28 @@ export function LoginScene() {
         <rect width="800" height="900" fill="hsl(var(--sidebar))" />
 
         <g style={layer(0.2)}>
-          <circle cx="600" cy="190" r="58" fill="#E8DFCF" opacity="0.14" />
+          <circle cx="600" cy="190" r="58" fill="#B19CD9" opacity="0.3" filter="drop-shadow(0 0 20px #B19CD9)" />
+          {/* Stars */}
+          <circle cx="100" cy="200" r="2" fill="white" className="animate-pulse" />
+          <circle cx="200" cy="100" r="1.5" fill="white" className="animate-pulse" style={{ animationDelay: "1s" }} />
+          <circle cx="400" cy="300" r="2.5" fill="white" className="animate-pulse" style={{ animationDelay: "0.5s" }} />
+          <circle cx="700" cy="250" r="2" fill="white" className="animate-pulse" style={{ animationDelay: "1.5s" }} />
         </g>
 
-        <g style={layer(0.4)} opacity="0.2">
-          <path d="M-60 640 L150 430 L320 610 L470 470 L640 640 L860 470 L860 940 L-60 940 Z" fill="#DCE5D8" />
+        <g style={layer(0.4)} opacity="0.4">
+          <path d="M-60 640 L150 430 L320 610 L470 470 L640 640 L860 470 L860 940 L-60 940 Z" fill="#2B1B54" />
         </g>
 
-        <g style={layer(0.7)} opacity="0.34">
-          <path d="M-60 740 L120 560 L300 720 L450 600 L620 760 L860 590 L860 940 L-60 940 Z" fill="#B7C7B2" />
+        <g style={layer(0.7)} opacity="0.6">
+          <path d="M-60 740 L120 560 L300 720 L450 600 L620 760 L860 590 L860 940 L-60 940 Z" fill="#3B28CC" />
         </g>
 
-        <g style={layer(1.1)} opacity="0.55">
-          <path d="M-60 830 L140 670 L330 820 L520 700 L720 840 L860 750 L860 940 L-60 940 Z" fill="#6E8470" />
+        <g style={layer(1.1)} opacity="0.8">
+          <path d="M-60 830 L140 670 L330 820 L520 700 L720 840 L860 750 L860 940 L-60 940 Z" fill="#4B0082" />
         </g>
 
         <g style={layer(1.6)}>
-          <path d="M-60 920 L180 790 L400 900 L620 800 L860 880 L860 960 L-60 960 Z" fill="#26352C" />
+          <path d="M-60 920 L180 790 L400 900 L620 800 L860 880 L860 960 L-60 960 Z" fill="#150c2c" />
         </g>
       </svg>
     </div>

@@ -110,15 +110,42 @@ function RecurringDialog({ item, accounts, categories, trigger }: RecurringDialo
             ))}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Nama tagihan</Label>
-            <Input id="description" name="description" placeholder="Listrik PLN" defaultValue={item?.description ?? ""} />
+          <div className="space-y-1">
+            <Label htmlFor="description">Catatan (opsional)</Label>
+            <Input
+              id="description"
+              name="description"
+              defaultValue={item?.description ?? ""}
+              placeholder={type === "expense" ? "Tagihan Listrik" : type === "income" ? "Gaji" : "Kirim ke tabungan"}
+            />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              id="is_manual"
+              name="is_manual"
+              value="true"
+              defaultChecked={item?.is_manual}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                // If manual, we don't need nominal
+                const moneyInput = document.getElementById("amount");
+                if (moneyInput) {
+                  (moneyInput as any).disabled = checked;
+                }
+              }}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="is_manual" className="font-normal cursor-pointer">
+              Debet Manual (Nominal tidak tetap / ditentukan saat bayar)
+            </Label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="space-y-1">
               <Label htmlFor="amount">Nominal</Label>
-              <MoneyInput id="amount" name="amount" min={1} placeholder="150.000" defaultValue={item?.amount ?? ""} required />
+              <MoneyInput id="amount" name="amount" defaultValue={item?.amount || ""} required={!item?.is_manual} disabled={item?.is_manual} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="frequency">Frekuensi</Label>
@@ -271,20 +298,57 @@ export function RecurringClient({ items, accounts, categories }: Props) {
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-1 border-t border-border pt-3">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={pending || !item.is_active}
-                    onClick={() =>
-                      startTransition(async () => {
-                        await runRecurringNow(item.id);
-                        router.refresh();
-                      })
-                    }
-                  >
-                    <Check className="h-3.5 w-3.5" />
-                    Catat
-                  </Button>
+                  {item.is_manual ? (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" disabled={pending || !item.is_active}>
+                          <Check className="h-3.5 w-3.5" />
+                          Catat (Manual)
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Masukan Nominal</DialogTitle>
+                          <DialogDescription>Berapa nominal untuk {item.description} periode ini?</DialogDescription>
+                        </DialogHeader>
+                        <form
+                          action={(formData) => {
+                            const amount = Number(formData.get("amount")?.toString().replace(/\D/g, ""));
+                            if (amount > 0) {
+                              startTransition(async () => {
+                                await runRecurringNow(item.id, amount);
+                                router.refresh();
+                              });
+                            }
+                          }}
+                          className="space-y-4"
+                        >
+                          <div className="space-y-1">
+                            <Label htmlFor="amount">Nominal</Label>
+                            <MoneyInput id="amount" name="amount" required />
+                          </div>
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Button type="submit" disabled={pending}>Simpan & Catat</Button>
+                          </div>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={pending || !item.is_active}
+                      onClick={() =>
+                        startTransition(async () => {
+                          await runRecurringNow(item.id);
+                          router.refresh();
+                        })
+                      }
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      Catat
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
