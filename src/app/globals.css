@@ -690,15 +690,14 @@
   }
 }
 
-/* Neon Chart Glowing Effects */
+/* Recharts Styles */
 .recharts-pie-sector {
-  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+  /* optional hover effect instead of glow */
 }
 
 /* Blinking Dots for Recharts (Removed per user request) */
 .recharts-dot {
   transform-origin: center;
-  filter: drop-shadow(0 0 8px currentColor);
 }
 
 @layer utilities {
