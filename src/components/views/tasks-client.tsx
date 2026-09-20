@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useTransition } from "react";
 import { format, addMonths, subMonths, addYears, subYears, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, startOfWeek, endOfWeek, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon } from "lucide-react";
@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { createTask, deleteTask, toggleTask } from "@/app/actions/tasks";
 import { OWNER_LABEL, type MemberOwner, type Task } from "@/lib/types";
-import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 export function TasksClient({ tasks }: { tasks: Task[] }) {
@@ -52,8 +51,21 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
     return "bg-gradient-to-r from-blue-500 to-pink-500"; // KITA
   };
 
+  const [optimisticTasks, updateOptimisticTasks] = React.useOptimistic(
+    tasks,
+    (state, update: { id: string; action: "toggle" | "delete"; is_done?: boolean }) => {
+      if (update.action === "toggle") {
+        return state.map((t) => (t.id === update.id ? { ...t, is_done: update.is_done! } : t));
+      }
+      if (update.action === "delete") {
+        return state.filter((t) => t.id !== update.id);
+      }
+      return state;
+    }
+  );
+
   const renderDay = (day: Date, isYearView = false) => {
-    const dayTasks = tasks.filter(t => t.due_on === format(day, "yyyy-MM-dd"));
+    const dayTasks = optimisticTasks.filter(t => t.due_on === format(day, "yyyy-MM-dd"));
     const isCurrentMonth = isSameMonth(day, currentDate);
     const isToday = isSameDay(day, new Date());
     
@@ -91,6 +103,7 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
 
   const handleToggle = (id: string, is_done: boolean) => {
     startTransition(async () => {
+      updateOptimisticTasks({ id, action: "toggle", is_done });
       await toggleTask(id, is_done);
       router.refresh();
     });
@@ -98,6 +111,7 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
 
   const handleDelete = (id: string) => {
     startTransition(async () => {
+      updateOptimisticTasks({ id, action: "delete" });
       await deleteTask(id);
       router.refresh();
     });
@@ -111,8 +125,8 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
         action={
           <div className="flex items-center gap-2">
             <div className="bg-muted p-1 rounded-md flex">
-              <Button variant={viewMode === "month" ? "subtle" : "ghost"} size="sm" onClick={() => setViewMode("month")}>Bulan</Button>
-              <Button variant={viewMode === "year" ? "subtle" : "ghost"} size="sm" onClick={() => setViewMode("year")}>Tahun</Button>
+              <Button variant={viewMode === "month" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("month")} className="transition-all duration-300">Bulan</Button>
+              <Button variant={viewMode === "year" ? "default" : "ghost"} size="sm" onClick={() => setViewMode("year")} className="transition-all duration-300">Tahun</Button>
             </div>
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
               <DialogTrigger asChild>
@@ -184,7 +198,7 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
                   end: endOfWeek(endOfMonth(monthDate), { weekStartsOn: 1 }) 
                 }).map(day => {
                   const isCurrentMonth = isSameMonth(day, monthDate);
-                  const hasTasks = tasks.some(t => t.due_on === format(day, "yyyy-MM-dd"));
+                  const hasTasks = optimisticTasks.some(t => t.due_on === format(day, "yyyy-MM-dd"));
                   
                   return (
                     <div 
@@ -214,8 +228,8 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            {selectedDate && tasks.filter(t => t.due_on === format(selectedDate, "yyyy-MM-dd")).length > 0 ? (
-              tasks.filter(t => t.due_on === format(selectedDate, "yyyy-MM-dd")).map(task => (
+            {selectedDate && optimisticTasks.filter(t => t.due_on === format(selectedDate, "yyyy-MM-dd")).length > 0 ? (
+              optimisticTasks.filter(t => t.due_on === format(selectedDate, "yyyy-MM-dd")).map(task => (
                 <div key={task.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20">
                   <input
                     type="checkbox"
