@@ -83,16 +83,16 @@ PASTIKAN jika menggunakan format di atas, JANGAN tambahkan teks pengantar/penutu
     // Map history to Gemini format. Exclude toolCall internal messages unless properly structured.
     // We will just map regular conversation, or properly pass function calls and responses.
     const contents = history.map(m => {
-      if (m.role === "assistant" && (m as any).toolCall) {
+      if (m.role === "model" && m.toolCall) {
         return {
           role: "model",
-          parts: [{ functionCall: { name: (m as any).toolCall.name, args: (m as any).toolCall.args } }]
+          parts: [{ functionCall: { name: m.toolCall.name, args: m.toolCall.args } }]
         };
       }
-      if (m.role === "user" && (m as any).toolResult) {
+      if (m.role === "user" && m.toolResult) {
         return {
           role: "user",
-          parts: [{ functionResponse: { name: (m as any).toolResult.name, response: { result: (m as any).toolResult.result } } }]
+          parts: [{ functionResponse: { name: m.toolResult.name, response: { result: m.toolResult.result } } }]
         };
       }
       return { role: m.role, parts: [{ text: m.parts?.[0]?.text || "" }] };
