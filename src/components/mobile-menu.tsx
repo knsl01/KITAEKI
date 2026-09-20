@@ -9,6 +9,8 @@ import { NAV_ITEMS } from "@/lib/nav";
 import { signOut } from "@/app/actions/auth";
 import { cn } from "@/lib/utils";
 
+import { MemberSwitcher, type ViewKey } from "@/components/member-switcher";
+
 /**
  * Sidebar untuk layar kecil: meluncur dari kiri dan isinya sama dengan sidebar desktop.
  * Dibuka lewat tombol "Menu" di topbar atau ikon menu di bar bawah (`variant`).
@@ -16,9 +18,13 @@ import { cn } from "@/lib/utils";
 export function MobileMenu({
   householdName,
   variant = "topbar",
+  currentView,
+  memberLabels,
 }: {
   householdName: string;
   variant?: "topbar" | "nav";
+  currentView: ViewKey;
+  memberLabels: { eki: string; dinda: string };
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -76,7 +82,11 @@ export function MobileMenu({
             </DialogPrimitive.Close>
           </div>
 
-          <nav aria-label="Menu utama" className="mt-6 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden">
+          <div className="mt-6 px-2 flex justify-center">
+            <MemberSwitcher value={currentView} labels={memberLabels} />
+          </div>
+
+          <nav aria-label="Menu utama" className="mt-4 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden">
             {NAV_ITEMS.map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;

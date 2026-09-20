@@ -26,12 +26,12 @@ export function MemberSwitcher({
     { key: "dinda", label: labels.dinda },
   ];
 
-  function select(key: ViewKey) {
-    const next = new URLSearchParams(params.toString());
-    if (key === "bersama") next.delete("view");
-    else next.set("view", key);
-    startTransition(() => {
-      router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false });
+  async function select(key: ViewKey) {
+    if (key === value) return;
+    startTransition(async () => {
+      const { setGlobalView } = await import("@/app/actions/view");
+      await setGlobalView(key);
+      router.refresh();
     });
   }
 

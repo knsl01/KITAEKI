@@ -169,11 +169,11 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tanggal</TableHead>
+                <TableHead className="hidden md:table-cell">Tanggal</TableHead>
                 <TableHead>Catatan</TableHead>
-                <TableHead>Kategori</TableHead>
-                <TableHead>Akun</TableHead>
-                <TableHead>Milik</TableHead>
+                <TableHead className="hidden sm:table-cell">Kategori</TableHead>
+                <TableHead className="hidden lg:table-cell">Akun</TableHead>
+                <TableHead className="hidden sm:table-cell">Milik</TableHead>
                 <TableHead className="text-right">Nominal</TableHead>
                 <TableHead className="w-20" />
               </TableRow>
@@ -181,13 +181,16 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
             <TableBody>
               {filtered.map((t) => (
                 <TableRow key={t.id}>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">
+                  <TableCell className="hidden md:table-cell whitespace-nowrap text-muted-foreground">
                     {formatDate(t.occurred_on)}
                   </TableCell>
                   <TableCell className="max-w-[220px]">
-                    <p className="truncate">{t.description || TYPE_LABEL[t.type]}</p>
+                    <div className="md:hidden text-xs font-medium text-muted-foreground mb-1">
+                      {formatDate(t.occurred_on)}
+                    </div>
+                    <p className="truncate font-medium md:font-normal">{t.description || TYPE_LABEL[t.type]}</p>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {t.category ? (
                       <span className="inline-flex items-center gap-2 text-sm">
                         <CategoryIconTile
@@ -202,12 +205,12 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
                       <span className="text-sm text-muted-foreground">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                     {t.type === "transfer"
                       ? `${t.account?.name ?? "—"} → ${t.to_account?.name ?? "—"}`
                       : t.account?.name ?? "—"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge tone="outline">{OWNER_LABEL[t.owner]}</Badge>
                   </TableCell>
                   <TableCell className="text-right">

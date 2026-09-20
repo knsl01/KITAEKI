@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Pencil } from "lucide-react";
 import { updateBanner } from "@/app/actions/workspace";
 import { MediaUpload } from "@/components/media-upload";
-import { MemberSwitcher, type ViewKey } from "@/components/member-switcher";
+import type { ViewKey } from "@/components/member-switcher";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -86,7 +86,6 @@ export function DashboardBanner({
           {settings.banner_subtitle ? (
             <p className="mt-2 text-sm text-white/75">{settings.banner_subtitle}</p>
           ) : null}
-          <MemberSwitcher value={view} labels={labels} className="mt-5" />
         </div>
 
         <div className="flex items-end justify-between gap-4 lg:flex-col lg:items-end">

@@ -55,14 +55,14 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4" />
-          Atur anggaran
+          Atur alokasi
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Atur anggaran</DialogTitle>
+          <DialogTitle>Atur alokasi</DialogTitle>
           <DialogDescription>
-            Satu kategori punya satu anggaran per bulan. Mengisi ulang kategori yang sama akan menimpa nilainya.
+            Satu kategori punya satu alokasi per bulan. Mengisi ulang kategori yang sama akan menimpa nilainya.
           </DialogDescription>
         </DialogHeader>
 
@@ -114,14 +114,25 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
     }
     return map;
   }, [transactions]);
+  
+  const otherSpent = useMemo(() => {
+    let sum = 0;
+    const budgetedCategoryIds = new Set(budgets.map(b => b.category_id));
+    for (const t of transactions) {
+      if (!t.category_id || !budgetedCategoryIds.has(t.category_id)) {
+        sum += Number(t.amount);
+      }
+    }
+    return sum;
+  }, [transactions, budgets]);
 
   const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + (spentByCategory.get(b.category_id) ?? 0), 0);
+  const totalSpent = budgets.reduce((sum, b) => sum + (spentByCategory.get(b.category_id) ?? 0), 0) + otherSpent;
 
   return (
     <div>
       <PageHeader
-        title="Anggaran"
+        title="Alokasi"
         description="Batas belanja per kategori supaya pengeluaran tetap terkendali."
         action={<BudgetDialog month={month} categories={categories} />}
       />
@@ -144,7 +155,7 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
       <Card className="mb-4">
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-sm text-muted-foreground">Total anggaran</p>
+            <p className="text-sm text-muted-foreground">Total alokasi</p>
             <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget)}</p>
           </div>
           <div>
@@ -158,15 +169,29 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
         </CardContent>
       </Card>
 
-      {budgets.length === 0 ? (
+      {budgets.length === 0 && otherSpent === 0 ? (
         <Card>
           <EmptyState
-            title={`Belum ada anggaran untuk ${monthLabel(month)}`}
+            title={`Belum ada alokasi untuk ${monthLabel(month)}`}
             description="Tentukan batas belanja per kategori untuk bulan ini."
           />
         </Card>
       ) : (
         <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {otherSpent > 0 && (
+            <Card className="p-5">
+              <div className="flex items-start justify-between gap-2">
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground" />
+                  <span className="truncate font-medium">Lain lain</span>
+                </span>
+              </div>
+              <p className="tabular mt-4 text-lg font-bold">{formatCurrency(otherSpent)}</p>
+              <p className="tabular text-xs text-muted-foreground">Pengeluaran di luar alokasi</p>
+              <Progress value={100} className="mt-3" barClassName="bg-muted-foreground" />
+              <p className="mt-2 text-xs text-muted-foreground">Tidak ada batas alokasi</p>
+            </Card>
+          )}
           {budgets.map((budget) => {
             const spent = spentByCategory.get(budget.category_id) ?? 0;
             const pct = percent(spent, Number(budget.amount));
@@ -183,10 +208,10 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
                     <span className="truncate font-medium">{budget.category?.name ?? "Kategori dihapus"}</span>
                   </span>
                   <ConfirmDelete
-                    title="Hapus anggaran?"
+                    title="Hapus alokasi?"
                     onConfirm={async () => deleteBudget(budget.id)}
                     trigger={
-                      <Button variant="ghost" size="icon" aria-label="Hapus anggaran">
+                      <Button variant="ghost" size="icon" aria-label="Hapus alokasi">
                         <Trash2 className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     }
