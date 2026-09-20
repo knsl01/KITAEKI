@@ -1,6 +1,6 @@
 "use server";
 
-export async function askKitaAi(history: { role: "user" | "model"; parts: [{ text: string }] }[], prompt: string) {
+export async function askKitaAi(history: { role: "user" | "model"; parts: { text: string }[] }[], prompt: string) {
   const apiKey = process.env.GEMINI_API_KEY;
   
   if (!apiKey) {
