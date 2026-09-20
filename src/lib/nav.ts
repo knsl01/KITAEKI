@@ -27,6 +27,7 @@ export const NAV_ITEMS = [
   { href: "/dashboard/tasks", label: "Calendar KITA", icon: ListChecks },
   { href: "/dashboard/shopping", label: "Belanja", icon: ShoppingCart },
   { href: "/dashboard/categories", label: "Kategori", icon: Tags },
+  { href: "/dashboard/share", label: "Share Story", icon: Target },
   { href: "/dashboard/settings", label: "Pengaturan", icon: Settings },
 ] as const;
 
