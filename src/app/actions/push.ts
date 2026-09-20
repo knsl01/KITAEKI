@@ -4,12 +4,13 @@ import webpush from "web-push";
 import { getUserClient, fail, type ActionResult } from "./_shared";
 
 // Set VAPID details
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+const vapidSubject = process.env.VAPID_SUBJECT || "mailto:hello@kita.app";
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || "";
 
-if (vapidPublicKey && vapidPrivateKey) {
+if (vapidSubject && vapidPublicKey && vapidPrivateKey) {
   webpush.setVapidDetails(
-    "mailto:hello@kita.app", // ganti dengan email admin
+    vapidSubject,
     vapidPublicKey,
     vapidPrivateKey
   );
