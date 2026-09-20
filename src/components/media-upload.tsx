@@ -5,6 +5,7 @@ import { ImagePlus, Loader2, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ImageCropper } from "@/components/image-cropper";
 
 /**
  * Unggah gambar langsung ke Supabase Storage dari browser.
@@ -17,6 +18,7 @@ export function MediaUpload({
   onChange,
   className,
   label = "Unggah gambar",
+  aspect = 16 / 9,
 }: {
   householdId: string;
   folder: string;
@@ -24,13 +26,19 @@ export function MediaUpload({
   onChange: (url: string | null) => void;
   className?: string;
   label?: string;
+  aspect?: number;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function upload(file: File) {
+  // State untuk cropper
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       setError("Pilih berkas gambar.");
@@ -41,14 +49,23 @@ export function MediaUpload({
       return;
     }
 
+    const objectUrl = URL.createObjectURL(file);
+    setCropImageSrc(objectUrl);
+    
+    // Reset input
+    e.target.value = "";
+  };
+
+  async function uploadCropped(blob: Blob) {
     setBusy(true);
+    setCropImageSrc(null); // Tutup cropper
+    
     const supabase = createClient();
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${householdId}/${folder}/${crypto.randomUUID()}.${ext}`;
+    const path = `${householdId}/${folder}/${crypto.randomUUID()}.jpg`;
 
     const { error: uploadError } = await supabase.storage
       .from("kita-media")
-      .upload(path, file, { cacheControl: "31536000", upsert: false });
+      .upload(path, blob, { contentType: "image/jpeg", cacheControl: "31536000", upsert: false });
 
     if (uploadError) {
       setError(uploadError.message);
@@ -92,21 +109,28 @@ export function MediaUpload({
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void upload(file);
-          e.target.value = "";
-        }}
+        onChange={handleFileChange}
       />
 
       {value ? (
         <Button type="button" variant="ghost" size="sm" onClick={() => inputRef.current?.click()} disabled={busy}>
-          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> : <ImagePlus className="h-3.5 w-3.5 mr-2" />}
           Ganti gambar
         </Button>
       ) : null}
 
       {error ? <p className="text-xs text-[hsl(var(--negative))]">{error}</p> : null}
+
+      {/* Cropper Modal */}
+      {cropImageSrc && (
+        <ImageCropper
+          isOpen={!!cropImageSrc}
+          imageSrc={cropImageSrc}
+          aspect={aspect}
+          onClose={() => setCropImageSrc(null)}
+          onCropCompleteAction={uploadCropped}
+        />
+      )}
     </div>
   );
 }
