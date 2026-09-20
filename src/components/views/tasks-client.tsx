@@ -111,8 +111,8 @@ export function TasksClient({ tasks }: { tasks: Task[] }) {
         action={
           <div className="flex items-center gap-2">
             <div className="bg-muted p-1 rounded-md flex">
-              <Button variant={viewMode === "month" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("month")}>Bulan</Button>
-              <Button variant={viewMode === "year" ? "secondary" : "ghost"} size="sm" onClick={() => setViewMode("year")}>Tahun</Button>
+              <Button variant={viewMode === "month" ? "subtle" : "ghost"} size="sm" onClick={() => setViewMode("month")}>Bulan</Button>
+              <Button variant={viewMode === "year" ? "subtle" : "ghost"} size="sm" onClick={() => setViewMode("year")}>Tahun</Button>
             </div>
             <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
               <DialogTrigger asChild>
