@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import { Download, Share2, Sparkles, Target, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 
@@ -62,15 +62,10 @@ export function ShareClient({
       <PageHeader title="Share ke IG Story" description="Pilih template dan pamerkan pencapaian finansial kalian!" />
 
       <div className="flex flex-col gap-4 mb-6">
-        <Select value={mode} onValueChange={(val: any) => setMode(val)}>
-          <SelectTrigger className="w-full h-12 rounded-xl bg-card">
-            <SelectValue placeholder="Pilih Template Story" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="balance"><div className="flex items-center"><Wallet className="w-4 h-4 mr-2"/> Saldo Bersama</div></SelectItem>
-            <SelectItem value="savings"><div className="flex items-center"><Target className="w-4 h-4 mr-2"/> Target Tabungan</div></SelectItem>
-            <SelectItem value="quotes"><div className="flex items-center"><Sparkles className="w-4 h-4 mr-2"/> Motivasi & Quotes</div></SelectItem>
-          </SelectContent>
+        <Select value={mode} onChange={(e: any) => setMode(e.target.value)} className="w-full h-12 rounded-xl bg-card">
+          <option value="balance">💰 Saldo Bersama</option>
+          <option value="savings">🎯 Target Tabungan</option>
+          <option value="quotes">✨ Motivasi & Quotes</option>
         </Select>
       </div>
 
