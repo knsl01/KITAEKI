@@ -1,33 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, X, Send, Bot, User } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, X, Send, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { askKitaAi } from "@/app/actions/ai";
+
+type Message = { role: "user" | "model" | "assistant"; content: string; isError?: boolean };
 
 export function KitaAiWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Halo! Saya KITA AI. Ada yang bisa saya bantu terkait rencana keuangan atau liburan kalian?" }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  function handleSend(e: React.FormEvent) {
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isTyping]);
+
+  async function handleSend(e: React.FormEvent) {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || isTyping) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: message }]);
+    const userMsg = message.trim();
+    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setMessage("");
     setIsTyping(true);
 
-    // Mock AI response
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Saat ini saya masih dalam tahap prototipe, tapi ke depannya saya akan bisa menganalisis pengeluaran dan memberikan rekomendasi cerdas untuk mencapai target KITA!" }
-      ]);
-      setIsTyping(false);
-    }, 1500);
+    // Siapkan history untuk API Gemini (format: { role: "user" | "model", parts: [{ text }] })
+    // Kita AI Widget pakai "assistant", tapi Gemini butuh "model".
+    const history = messages
+      .filter((m) => !m.isError)
+      .map((m) => ({
+        role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+        parts: [{ text: m.content }]
+      }));
+
+    const res = await askKitaAi(history, userMsg);
+    
+    setIsTyping(false);
+    
+    if (res.error) {
+      setMessages((prev) => [...prev, { role: "assistant", content: res.error, isError: true }]);
+    } else if (res.reply) {
+      setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
+    }
   }
 
   return (
@@ -79,7 +100,7 @@ export function KitaAiWidget() {
             <div key={i} className={cn("flex w-full", m.role === "user" ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
-                  "max-w-[80%] rounded-2xl px-4 py-2 text-sm",
+                  "max-w-[80%] rounded-2xl px-4 py-2 text-sm whitespace-pre-wrap",
                   m.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"
                 )}
               >
@@ -96,6 +117,7 @@ export function KitaAiWidget() {
               </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
 
         {/* Input */}

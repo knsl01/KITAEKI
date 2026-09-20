@@ -9,16 +9,6 @@ export function IncomeExpenseChart({ data }: { data: MonthlyPoint[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-        <defs>
-          <filter id="neon-income" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="var(--chart-income)" floodOpacity="0.8" />
-            <feDropShadow dx="0" dy="0" stdDeviation="8" floodColor="var(--chart-income)" floodOpacity="0.5" />
-          </filter>
-          <filter id="neon-expense" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="var(--chart-expense)" floodOpacity="0.8" />
-            <feDropShadow dx="0" dy="0" stdDeviation="8" floodColor="var(--chart-expense)" floodOpacity="0.5" />
-          </filter>
-        </defs>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
         <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} stroke="var(--chart-axis)" />
         <YAxis
@@ -40,7 +30,6 @@ export function IncomeExpenseChart({ data }: { data: MonthlyPoint[] }) {
           name="Pemasukan" 
           stroke="var(--chart-income)" 
           strokeWidth={3} 
-          filter="url(#neon-income)"
           dot={{ className: "recharts-dot", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6 }} 
         />
@@ -50,7 +39,6 @@ export function IncomeExpenseChart({ data }: { data: MonthlyPoint[] }) {
           name="Pengeluaran" 
           stroke="var(--chart-expense)" 
           strokeWidth={3}
-          filter="url(#neon-expense)"
           dot={{ className: "recharts-dot", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6 }} 
         />
