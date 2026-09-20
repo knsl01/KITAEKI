@@ -123,7 +123,7 @@ export function AiClient() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+    <div className="flex flex-col h-full bg-card rounded-xl border border-border overflow-hidden shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-muted/30">
         <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-serif font-bold">
