@@ -4,10 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { ShareClient } from "@/components/views/share-client";
 
 export default async function SharePage() {
-  const workspace = await getWorkspace();
-  if (!workspace || !workspace.user) redirect("/login");
-
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const workspace = await getWorkspace();
+  if (!workspace) redirect("/login");
 
   // Get total balance
   const { data: accounts } = await supabase
