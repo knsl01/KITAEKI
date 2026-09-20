@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { IncomeExpenseChart } from "@/components/charts/income-expense-chart";
 import { CategoryDonut } from "@/components/charts/category-donut";
+import { MemberExpenseChart } from "@/components/charts/member-expense-chart";
 import { sumTotals } from "@/lib/analytics";
 import { formatCurrency, formatDate, percent } from "@/lib/format";
 import { ACCOUNT_TYPE_LABEL, OWNER_LABEL, type Account, type Category, type MemberOwner, type RecurringTransaction, type Transaction } from "@/lib/types";
@@ -38,8 +39,27 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
 
     const map = new Map<string, { income: number; expense: number }>();
     
+    // Fill all dates/months in range to prevent straight lines skipping days
+    const curr = new Date(start);
+    const endObj = new Date(end);
+    
+    while (curr <= endObj) {
+      const y = curr.getFullYear();
+      const m = String(curr.getMonth() + 1).padStart(2, "0");
+      const d = String(curr.getDate()).padStart(2, "0");
+      
+      if (isDaily) {
+        map.set(`${y}-${m}-${d}`, { income: 0, expense: 0 });
+        curr.setDate(curr.getDate() + 1);
+      } else {
+        const monthStr = `${y}-${m}`;
+        if (!map.has(monthStr)) map.set(monthStr, { income: 0, expense: 0 });
+        curr.setMonth(curr.getMonth() + 1);
+      }
+    }
+    
     for (const t of transactions) {
-      const key = isDaily ? formatDate(t.occurred_on) : t.occurred_on.slice(0, 7);
+      const key = isDaily ? t.occurred_on : t.occurred_on.slice(0, 7);
       if (!map.has(key)) map.set(key, { income: 0, expense: 0 });
       const current = map.get(key)!;
       if (t.type === "income") current.income += Number(t.amount);
@@ -48,8 +68,8 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
     
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([label, data]) => ({
-        label,
+      .map(([key, data]) => ({
+        label: isDaily ? formatDate(key) : key,
         ...data,
       }));
   }, [transactions, start, end]);
@@ -99,6 +119,17 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
       })
       .sort((a, b) => b.value - a.value);
   }, [transactions, categories]);
+
+  const memberExpenseData = useMemo(() => {
+    return owners.map(owner => {
+      const ownerTotals = sumTotals(transactions.filter((t) => t.owner === owner));
+      return {
+        name: OWNER_LABEL[owner],
+        amount: ownerTotals.expense,
+        fill: owner === "eki" ? "#3F5540" : owner === "dinda" ? "#C7A17A" : "#8A9A5B"
+      };
+    }).filter(d => d.amount > 0);
+  }, [transactions, owners]);
 
   function handleDateChange(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -235,6 +266,11 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
               <CardTitle>Arus kas per orang</CardTitle>
             </CardHeader>
             <CardContent className="pt-2">
+              {memberExpenseData.length > 0 ? (
+                <div className="mb-4">
+                  <MemberExpenseChart data={memberExpenseData} />
+                </div>
+              ) : null}
               <ul className="divide-y divide-border">
                 {owners.map((owner) => {
                   const ownerTotals = sumTotals(transactions.filter((t) => t.owner === owner));

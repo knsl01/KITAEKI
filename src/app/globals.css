@@ -695,14 +695,8 @@
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
 }
 
-/* Blinking Dots for Recharts */
-@keyframes smooth-blink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.3); }
-}
-
+/* Blinking Dots for Recharts (Removed per user request) */
 .recharts-dot {
-  animation: smooth-blink 2.5s ease-in-out infinite;
   transform-origin: center;
   filter: drop-shadow(0 0 8px currentColor);
 }

@@ -41,7 +41,7 @@ export function IncomeExpenseChart({ data }: { data: MonthlyPoint[] }) {
           stroke="var(--chart-income)" 
           strokeWidth={3} 
           filter="url(#neon-income)"
-          dot={{ className: "recharts-dot animate-smooth-blink", strokeWidth: 2, r: 4 }}
+          dot={{ className: "recharts-dot", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6 }} 
         />
         <Line 
@@ -51,7 +51,7 @@ export function IncomeExpenseChart({ data }: { data: MonthlyPoint[] }) {
           stroke="var(--chart-expense)" 
           strokeWidth={3}
           filter="url(#neon-expense)"
-          dot={{ className: "recharts-dot animate-smooth-blink", strokeWidth: 2, r: 4 }}
+          dot={{ className: "recharts-dot", strokeWidth: 2, r: 4 }}
           activeDot={{ r: 6 }} 
         />
       </LineChart>
