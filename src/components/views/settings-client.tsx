@@ -8,8 +8,9 @@ import { signOut } from "@/app/actions/auth";
 import { HouseholdCard } from "@/components/views/household-card";
 import { PageHeader } from "@/components/page-header";
 import { ThemePicker } from "@/components/theme-switcher";
+import { PushManager } from "@/components/push-manager";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -54,6 +55,16 @@ export function SettingsClient({
           memberKey={memberKey}
           members={members}
         />
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifikasi</CardTitle>
+            <CardDescription>Aktifkan notifikasi untuk menerima info tagihan dan aktivitas.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PushManager />
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>

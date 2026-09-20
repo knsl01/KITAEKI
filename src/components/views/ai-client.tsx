@@ -1,11 +1,22 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, Sparkles } from "lucide-react";
+import { Send, Bot, Sparkles, CheckCircle2, XCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { askKitaAi } from "@/app/actions/ai";
+import { aiExecuteTool } from "@/app/actions/ai-tools";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { FinancialSummaryCard, SavingsPlanCard, TravelPlanCard } from "@/components/ui/ai-cards";
 
-type Message = { role: "user" | "model" | "assistant"; content: string; isError?: boolean };
+type Message = { 
+  role: "user" | "model" | "assistant"; 
+  content: string; 
+  isError?: boolean;
+  toolCall?: { name: string; args: any };
+  toolResult?: { name: string; result: any };
+};
 
 export function AiClient() {
   const [message, setMessage] = useState("");
@@ -21,33 +32,95 @@ export function AiClient() {
     }
   }, [messages, isTyping]);
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
+  async function processResponse(res: any, currentMessages: Message[]) {
+    if (res.error) {
+      setMessages([...currentMessages, { role: "assistant", content: res.error, isError: true }]);
+    } else if (res.toolCall) {
+      setMessages([...currentMessages, { role: "assistant", content: "", toolCall: res.toolCall }]);
+    } else if (res.reply) {
+      setMessages([...currentMessages, { role: "assistant", content: res.reply }]);
+    }
+  }
+
+  async function handleSend(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     if (!message.trim() || isTyping) return;
 
     const userMsg = message.trim();
-    setMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    const newMessages: Message[] = [...messages, { role: "user", content: userMsg }];
+    setMessages(newMessages);
     setMessage("");
     setIsTyping(true);
 
-    const history = messages
-      .filter((m) => !m.isError)
-      .slice(1)
-      .map((m) => ({
-        role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
-        parts: [{ text: m.content }]
-      }));
+    const history = newMessages.slice(1).map((m) => ({
+      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+      parts: [{ text: m.content }],
+      toolCall: m.toolCall,
+      toolResult: m.toolResult,
+    }));
 
     const res = await askKitaAi(history, userMsg);
-    
     setIsTyping(false);
-    
-    if (res.error) {
-      setMessages((prev) => [...prev, { role: "assistant", content: res.error, isError: true }]);
-    } else if (res.reply) {
-      setMessages((prev) => [...prev, { role: "assistant", content: res.reply }]);
-    }
+    await processResponse(res, newMessages);
   }
+
+  async function handleExecuteTool(toolName: string, args: any) {
+    setIsTyping(true);
+    const result = await aiExecuteTool(toolName, args);
+    const newMessages: Message[] = [
+      ...messages,
+      { role: "user", content: "Sistem: Aksi sudah dikonfirmasi dan dijalankan.", toolResult: { name: toolName, result } }
+    ];
+    setMessages(newMessages);
+    
+    const history = newMessages.slice(1).map((m) => ({
+      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+      parts: [{ text: m.content }],
+      toolCall: m.toolCall,
+      toolResult: m.toolResult,
+    }));
+    
+    const res = await askKitaAi(history, "");
+    setIsTyping(false);
+    await processResponse(res, newMessages);
+  }
+
+  async function handleCancelTool(toolName: string) {
+    setIsTyping(true);
+    const newMessages: Message[] = [
+      ...messages,
+      { role: "user", content: "Sistem: User membatalkan aksi ini.", toolResult: { name: toolName, result: "Cancelled" } }
+    ];
+    setMessages(newMessages);
+    
+    const history = newMessages.slice(1).map((m) => ({
+      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
+      parts: [{ text: m.content }],
+      toolCall: m.toolCall,
+      toolResult: m.toolResult,
+    }));
+    
+    const res = await askKitaAi(history, "");
+    setIsTyping(false);
+    await processResponse(res, newMessages);
+  }
+
+  const markdownComponents: any = {
+    code({ node, inline, className, children, ...props }: any) {
+      const match = /language-(\w+)/.exec(className || '');
+      if (!inline && match && match[1] === 'json') {
+        try {
+          const parsed = JSON.parse(String(children).replace(/\n$/, ''));
+          if (parsed.type === 'financial_summary') return <FinancialSummaryCard data={parsed.data} />;
+          if (parsed.type === 'savings_plan') return <SavingsPlanCard data={parsed.data} />;
+          if (parsed.type === 'travel_plan') return <TravelPlanCard data={parsed.data} />;
+        } catch (e) {
+          // Fallback to normal code block if parsing fails
+        }
+      }
+      return <code className={className} {...props}>{children}</code>;
+    }
+  };
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)] bg-card rounded-xl border border-border overflow-hidden shadow-sm">
@@ -66,20 +139,49 @@ export function AiClient() {
 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((m, i) => (
+        {messages.map((m, i) => {
+          if (m.toolResult) return null; // Sembunyikan pesan sistem eksekusi tool dari UI
+          
+          return (
           <div key={i} className={cn("flex w-full", m.role === "user" ? "justify-end" : "justify-start")}>
             <div className={cn(
-              "max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 text-sm",
+              "max-w-[90%] sm:max-w-[85%] rounded-2xl px-4 py-3 text-sm",
               m.role === "user" 
                 ? "bg-primary text-primary-foreground rounded-br-sm" 
                 : m.isError
                   ? "bg-rose-50 text-rose-700 border border-rose-200 rounded-bl-sm"
                   : "bg-muted text-foreground rounded-bl-sm"
             )}>
-              <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+              {m.toolCall ? (
+                <div className="space-y-3">
+                  <div className="font-semibold border-b border-border pb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" /> Konfirmasi Aksi
+                  </div>
+                  <div className="text-sm">
+                    KITA AI ingin melakukan aksi: <strong className="text-primary">{m.toolCall.name}</strong>
+                    <pre className="mt-2 p-2 bg-background rounded-md border border-border text-xs overflow-x-auto">
+                      {JSON.stringify(m.toolCall.args, null, 2)}
+                    </pre>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2">
+                    <Button size="sm" onClick={() => handleExecuteTool(m.toolCall!.name, m.toolCall!.args)} disabled={isTyping}>
+                      <CheckCircle2 className="mr-1.5 h-4 w-4" /> Ya, Eksekusi
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => handleCancelTool(m.toolCall!.name)} disabled={isTyping}>
+                      <XCircle className="mr-1.5 h-4 w-4" /> Batal
+                    </Button>
+                  </div>
+                </div>
+              ) : m.role === "user" ? (
+                <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
+              ) : (
+                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary marker:text-primary prose-ul:my-2 prose-p:my-2 prose-pre:bg-primary/5 prose-pre:text-foreground prose-pre:border prose-pre:border-border">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{m.content}</ReactMarkdown>
+                </div>
+              )}
             </div>
           </div>
-        ))}
+        )})}
         {isTyping && (
           <div className="flex w-full justify-start">
             <div className="bg-muted text-muted-foreground rounded-2xl rounded-bl-sm px-4 py-3 text-sm flex items-center gap-2">
