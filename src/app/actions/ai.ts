@@ -18,7 +18,8 @@ export async function askKitaAi(history: { role: "user" | "model"; parts: { text
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: {
+          system_instruction: {
+            role: "system",
             parts: [{ text: "Kamu adalah KITA AI, asisten keuangan dan perencanaan cerdas untuk aplikasi KITA (digunakan oleh pasangan). Berbicaralah dengan nada santai, ramah, suportif, dan bahasa Indonesia gaul tapi sopan. Fokus pada memberikan saran keuangan, menabung, atau ide liburan." }]
           },
           contents,
@@ -34,7 +35,7 @@ export async function askKitaAi(history: { role: "user" | "model"; parts: { text
     
     if (!response.ok) {
       console.error("Gemini API Error:", data);
-      return { error: "Maaf, KITA AI sedang mengalami gangguan koneksi." };
+      return { error: `Gemini Error: ${data?.error?.message || "Gangguan koneksi"}` };
     }
 
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
