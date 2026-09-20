@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getWorkspaceId } from "@/lib/workspace";
+import { getWorkspace } from "@/lib/workspace";
 
 export async function askKitaAi(history: { role: "user" | "model"; parts: { text: string }[] }[], prompt: string) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -14,7 +14,12 @@ export async function askKitaAi(history: { role: "user" | "model"; parts: { text
 
   try {
     const supabase = await createClient();
-    const householdId = await getWorkspaceId();
+    const workspace = await getWorkspace();
+    const householdId = workspace?.householdId;
+    
+    if (!householdId) {
+      return { error: "Data workspace tidak ditemukan." };
+    }
     
     // Ambil rekap data keuangan secara dinamis
     const dateStart = new Date();
