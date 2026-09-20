@@ -53,7 +53,7 @@ export const getWorkspace = cache(async (): Promise<Workspace | null> => {
   if (householdId) {
     const [{ data: rows }, { data: profiles }] = await Promise.all([
       supabase.from("household_members").select("user_id, member_key").eq("household_id", householdId),
-      supabase.from("profiles").select("id, full_name, email").eq("household_id", householdId),
+      supabase.from("profiles").select("id, full_name, email, avatar_url"),
     ]);
 
     members = (rows ?? []).map((row) => {
@@ -63,6 +63,7 @@ export const getWorkspace = cache(async (): Promise<Workspace | null> => {
         member_key: row.member_key as MemberOwner,
         full_name: profile?.full_name ?? null,
         email: profile?.email ?? null,
+        avatar_url: profile?.avatar_url ?? null,
       };
     });
   }

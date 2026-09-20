@@ -21,10 +21,10 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "KITA", statusBarStyle: "black-translucent" },
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon.jpg", type: "image/jpeg" },
+      { url: "/favicon-32.jpg", sizes: "32x32", type: "image/jpeg" },
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    apple: [{ url: "/apple-touch-icon.jpg", sizes: "180x180" }],
   },
   formatDetection: { telephone: false },
 };

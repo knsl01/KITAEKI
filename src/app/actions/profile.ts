@@ -9,10 +9,11 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
 
   const full_name = str(formData, "full_name");
   const default_owner = str(formData, "default_owner") || "shared";
+  const avatar_url = str(formData, "avatar_url");
 
   const { error } = await supabase
     .from("profiles")
-    .upsert({ id: user.id, email: user.email, full_name, default_owner });
+    .upsert({ id: user.id, email: user.email, full_name, default_owner, avatar_url });
   if (error) return fail(error.message);
 
   revalidatePath("/dashboard", "layout");
