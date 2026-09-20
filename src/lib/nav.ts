@@ -12,10 +12,12 @@ import {
   Target,
   Wallet,
   BarChart3,
+  Bot,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard/ai", label: "KITA AI", icon: Bot },
   { href: "/dashboard/transactions", label: "Transaksi", icon: ArrowLeftRight },
   { href: "/dashboard/accounts", label: "Akun & Saldo", icon: Wallet },
   { href: "/dashboard/finance", label: "Keuangan", icon: Receipt },
@@ -30,7 +32,7 @@ export const NAV_ITEMS = [
 
 export const MOBILE_NAV_ITEMS = [
   { href: "/dashboard", label: "Beranda", icon: LayoutDashboard },
+  { href: "/dashboard/ai", label: "KITA AI", icon: Bot },
   { href: "/dashboard/transactions", label: "Transaksi", icon: ArrowLeftRight },
-  { href: "/dashboard/budget", label: "Alokasi", icon: Target },
-  { href: "/dashboard/savings", label: "Target", icon: PiggyBank },
+  { href: "/dashboard/finance", label: "Keuangan", icon: Receipt },
 ] as const;
