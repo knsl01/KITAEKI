@@ -3,33 +3,32 @@
 @tailwind utilities;
 
 @layer base {
-  :root,
-  [data-theme="sage"] {
-    --background: 40 12% 97%;
-    --foreground: 150 10% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 150 10% 12%;
-    --muted: 40 10% 94%;
-    --muted-foreground: 150 6% 45%;
-    --accent: 140 12% 92%;
-    --accent-foreground: 150 10% 12%;
-    --primary: 148 17% 22%;
-    --primary-foreground: 40 20% 97%;
-    --secondary: 40 10% 94%;
-    --secondary-foreground: 150 10% 12%;
-    --destructive: 352 62% 48%;
+  :root {
+    --background: 230 40% 6%;
+    --foreground: 210 20% 98%;
+    --card: 232 42% 10%;
+    --card-foreground: 210 20% 98%;
+    --muted: 232 30% 15%;
+    --muted-foreground: 215 15% 65%;
+    --accent: 260 50% 20%;
+    --accent-foreground: 210 20% 98%;
+    --primary: 265 80% 65%;
+    --primary-foreground: 230 40% 6%;
+    --secondary: 230 50% 25%;
+    --secondary-foreground: 210 20% 98%;
+    --destructive: 350 80% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 8% 89%;
-    --input: 40 8% 89%;
-    --ring: 148 17% 30%;
-    --sidebar: 155 14% 13%;
-    --sidebar-foreground: 40 14% 88%;
-    --positive: 152 82% 27%;
-    --negative: 353 82% 47%;
-    --chart-income: hsl(148 26% 34%);
-    --chart-expense: hsl(352 45% 55%);
-    --chart-grid: hsl(40 8% 89%);
-    --chart-axis: hsl(150 6% 45%);
+    --border: 232 30% 20%;
+    --input: 232 30% 20%;
+    --ring: 265 80% 65%;
+    --sidebar: 230 40% 8%;
+    --sidebar-foreground: 210 20% 98%;
+    --positive: 150 70% 50%;
+    --negative: 350 80% 60%;
+    --chart-income: hsl(190 90% 60%);
+    --chart-expense: hsl(300 90% 65%);
+    --chart-grid: hsl(232 30% 20%);
+    --chart-axis: hsl(215 15% 65%);
     --radius: 0.75rem;
   }
 
@@ -689,6 +688,26 @@
       radial-gradient(120% 100% at 100% 0%, hsl(var(--glow-1) / 0.34) 0%, transparent 58%),
       radial-gradient(90% 90% at 0% 100%, hsl(var(--glow-2) / 0.28) 0%, transparent 62%);
   }
+}
+
+/* Neon Chart Glowing Effects */
+.recharts-line-curve {
+  filter: drop-shadow(0 0 6px hsl(var(--chart-income))) drop-shadow(0 0 12px hsl(var(--chart-income)));
+}
+.recharts-pie-sector {
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
+}
+
+/* Blinking Dots for Recharts */
+@keyframes smooth-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.3); }
+}
+
+.recharts-dot {
+  animation: smooth-blink 2.5s ease-in-out infinite;
+  transform-origin: center;
+  filter: drop-shadow(0 0 8px currentColor);
 }
 
 @layer utilities {

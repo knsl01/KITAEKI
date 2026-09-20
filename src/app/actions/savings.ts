@@ -13,6 +13,8 @@ export async function createSavingsGoal(formData: FormData): Promise<ActionResul
   const current_amount = num(formData, "current_amount");
   const target_date = optionalStr(formData, "target_date");
   const owner = str(formData, "owner") || "shared";
+  const image_url = optionalStr(formData, "image_url");
+  const item_url = optionalStr(formData, "item_url");
 
   if (!name) return fail("Nama target wajib diisi.");
   if (!Number.isFinite(target_amount) || target_amount <= 0) return fail("Target dana harus lebih dari 0.");
@@ -25,6 +27,8 @@ export async function createSavingsGoal(formData: FormData): Promise<ActionResul
     current_amount: Number.isFinite(current_amount) ? current_amount : 0,
     target_date,
     owner,
+    image_url,
+    item_url,
   });
   if (error) return fail(error.message);
 
@@ -42,6 +46,8 @@ export async function updateSavingsGoal(id: string, formData: FormData): Promise
   const current_amount = num(formData, "current_amount");
   const target_date = optionalStr(formData, "target_date");
   const owner = str(formData, "owner") || "shared";
+  const image_url = optionalStr(formData, "image_url");
+  const item_url = optionalStr(formData, "item_url");
 
   if (!name) return fail("Nama target wajib diisi.");
   if (!Number.isFinite(target_amount) || target_amount <= 0) return fail("Target dana harus lebih dari 0.");
@@ -54,6 +60,8 @@ export async function updateSavingsGoal(id: string, formData: FormData): Promise
       current_amount: Number.isFinite(current_amount) ? current_amount : 0,
       target_date,
       owner,
+      image_url,
+      item_url,
     })
     .eq("id", id)
     .eq("household_id", householdId);

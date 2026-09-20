@@ -24,7 +24,9 @@ function parse(formData: FormData) {
   const owner = str(formData, "owner") || "shared";
   const description = optionalStr(formData, "description");
 
-  if (!Number.isFinite(amount) || amount <= 0) return { error: "Nominal harus lebih dari 0." } as const;
+  const is_manual = formData.get("is_manual") === "true";
+
+  if (!is_manual && (!Number.isFinite(amount) || amount <= 0)) return { error: "Nominal harus lebih dari 0." } as const;
   if (!next_run_on) return { error: "Tanggal jatuh tempo wajib diisi." } as const;
   if (!account_id) return { error: "Pilih akun." } as const;
   if (type === "transfer" && !to_account_id) return { error: "Pilih akun tujuan." } as const;
@@ -32,7 +34,7 @@ function parse(formData: FormData) {
   return {
     values: {
       type,
-      amount,
+      amount: is_manual ? 0 : amount,
       frequency,
       next_run_on,
       account_id,
@@ -40,6 +42,7 @@ function parse(formData: FormData) {
       category_id: type === "transfer" ? null : category_id,
       owner,
       description,
+      is_manual,
     },
   } as const;
 }
@@ -107,7 +110,7 @@ export async function deleteRecurring(id: string): Promise<ActionResult> {
 }
 
 /** Catat tagihan berulang jadi transaksi nyata, lalu majukan tanggal berikutnya. */
-export async function runRecurringNow(id: string): Promise<ActionResult> {
+export async function runRecurringNow(id: string, customAmount?: number): Promise<ActionResult> {
   const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
@@ -120,11 +123,14 @@ export async function runRecurringNow(id: string): Promise<ActionResult> {
     .single();
   if (readError || !row) return fail("Transaksi berulang tidak ditemukan.");
 
+  const finalAmount = customAmount !== undefined ? customAmount : row.amount;
+  if (!finalAmount || finalAmount <= 0) return fail("Nominal tidak valid.");
+
   const { error: insertError } = await supabase.from("transactions").insert({
     user_id: user.id,
     household_id: householdId,
     type: row.type,
-    amount: row.amount,
+    amount: finalAmount,
     occurred_on: row.next_run_on,
     description: row.description,
     owner: row.owner,

@@ -21,7 +21,7 @@ export async function createTask(formData: FormData): Promise<ActionResult> {
   });
   if (error) return fail(error.message);
 
-  revalidatePath("/dashboard/tasks");
+  revalidatePath("/dashboard/calendar");
   return { ok: true };
 }
 
@@ -37,7 +37,7 @@ export async function toggleTask(id: string, done: boolean): Promise<ActionResul
     .eq("household_id", householdId);
   if (error) return fail(error.message);
 
-  revalidatePath("/dashboard/tasks");
+  revalidatePath("/dashboard/calendar");
   return { ok: true };
 }
 
@@ -49,6 +49,6 @@ export async function deleteTask(id: string): Promise<ActionResult> {
   const { error } = await supabase.from("tasks").delete().eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
-  revalidatePath("/dashboard/tasks");
+  revalidatePath("/dashboard/calendar");
   return { ok: true };
 }
