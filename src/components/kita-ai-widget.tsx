@@ -33,8 +33,10 @@ export function KitaAiWidget() {
 
     // Siapkan history untuk API Gemini (format: { role: "user" | "model", parts: [{ text }] })
     // Kita AI Widget pakai "assistant", tapi Gemini butuh "model".
+    // CATATAN PENTING: Gemini API WAJIB diawali oleh "user". Jadi pesan pertama (greeting dari AI) harus kita skip.
     const history = messages
       .filter((m) => !m.isError)
+      .slice(1) // Skip the first greeting message
       .map((m) => ({
         role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
         parts: [{ text: m.content }]
