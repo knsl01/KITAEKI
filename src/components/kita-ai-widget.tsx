@@ -180,13 +180,13 @@ export function KitaAiWidget() {
                 )}
               >
                 {m.toolCall ? (
-                  <div className="space-y-3">
+                  <div className="space-y-3 text-foreground">
                     <div className="font-semibold border-b border-border pb-2 flex items-center gap-2">
                       <Sparkles className="h-4 w-4" /> Konfirmasi
                     </div>
                     <div className="text-xs">
                       Aksi: <strong className="text-primary">{m.toolCall.name}</strong>
-                      <pre className="mt-2 p-2 bg-background rounded-md border border-border text-[10px] overflow-x-auto">
+                      <pre className="mt-2 p-2 bg-background rounded-md border border-border text-[10px] overflow-x-auto text-foreground">
                         {JSON.stringify(m.toolCall.args, null, 2)}
                       </pre>
                     </div>
@@ -202,7 +202,7 @@ export function KitaAiWidget() {
                 ) : m.role === "user" ? (
                   <div className="whitespace-pre-wrap">{m.content}</div>
                 ) : (
-                  <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary marker:text-primary prose-ul:my-2 prose-p:my-2 prose-pre:bg-primary/5 prose-pre:text-foreground prose-pre:border prose-pre:border-border">
+                  <div className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-p:leading-relaxed prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary marker:text-primary prose-ul:my-2 prose-p:my-2 prose-pre:bg-primary/5 prose-pre:text-foreground prose-pre:border prose-pre:border-border">
                     <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{m.content}</ReactMarkdown>
                   </div>
                 )}
@@ -228,7 +228,7 @@ export function KitaAiWidget() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tanya KITA AI..."
-            className="flex-1 rounded-full border border-input bg-muted/50 px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+            className="flex-1 rounded-full border border-input bg-muted/50 px-4 py-2 text-base text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
           />
           <button
             type="submit"

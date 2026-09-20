@@ -16,6 +16,15 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { OWNER_LABEL, type MemberOwner } from "@/lib/types";
 
+function Avatar({ name, className }: { name: string; className?: string }) {
+  const initial = (name || "?").charAt(0).toUpperCase();
+  return (
+    <div className={`flex items-center justify-center bg-primary text-primary-foreground font-bold rounded-full h-16 w-16 text-xl border-4 border-background shadow-sm ${className}`}>
+      {initial}
+    </div>
+  );
+}
+
 export function SettingsClient({
   email,
   fullName,
@@ -43,9 +52,36 @@ export function SettingsClient({
   const [profilePending, startProfile] = useTransition();
   const [passwordPending, startPassword] = useTransition();
 
+  const me = members.find(m => m.member_key === memberKey) || { full_name: fullName, email: email };
+  const partner = members.find(m => m.member_key !== memberKey && m.member_key !== "shared");
+
   return (
     <div>
       <PageHeader title="Pengaturan" description="Profil, preferensi, dan keamanan akun." />
+
+      {/* Coupled Profile Header */}
+      <div className="flex flex-col items-center justify-center p-6 bg-card border border-border rounded-xl shadow-sm mb-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+        <div className="flex items-center justify-center relative z-10 mb-3">
+          <Avatar name={me.full_name || me.email || "?"} className="z-20 relative" />
+          {partner && (
+            <Avatar name={partner.full_name || partner.email || "?"} className="-ml-4 z-10 opacity-90" />
+          )}
+        </div>
+        <div className="text-center relative z-10">
+          <h3 className="font-bold text-lg">{me.full_name || me.email}</h3>
+          <p className="text-sm text-muted-foreground mb-1">Login sebagai <strong className="text-primary capitalize">{memberKey}</strong></p>
+          {partner ? (
+            <div className="inline-flex items-center justify-center px-3 py-1 bg-green-500/10 text-green-500 rounded-full text-xs font-medium mt-1">
+              ✨ Terhubung dengan {partner.full_name || partner.email}
+            </div>
+          ) : (
+            <div className="inline-flex items-center justify-center px-3 py-1 bg-amber-500/10 text-amber-500 rounded-full text-xs font-medium mt-1">
+              Belum ada pasangan terhubung
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">

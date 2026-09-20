@@ -153,13 +153,13 @@ export function AiClient() {
                   : "bg-muted text-foreground rounded-bl-sm"
             )}>
               {m.toolCall ? (
-                <div className="space-y-3">
+                <div className="space-y-3 text-foreground">
                   <div className="font-semibold border-b border-border pb-2 flex items-center gap-2">
                     <Sparkles className="h-4 w-4" /> Konfirmasi Aksi
                   </div>
                   <div className="text-sm">
                     KITA AI ingin melakukan aksi: <strong className="text-primary">{m.toolCall.name}</strong>
-                    <pre className="mt-2 p-2 bg-background rounded-md border border-border text-xs overflow-x-auto">
+                    <pre className="mt-2 p-2 bg-background rounded-md border border-border text-xs overflow-x-auto text-foreground">
                       {JSON.stringify(m.toolCall.args, null, 2)}
                     </pre>
                   </div>
@@ -175,7 +175,7 @@ export function AiClient() {
               ) : m.role === "user" ? (
                 <div className="whitespace-pre-wrap leading-relaxed">{m.content}</div>
               ) : (
-                <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary marker:text-primary prose-ul:my-2 prose-p:my-2 prose-pre:bg-primary/5 prose-pre:text-foreground prose-pre:border prose-pre:border-border">
+                <div className="prose prose-sm dark:prose-invert max-w-none text-foreground prose-p:leading-relaxed prose-headings:font-serif prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-a:text-primary marker:text-primary prose-ul:my-2 prose-p:my-2 prose-pre:bg-primary/5 prose-pre:text-foreground prose-pre:border prose-pre:border-border">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>{m.content}</ReactMarkdown>
                 </div>
               )}
@@ -201,7 +201,7 @@ export function AiClient() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tanya soal pengeluaran atau minta saran liburan..."
-            className="flex-1 h-12 rounded-full border border-border bg-muted/50 px-4 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="flex-1 h-12 rounded-full border border-border bg-muted/50 px-4 pr-12 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             disabled={isTyping}
           />
           <button
