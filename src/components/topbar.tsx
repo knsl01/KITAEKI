@@ -32,7 +32,7 @@ export function Topbar({
           Di Safari tingginya 0, jadi tidak terlihat. */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-sidebar" />
       <div className="flex flex-1 items-center gap-2">
-        <MobileMenu householdName={householdName} variant="topbar" />
+        <MobileMenu householdName={householdName} variant="topbar" currentView={currentView} memberLabels={memberLabels} />
         <div className="flex-1 max-w-sm hidden md:flex ml-4 justify-start">
            <MemberSwitcher value={currentView} labels={memberLabels} />
         </div>
