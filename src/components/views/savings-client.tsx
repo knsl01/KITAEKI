@@ -125,6 +125,7 @@ function GoalDialog({ goal, trigger, householdId }: { goal?: SavingsGoal; trigge
               value={imageUrl}
               onChange={setImageUrl}
               label="Unggah foto impianmu"
+              aspect={1}
             />
           </div>
 

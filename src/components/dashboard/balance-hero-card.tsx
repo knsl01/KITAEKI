@@ -265,6 +265,7 @@ function BackgroundDialog({
             value={image}
             onChange={setImage}
             label="Unggah foto latar"
+            aspect={2 / 1}
           />
 
           {image ? (

@@ -125,6 +125,7 @@ export function DashboardBanner({
                     value={image}
                     onChange={setImage}
                     label="Unggah foto banner"
+                    aspect={3 / 1}
                   />
 
                   <div className="space-y-2">
