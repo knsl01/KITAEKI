@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MOBILE_NAV_ITEMS } from "@/lib/nav";
@@ -8,9 +9,45 @@ import { cn } from "@/lib/utils";
 /** Bar melayang di bawah, khusus layar kecil. */
 export function MobileNav({ action, menu }: { action?: React.ReactNode; menu?: React.ReactNode }) {
   const pathname = usePathname();
+  const [isHidden, setIsHidden] = useState(false);
+
+  useEffect(() => {
+    let lastScroll = window.scrollY;
+    let timeoutId: NodeJS.Timeout;
+
+    const onScroll = () => {
+      const currentScroll = window.scrollY;
+      
+      // Sembunyikan saat scroll turun (minimal scroll 50px dari atas agar tidak glitch)
+      if (currentScroll > lastScroll && currentScroll > 50) {
+        setIsHidden(true);
+      } else {
+        setIsHidden(false);
+      }
+      
+      lastScroll = currentScroll;
+
+      // Munculkan otomatis saat berhenti scroll setelah 1.5 detik
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setIsHidden(false);
+      }, 1500);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden">
+    <div 
+      className={cn(
+        "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] lg:hidden transition-all duration-500 ease-out",
+        isHidden ? "translate-y-32 opacity-0 scale-90" : "translate-y-0 opacity-100 scale-100"
+      )}
+    >
       <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-border bg-card/95 p-1.5 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.35)] backdrop-blur">
         {MOBILE_NAV_ITEMS.map((item) => {
           const active = pathname === item.href;

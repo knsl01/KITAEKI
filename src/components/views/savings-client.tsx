@@ -261,8 +261,17 @@ export function SavingsClient({ goals, householdId }: { goals: SavingsGoal[]; ho
               <FlipCard
                 key={goal.id}
                 front={
-                  <Card className="p-5 h-full flex flex-col">
-                    <div className="flex items-start justify-between gap-2">
+                  <Card className="p-5 h-full flex flex-col relative overflow-hidden group">
+                    {goal.image_url && (
+                      <div 
+                        className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                        style={{ backgroundImage: `url(${goal.image_url})` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/60 to-background/90 backdrop-blur-[2px]" />
+                      </div>
+                    )}
+                    
+                    <div className="flex items-start justify-between gap-2 relative z-10">
                       <div className="min-w-0">
                         <p className="truncate font-medium">{goal.name}</p>
                         <p className="mt-1 text-xs text-muted-foreground">
@@ -273,14 +282,14 @@ export function SavingsClient({ goals, householdId }: { goals: SavingsGoal[]; ho
                       {pct >= 100 ? <Badge tone="positive">Tercapai</Badge> : null}
                     </div>
 
-                    <div className="mt-auto">
+                    <div className="mt-auto relative z-10">
                       <p className="tabular mt-4 text-lg font-bold">{formatCurrency(Number(goal.current_amount))}</p>
                       <p className="tabular text-xs text-muted-foreground">
                         dari {formatCurrency(Number(goal.target_amount))} · {pct}%
                       </p>
-                      <Progress value={pct} className="mt-3" />
+                      <Progress value={pct} className="mt-3 bg-muted/50" />
 
-                      <div className="mt-4 flex flex-wrap gap-1 border-t border-border pt-3">
+                      <div className="mt-4 flex flex-wrap gap-1 border-t border-border/50 pt-3">
                         <ContributionDialog goal={goal} />
                         <GoalDialog
                           householdId={householdId}

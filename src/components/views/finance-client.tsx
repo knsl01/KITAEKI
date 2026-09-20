@@ -30,23 +30,53 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
   const totals = sumTotals(transactions);
   const owners: MemberOwner[] = ["eki", "dinda", "shared"];
 
-  // Monthly income vs expense chart
-  const monthlyData = useMemo(() => {
+  const chartData = useMemo(() => {
+    const sDate = new Date(start);
+    const eDate = new Date(end);
+    const diffDays = Math.round((eDate.getTime() - sDate.getTime()) / (1000 * 3600 * 24));
+    const isDaily = diffDays <= 31;
+
     const map = new Map<string, { income: number; expense: number }>();
+    
     for (const t of transactions) {
-      const month = t.occurred_on.slice(0, 7); // yyyy-mm
-      if (!map.has(month)) map.set(month, { income: 0, expense: 0 });
-      const current = map.get(month)!;
+      const key = isDaily ? formatDate(t.occurred_on) : t.occurred_on.slice(0, 7);
+      if (!map.has(key)) map.set(key, { income: 0, expense: 0 });
+      const current = map.get(key)!;
       if (t.type === "income") current.income += Number(t.amount);
       if (t.type === "expense") current.expense += Number(t.amount);
     }
+    
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([month, data]) => ({
-        label: month,
+      .map(([label, data]) => ({
+        label,
         ...data,
       }));
-  }, [transactions]);
+  }, [transactions, start, end]);
+
+  function exportToCSV() {
+    const headers = ["Tanggal", "Tipe", "Nominal", "Milik", "Kategori"];
+    const rows = transactions.map(t => {
+      const cat = categories.find(c => c.id === t.category_id)?.name ?? "Lainnya";
+      return [
+        t.occurred_on,
+        t.type,
+        t.amount,
+        OWNER_LABEL[t.owner],
+        cat
+      ].join(",");
+    });
+    
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Rekap_KITA_${start}_${end}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   // Category donut chart (expenses)
   const categoryData = useMemo(() => {
@@ -113,6 +143,9 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         <button type="submit" className="h-9 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
           Terapkan
         </button>
+        <button type="button" onClick={exportToCSV} className="h-9 inline-flex items-center justify-center rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium shadow-sm hover:bg-muted">
+          Unduh Laporan (CSV)
+        </button>
       </form>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-4">
@@ -144,8 +177,8 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
             <CardTitle>Arus Kas Bulanan</CardTitle>
           </CardHeader>
           <CardContent>
-            {monthlyData.length > 0 ? (
-              <IncomeExpenseChart data={monthlyData} />
+            {chartData.length > 0 ? (
+              <IncomeExpenseChart data={chartData} />
             ) : (
               <EmptyState title="Tidak ada data" />
             )}

@@ -691,9 +691,6 @@
 }
 
 /* Neon Chart Glowing Effects */
-.recharts-line-curve {
-  filter: drop-shadow(0 0 6px hsl(var(--chart-income))) drop-shadow(0 0 12px hsl(var(--chart-income)));
-}
 .recharts-pie-sector {
   filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.2));
 }

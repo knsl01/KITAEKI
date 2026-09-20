@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { TransactionDialog } from "@/components/transaction-dialog";
+import { KitaAiWidget } from "@/components/kita-ai-widget";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspace } from "@/lib/workspace";
 
@@ -78,6 +79,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           />
         }
       />
+      <KitaAiWidget />
     </div>
   );
 }
