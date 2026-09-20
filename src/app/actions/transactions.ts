@@ -43,6 +43,8 @@ function parseTransaction(formData: FormData) {
   } as const;
 }
 
+import { sendPushNotification } from "./push";
+
 export async function createTransaction(formData: FormData): Promise<ActionResult> {
   const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
@@ -53,6 +55,16 @@ export async function createTransaction(formData: FormData): Promise<ActionResul
 
   const { error } = await supabase.from("transactions").insert({ ...parsed.values, user_id: user.id, household_id: householdId });
   if (error) return fail(error.message);
+  
+  // Push Notification
+  const title = parsed.values.description || (parsed.values.type === "income" ? "Pemasukan" : parsed.values.type === "expense" ? "Pengeluaran" : "Transfer");
+  const rp = `Rp${parsed.values.amount.toLocaleString("id-ID")}`;
+  await sendPushNotification(
+    householdId,
+    user.id,
+    parsed.values.type === "income" ? "Pemasukan Baru!" : "Transaksi Baru",
+    `${title}: ${rp} ditambahkan.`
+  );
 
   revalidateAll();
   return { ok: true };

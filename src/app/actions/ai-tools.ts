@@ -1,0 +1,137 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getUserClient, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
+import type { TransactionType, MemberOwner } from "@/lib/types";
+
+import { sendPushNotification } from "./push";
+
+export async function aiExecuteTool(toolName: string, args: any): Promise<ActionResult & { data?: any }> {
+  const { supabase, user, householdId } = await getUserClient();
+  if (!user) return { ok: false, error: UNAUTH };
+  if (!householdId) return { ok: false, error: NO_HOUSEHOLD };
+
+  try {
+    switch (toolName) {
+      case "add_income":
+      case "add_expense": {
+        const type: TransactionType = toolName === "add_income" ? "income" : "expense";
+        const { amount, account_id, category_id, date, owner, title } = args;
+        
+        const { error } = await supabase.from("transactions").insert({
+          household_id: householdId,
+          created_by: user.id,
+          type,
+          amount,
+          account_id,
+          category_id: category_id || null,
+          occurred_on: date,
+          owner: owner || "shared",
+          description: title,
+        });
+        if (error) throw error;
+        
+        // Kirim Notifikasi
+        const rp = `Rp${amount.toLocaleString("id-ID")}`;
+        await sendPushNotification(
+          householdId,
+          user.id,
+          type === "income" ? "Pemasukan Baru!" : "Pengeluaran Baru",
+          `${title}: ${rp} ditambahkan via KITA AI.`
+        );
+
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Transaction added successfully." };
+      }
+      
+      case "delete_transaction": {
+        const { error } = await supabase
+          .from("transactions")
+          .delete()
+          .eq("id", args.id)
+          .eq("household_id", householdId);
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Transaction deleted successfully." };
+      }
+
+      case "update_transaction": {
+        const { id, ...updates } = args;
+        const { error } = await supabase
+          .from("transactions")
+          .update({
+            amount: updates.amount,
+            account_id: updates.account_id,
+            category_id: updates.category_id || null,
+            occurred_on: updates.date,
+            owner: updates.owner,
+            description: updates.title,
+          })
+          .eq("id", id)
+          .eq("household_id", householdId);
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Transaction updated successfully." };
+      }
+
+      case "create_savings_goal": {
+        const { error } = await supabase.from("savings_goals").insert({
+          household_id: householdId,
+          created_by: user.id,
+          name: args.name,
+          target_amount: args.target_amount,
+          target_date: args.target_date,
+          owner: args.owner || "shared",
+        });
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Savings goal created successfully." };
+      }
+
+      case "create_event":
+      case "create_trip": {
+        const { error } = await supabase.from("tasks").insert({
+          household_id: householdId,
+          created_by: user.id,
+          title: args.title,
+          due_on: args.date,
+          assigned_to: args.owner || "shared",
+        });
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Event/Trip created successfully." };
+      }
+
+      case "update_event": {
+        const { error } = await supabase
+          .from("tasks")
+          .update({
+            title: args.title,
+            due_on: args.date,
+            assigned_to: args.owner,
+          })
+          .eq("id", args.id)
+          .eq("household_id", householdId);
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Event updated successfully." };
+      }
+
+      case "delete_event": {
+        const { error } = await supabase
+          .from("tasks")
+          .delete()
+          .eq("id", args.id)
+          .eq("household_id", householdId);
+        if (error) throw error;
+        revalidatePath("/dashboard", "layout");
+        return { ok: true, data: "Event deleted successfully." };
+      }
+
+      default:
+        return { ok: false, error: "Unknown tool: " + toolName };
+    }
+  } catch (e: any) {
+    return { ok: false, error: e.message || "Failed to execute tool" };
+  }
+}
