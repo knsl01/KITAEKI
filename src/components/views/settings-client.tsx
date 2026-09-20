@@ -16,11 +16,15 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { OWNER_LABEL, type MemberOwner } from "@/lib/types";
 
-function Avatar({ name, className }: { name: string; className?: string }) {
+function Avatar({ name, url, className }: { name: string; url?: string | null; className?: string }) {
   const initial = (name || "?").charAt(0).toUpperCase();
   return (
-    <div className={`flex items-center justify-center bg-primary text-primary-foreground font-bold rounded-full h-16 w-16 text-xl border-4 border-background shadow-sm ${className}`}>
-      {initial}
+    <div className={`flex items-center justify-center bg-primary text-primary-foreground font-bold rounded-full h-16 w-16 text-xl border-4 border-background shadow-sm overflow-hidden ${className}`}>
+      {url ? (
+        <img src={url} alt={name} className="w-full h-full object-cover" />
+      ) : (
+        initial
+      )}
     </div>
   );
 }
@@ -44,7 +48,7 @@ export function SettingsClient({
   householdName: string;
   inviteCode: string | null;
   memberKey: MemberOwner;
-  members: { user_id: string; member_key: MemberOwner; full_name: string | null; email: string | null }[];
+  members: { user_id: string; member_key: MemberOwner; full_name: string | null; email: string | null; avatar_url: string | null }[];
 }) {
   const router = useRouter();
   const [profileState, setProfileState] = useState<{ ok?: boolean; message?: string }>({});
@@ -52,8 +56,21 @@ export function SettingsClient({
   const [profilePending, startProfile] = useTransition();
   const [passwordPending, startPassword] = useTransition();
 
-  const me = members.find(m => m.member_key === memberKey) || { full_name: fullName, email: email };
+  const me = members.find(m => m.member_key === memberKey) || { full_name: fullName, email: email, avatar_url: null };
   const partner = members.find(m => m.member_key !== memberKey && m.member_key !== "shared");
+
+  const [avatarBase64, setAvatarBase64] = useState<string | null>(me.avatar_url || null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAvatarBase64(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div>
@@ -63,9 +80,9 @@ export function SettingsClient({
       <div className="flex flex-col items-center justify-center p-6 bg-card border border-border rounded-xl shadow-sm mb-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-primary/5"></div>
         <div className="flex items-center justify-center relative z-10 mb-3">
-          <Avatar name={me.full_name || me.email || "?"} className="z-20 relative" />
+          <Avatar name={me.full_name || me.email || "?"} url={me.avatar_url} className="z-20 relative" />
           {partner && (
-            <Avatar name={partner.full_name || partner.email || "?"} className="-ml-4 z-10 opacity-90" />
+            <Avatar name={partner.full_name || partner.email || "?"} url={partner.avatar_url} className="-ml-4 z-10 opacity-90" />
           )}
         </div>
         <div className="text-center relative z-10">
@@ -110,6 +127,7 @@ export function SettingsClient({
             <form
               action={(formData) =>
                 startProfile(async () => {
+                  if (avatarBase64) formData.set("avatar_url", avatarBase64);
                   const result = await updateProfile(formData);
                   setProfileState(
                     result.ok
@@ -121,6 +139,17 @@ export function SettingsClient({
               }
               className="space-y-4"
             >
+              <div className="flex flex-col items-center sm:flex-row sm:items-start gap-4 mb-4">
+                <Avatar name={me.full_name || me.email || "?"} url={avatarBase64} className="h-20 w-20 text-2xl" />
+                <div className="space-y-1 text-center sm:text-left">
+                  <Label htmlFor="avatar_upload" className="cursor-pointer inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                    Ubah Foto
+                  </Label>
+                  <input id="avatar_upload" type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+                  <p className="text-xs text-muted-foreground">JPG, PNG, GIF Max 2MB.</p>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" value={email} disabled />
