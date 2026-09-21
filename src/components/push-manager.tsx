@@ -1,105 +1,89 @@
 "use client";
 
-import { Bell, BellOff, BellRing, Send, Share, Smartphone } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bell, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePush } from "@/hooks/use-push";
+import { subscribeToPush } from "@/app/actions/push";
 
-/** Kartu pengaturan notifikasi (halaman Pengaturan). */
+const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 export function PushManager() {
-  const { status, busy, error, test, enable, disable, sendTest } = usePush();
+  const [isSupported, setIsSupported] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (status === "loading") {
-    return <p className="text-xs text-muted-foreground">Memeriksa dukungan notifikasi…</p>;
+  useEffect(() => {
+    if ("serviceWorker" in navigator && "PushManager" in window) {
+      setIsSupported(true);
+      navigator.serviceWorker.register("/sw.js").then((reg) => {
+        reg.pushManager.getSubscription().then((sub) => {
+          setIsSubscribed(!!sub);
+          setIsLoading(false);
+        });
+      });
+    } else {
+      setIsLoading(false);
+    }
+  }, []);
+
+  async function handleSubscribe() {
+    if (!VAPID_PUBLIC_KEY) {
+      alert("VAPID_PUBLIC_KEY belum dikonfigurasi di .env.local");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        throw new Error("Izin notifikasi ditolak");
+      }
+
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+
+      const res = await subscribeToPush(sub.toJSON());
+      if (res.ok) {
+        setIsSubscribed(true);
+      } else {
+        alert("Gagal menyimpan langganan notifikasi");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Gagal berlangganan notifikasi");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  if (status === "ios-install") {
-    return (
-      <div className="space-y-3 rounded-xl border border-border bg-muted/40 p-4 text-sm">
-        <p className="flex items-center gap-2 font-semibold">
-          <Smartphone className="h-4 w-4" /> Di iPhone, notifikasi hanya jalan dari aplikasi yang dipasang
-        </p>
-        <ol className="list-decimal space-y-1.5 pl-5 text-muted-foreground">
-          <li>
-            Buka KITA di <strong className="text-foreground">Safari</strong>, ketuk tombol{" "}
-            <Share className="inline h-3.5 w-3.5 -translate-y-px" /> <strong className="text-foreground">Bagikan</strong>.
-          </li>
-          <li>
-            Pilih <strong className="text-foreground">Tambah ke Layar Utama</strong>, lalu <strong className="text-foreground">Tambah</strong>.
-          </li>
-          <li>Tutup Safari, buka KITA dari ikon di Layar Utama.</li>
-          <li>
-            Masuk ke <strong className="text-foreground">Pengaturan → Notifikasi</strong> dan tekan{" "}
-            <strong className="text-foreground">Aktifkan notifikasi</strong>.
-          </li>
-        </ol>
-        <p className="text-xs text-muted-foreground">Butuh iOS/iPadOS 16.4 atau lebih baru.</p>
-      </div>
-    );
-  }
-
-  if (status === "unsupported") {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Browser ini belum mendukung notifikasi push. Coba Chrome, Edge, Firefox, atau Safari terbaru (di iPhone: iOS 16.4+
-        dan pasang ke Layar Utama).
-      </p>
-    );
-  }
-
-  if (status === "denied") {
-    return (
-      <div className="space-y-2 text-sm">
-        <p className="font-semibold">Izin notifikasi sedang diblokir</p>
-        <p className="text-muted-foreground">
-          Buka <strong className="text-foreground">Pengaturan perangkat → Notifikasi → KITA</strong> (iPhone/Android) atau ikon gembok
-          di address bar (desktop), izinkan notifikasi, lalu muat ulang halaman ini.
-        </p>
-      </div>
-    );
+  if (!isSupported) {
+    return <p className="text-xs text-muted-foreground">Browser ini tidak mendukung Push Notification.</p>;
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {status === "on" ? (
-          <>
-            <Button variant="subtle" size="sm" onClick={sendTest} disabled={busy}>
-              <Send className="h-4 w-4" /> Kirim notifikasi tes
-            </Button>
-            <Button variant="outline" size="sm" onClick={disable} disabled={busy}>
-              <BellOff className="h-4 w-4" /> Nonaktifkan
-            </Button>
-          </>
-        ) : (
-          <Button size="sm" onClick={enable} disabled={busy}>
-            <Bell className="h-4 w-4" /> {busy ? "Mengaktifkan…" : "Aktifkan notifikasi"}
-          </Button>
-        )}
-      </div>
-
-      {status === "on" && !test && !error && (
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <BellRing className="h-3.5 w-3.5 text-emerald-500" /> Aktif di perangkat ini. Kamu akan diberi tahu saat ada transaksi,
-          tabungan, tugas, dan belanja baru.
-        </p>
-      )}
-
-      {test && (
-        <p
-          role="status"
-          className={`rounded-lg px-3 py-2 text-xs ${
-            test.ok ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-destructive/10 text-destructive"
-          }`}
-        >
-          {test.message}
-        </p>
-      )}
-
-      {error && (
-        <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">
-          {error}
-        </p>
-      )}
-    </div>
+    <Button
+      variant={isSubscribed ? "outline" : "default"}
+      size="sm"
+      onClick={handleSubscribe}
+      disabled={isLoading || isSubscribed}
+      className="w-full sm:w-auto"
+    >
+      {isSubscribed ? <BellOff className="h-4 w-4 mr-2" /> : <Bell className="h-4 w-4 mr-2" />}
+      {isSubscribed ? "Notifikasi Aktif" : "Aktifkan Notifikasi"}
+    </Button>
   );
 }

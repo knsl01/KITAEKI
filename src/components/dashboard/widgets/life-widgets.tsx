@@ -53,9 +53,9 @@ export function TasksWidget({ tasks, today }: { tasks: TaskRow[]; today: string 
   }
 
   return (
-    <WidgetFrame title="Tugas" action={<FrameLink href="/dashboard/calendar">Buka</FrameLink>}>
+    <WidgetFrame title="Tugas" action={<FrameLink href="/dashboard/tasks">Buka</FrameLink>}>
       {open.length === 0 ? (
-        <Empty title={tasks.length ? "Semua tugas beres" : "Belum ada tugas"} description={tasks.length ? "Tidak ada yang menunggu. Nikmati harinya." : "Catat hal yang perlu dikerjakan berdua."} href="/dashboard/calendar" cta="Buka Tugas" />
+        <Empty title={tasks.length ? "Semua tugas beres" : "Belum ada tugas"} description={tasks.length ? "Tidak ada yang menunggu. Nikmati harinya." : "Catat hal yang perlu dikerjakan berdua."} href="/dashboard/tasks" cta="Buka Tugas" />
       ) : (
         <div className="flex h-full min-h-0 flex-col">
           <ul className="min-h-0 flex-1 overflow-hidden">
