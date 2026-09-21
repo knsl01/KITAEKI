@@ -2,11 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
-import { pushActivity } from "@/lib/push";
 
 export async function createAccount(formData: FormData): Promise<ActionResult> {
-  const session = await getUserClient();
-  const { supabase, user, householdId } = session;
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -23,12 +21,6 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     .from("accounts")
     .insert({ user_id: user.id, household_id: householdId, name, type, owner, initial_balance, icon_key });
   if (error) return fail(error.message);
-
-  await pushActivity(session, ({ who }) => ({
-    title: "🏦 Akun baru",
-    body: `${who} menambahkan akun “${name}”`,
-    url: "/dashboard/accounts",
-  }));
 
   revalidatePath("/dashboard", "layout");
   return { ok: true };

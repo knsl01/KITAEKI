@@ -13,11 +13,9 @@ import {
   UNAUTH,
   type ActionResult,
 } from "./_shared";
-import { pushActivity } from "@/lib/push";
 
 export async function createShoppingItem(formData: FormData): Promise<ActionResult> {
-  const session = await getUserClient();
-  const { supabase, user, householdId } = session;
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -37,19 +35,12 @@ export async function createShoppingItem(formData: FormData): Promise<ActionResu
   });
   if (error) return fail(error.message);
 
-  await pushActivity(session, ({ who }) => ({
-    title: "🛒 Belanja baru",
-    body: `${who} menambahkan “${name}” ke daftar belanja`,
-    url: "/dashboard/shopping",
-  }));
-
   revalidatePath("/dashboard/shopping");
   return { ok: true };
 }
 
 export async function toggleShoppingItem(id: string, bought: boolean): Promise<ActionResult> {
-  const session = await getUserClient();
-  const { supabase, user, householdId } = session;
+  const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -59,10 +50,6 @@ export async function toggleShoppingItem(id: string, bought: boolean): Promise<A
     .eq("id", id)
     .eq("household_id", householdId);
   if (error) return fail(error.message);
-
-  if (bought) {
-    await pushActivity(session, ({ who }) => ({ title: "🛍️ Sudah dibeli", body: `${who} menandai satu barang sudah dibeli`, url: "/dashboard/shopping" }));
-  }
 
   revalidatePath("/dashboard/shopping");
   return { ok: true };

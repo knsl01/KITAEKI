@@ -7,7 +7,6 @@ import { Sidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 import { TransactionDialog } from "@/components/transaction-dialog";
 import { KitaAiWidget } from "@/components/kita-ai-widget";
-import { NotificationPrompt } from "@/components/notification-prompt";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspace } from "@/lib/workspace";
 
@@ -50,7 +49,6 @@ export default async function DashboardLayout({ children }: { children: React.Re
           memberLabels={memberLabels}
         />
         <main className="pb-32 pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-6 lg:px-8 lg:pb-12">
-          <NotificationPrompt />
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

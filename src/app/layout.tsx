@@ -21,17 +21,10 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "KITA", statusBarStyle: "black-translucent" },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon.jpg", type: "image/jpeg" },
+      { url: "/favicon-32.jpg", sizes: "32x32", type: "image/jpeg" },
     ],
-    // iOS memakai ikon ini persis apa adanya: harus PNG, opak, dan penuh sampai tepi
-    // (iOS sendiri yang membulatkan sudutnya). Kalau ada margin hitam / transparan, iOS menampilkannya hitam.
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-      { url: "/icons/apple-touch-icon-167.png", sizes: "167x167", type: "image/png" },
-      { url: "/icons/apple-touch-icon-152.png", sizes: "152x152", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-touch-icon.jpg", sizes: "180x180" }],
   },
   formatDetection: { telephone: false },
 };
