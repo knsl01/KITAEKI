@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { getUserClient, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 import type { TransactionType, MemberOwner } from "@/lib/types";
 
-import { sendPushNotification } from "./push";
+import { pushActivity, rupiah } from "@/lib/push";
 
 export async function aiExecuteTool(toolName: string, args: any): Promise<ActionResult & { data?: any }> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return { ok: false, error: UNAUTH };
   if (!householdId) return { ok: false, error: NO_HOUSEHOLD };
 
@@ -20,7 +21,7 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
         
         const { error } = await supabase.from("transactions").insert({
           household_id: householdId,
-          created_by: user.id,
+          user_id: user.id,
           type,
           amount,
           account_id,
@@ -31,14 +32,12 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
         });
         if (error) throw error;
         
-        // Kirim Notifikasi
-        const rp = `Rp${amount.toLocaleString("id-ID")}`;
-        await sendPushNotification(
-          householdId,
-          user.id,
-          type === "income" ? "Pemasukan Baru!" : "Pengeluaran Baru",
-          `${title}: ${rp} ditambahkan via KITA AI.`
-        );
+        // Kirim notifikasi (tidak pernah menggagalkan aksi)
+        await pushActivity(session, ({ who }) => ({
+          title: type === "income" ? "💰 Pemasukan baru" : "💸 Pengeluaran baru",
+          body: `${who} (via KITA AI): ${title ? `${title} · ` : ""}${rupiah(Number(amount))}`,
+          url: "/dashboard/transactions",
+        }));
 
         revalidatePath("/dashboard", "layout");
         return { ok: true, data: "Transaction added successfully." };
@@ -77,7 +76,7 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
       case "create_savings_goal": {
         const { error } = await supabase.from("savings_goals").insert({
           household_id: householdId,
-          created_by: user.id,
+          user_id: user.id,
           name: args.name,
           target_amount: args.target_amount,
           target_date: args.target_date,
