@@ -24,7 +24,7 @@ export const NAV_ITEMS = [
   { href: "/dashboard/budget", label: "Alokasi", icon: Target },
   { href: "/dashboard/savings", label: "Tabungan & Target", icon: PiggyBank },
   { href: "/dashboard/recurring", label: "Berlangganan", icon: Repeat },
-  { href: "/dashboard/tasks", label: "Calendar KITA", icon: ListChecks },
+  { href: "/dashboard/calendar", label: "Calendar KITA", icon: ListChecks },
   { href: "/dashboard/shopping", label: "Belanja", icon: ShoppingCart },
   { href: "/dashboard/categories", label: "Kategori", icon: Tags },
   { href: "/dashboard/share", label: "Share Story", icon: Target },

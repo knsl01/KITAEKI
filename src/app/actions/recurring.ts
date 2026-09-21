@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
+import { pushActivity, rupiah } from "@/lib/push";
 import type { RecurringFrequency, TransactionType } from "@/lib/types";
 
 function nextDate(from: string, frequency: RecurringFrequency) {
@@ -111,7 +112,8 @@ export async function deleteRecurring(id: string): Promise<ActionResult> {
 
 /** Catat tagihan berulang jadi transaksi nyata, lalu majukan tanggal berikutnya. */
 export async function runRecurringNow(id: string, customAmount?: number): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -146,6 +148,12 @@ export async function runRecurringNow(id: string, customAmount?: number): Promis
     .eq("id", id)
     .eq("household_id", householdId);
   if (updateError) return fail(updateError.message);
+
+  await pushActivity(session, ({ who }) => ({
+    title: row.type === "income" ? "💰 Pemasukan baru" : "💸 Tagihan dibayar",
+    body: `${who} mencatat ${row.description ? `${row.description} · ` : ""}${rupiah(Number(finalAmount))}`,
+    url: "/dashboard/transactions",
+  }));
 
   revalidatePath("/dashboard", "layout");
   return { ok: true };

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
+import { pushActivity, rupiah } from "@/lib/push";
 import type { TransactionType } from "@/lib/types";
 
 const TYPES: TransactionType[] = ["income", "expense", "transfer"];
@@ -43,10 +44,9 @@ function parseTransaction(formData: FormData) {
   } as const;
 }
 
-import { sendPushNotification } from "./push";
-
 export async function createTransaction(formData: FormData): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -55,23 +55,21 @@ export async function createTransaction(formData: FormData): Promise<ActionResul
 
   const { error } = await supabase.from("transactions").insert({ ...parsed.values, user_id: user.id, household_id: householdId });
   if (error) return fail(error.message);
-  
-  // Push Notification
-  const title = parsed.values.description || (parsed.values.type === "income" ? "Pemasukan" : parsed.values.type === "expense" ? "Pengeluaran" : "Transfer");
-  const rp = `Rp${parsed.values.amount.toLocaleString("id-ID")}`;
-  await sendPushNotification(
-    householdId,
-    user.id,
-    parsed.values.type === "income" ? "Pemasukan Baru!" : "Transaksi Baru",
-    `${title}: ${rp} ditambahkan.`
-  );
+
+  const v = parsed.values;
+  await pushActivity(session, ({ who }) => ({
+    title: v.type === "income" ? "💰 Pemasukan baru" : v.type === "expense" ? "💸 Pengeluaran baru" : "🔁 Transfer baru",
+    body: `${who} mencatat ${v.description ? `${v.description} · ` : ""}${rupiah(v.amount)}`,
+    url: "/dashboard/transactions",
+  }));
 
   revalidateAll();
   return { ok: true };
 }
 
 export async function updateTransaction(id: string, formData: FormData): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -81,17 +79,41 @@ export async function updateTransaction(id: string, formData: FormData): Promise
   const { error } = await supabase.from("transactions").update(parsed.values).eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
 
+  const v = parsed.values;
+  await pushActivity(session, ({ who }) => ({
+    title: "✏️ Transaksi diubah",
+    body: `${who} mengubah ${v.description ? `${v.description} · ` : ""}${rupiah(v.amount)}`,
+    url: "/dashboard/transactions",
+  }));
+
   revalidateAll();
   return { ok: true };
 }
 
 export async function deleteTransaction(id: string): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
+  // Ambil ringkasan dulu supaya notifikasinya informatif setelah barisnya hilang.
+  const { data: before } = await supabase
+    .from("transactions")
+    .select("amount, description")
+    .eq("id", id)
+    .eq("household_id", householdId)
+    .maybeSingle();
+
   const { error } = await supabase.from("transactions").delete().eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);
+
+  if (before) {
+    await pushActivity(session, ({ who }) => ({
+      title: "🗑️ Transaksi dihapus",
+      body: `${who} menghapus ${before.description ? `${before.description} · ` : ""}${rupiah(Number(before.amount))}`,
+      url: "/dashboard/transactions",
+    }));
+  }
 
   revalidateAll();
   return { ok: true };

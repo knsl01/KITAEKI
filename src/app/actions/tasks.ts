@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, OWNER_KEYS, optionalStr, pick, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
+import { pushActivity } from "@/lib/push";
 
 export async function createTask(formData: FormData): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -21,12 +23,19 @@ export async function createTask(formData: FormData): Promise<ActionResult> {
   });
   if (error) return fail(error.message);
 
+  await pushActivity(session, ({ who }) => ({
+    title: "📅 Agenda baru",
+    body: `${who} menambahkan “${title}”`,
+    url: "/dashboard/calendar",
+  }));
+
   revalidatePath("/dashboard/calendar");
   return { ok: true };
 }
 
 export async function toggleTask(id: string, done: boolean): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -36,6 +45,10 @@ export async function toggleTask(id: string, done: boolean): Promise<ActionResul
     .eq("id", id)
     .eq("household_id", householdId);
   if (error) return fail(error.message);
+
+  if (done) {
+    await pushActivity(session, ({ who }) => ({ title: "✅ Tugas selesai", body: `${who} menyelesaikan sebuah tugas`, url: "/dashboard/calendar" }));
+  }
 
   revalidatePath("/dashboard/calendar");
   return { ok: true };

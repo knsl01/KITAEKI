@@ -14,6 +14,7 @@ import {
   UNAUTH,
   type ActionResult,
 } from "./_shared";
+import { pushActivity } from "@/lib/push";
 
 const PRIORITIES = ["low", "medium", "high"] as const;
 
@@ -41,7 +42,8 @@ function readFields(formData: FormData) {
 }
 
 export async function createWishlistItem(formData: FormData): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -52,6 +54,12 @@ export async function createWishlistItem(formData: FormData): Promise<ActionResu
     .from("wishlist_items")
     .insert({ household_id: householdId, created_by: user.id, ...fields.values });
   if (error) return fail(error.message);
+
+  await pushActivity(session, ({ who }) => ({
+    title: "🎁 Wishlist baru",
+    body: `${who} menambahkan “${fields.values.name}”`,
+    url: "/dashboard/savings",
+  }));
 
   revalidatePath("/dashboard/wishlist");
   return { ok: true };
@@ -73,7 +81,8 @@ export async function updateWishlistItem(id: string, formData: FormData): Promis
 }
 
 export async function toggleWishlistPurchased(id: string, purchased: boolean): Promise<ActionResult> {
-  const { supabase, user, householdId } = await getUserClient();
+  const session = await getUserClient();
+  const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
@@ -83,6 +92,10 @@ export async function toggleWishlistPurchased(id: string, purchased: boolean): P
     .eq("id", id)
     .eq("household_id", householdId);
   if (error) return fail(error.message);
+
+  if (purchased) {
+    await pushActivity(session, ({ who }) => ({ title: "🎁 Wishlist terbeli", body: `${who} menandai satu wishlist sudah terbeli`, url: "/dashboard/savings" }));
+  }
 
   revalidatePath("/dashboard/wishlist");
   return { ok: true };
