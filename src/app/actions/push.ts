@@ -84,3 +84,80 @@ export async function sendPushNotification(
 
   await Promise.all(promises);
 }
+
+// ----- Types -----
+
+export type PushTestResult = {
+  ok: boolean;
+  message: string;
+  sent?: number;
+  failed?: number;
+};
+
+// ----- Test push -----
+
+export async function sendTestPush(): Promise<PushTestResult> {
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    return { ok: false, message: "VAPID keys tidak dikonfigurasi di .env.local" };
+  }
+
+  const { supabase, user, householdId } = await getUserClient();
+  if (!user || !householdId) return { ok: false, message: "Unauthorized" };
+
+  // Kirim hanya ke device milik user sendiri
+  const { data: subs, error } = await supabase
+    .from("push_subscriptions")
+    .select("*")
+    .eq("user_id", user.id);
+
+  if (error) return { ok: false, message: error.message };
+  if (!subs || subs.length === 0)
+    return { ok: false, message: "Tidak ada langganan aktif untuk akun ini. Aktifkan notifikasi terlebih dahulu." };
+
+  const payload = JSON.stringify({
+    title: "🔔 Test Notifikasi",
+    body: "Notifikasi push berhasil! Kita siap pakai.",
+    url: "/",
+  });
+
+  let sent = 0;
+  let failed = 0;
+
+  await Promise.all(
+    subs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          payload
+        );
+        sent++;
+      } catch (err: any) {
+        failed++;
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+        } else {
+          console.error("Error sending test push:", err);
+        }
+      }
+    })
+  );
+
+  if (sent > 0) return { ok: true, message: `Test berhasil dikirim ke ${sent} perangkat.`, sent, failed };
+  return { ok: false, message: "Gagal mengirim test ke semua perangkat.", sent, failed };
+}
+
+// ----- Unsubscribe -----
+
+export async function unsubscribeFromPush(endpoint: string): Promise<ActionResult> {
+  const { supabase, user } = await getUserClient();
+  if (!user) return fail("Unauthorized");
+
+  const { error } = await supabase
+    .from("push_subscriptions")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("endpoint", endpoint);
+
+  if (error) return fail(error.message);
+  return { ok: true };
+}

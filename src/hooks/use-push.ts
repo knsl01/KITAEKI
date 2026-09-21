@@ -2,158 +2,173 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { sendTestPush, subscribeToPush, unsubscribeFromPush, type PushTestResult } from "@/app/actions/push";
-import {
-  VAPID_PUBLIC_KEY,
-  detectPushEnv,
-  registerServiceWorker,
-  sameApplicationServerKey,
-  urlBase64ToUint8Array,
-} from "@/lib/push-client";
 
-export type PushStatus =
-  | "loading"
-  | "unsupported" // browser tidak punya Push API (mis. iOS < 16.4)
-  | "ios-install" // iPhone/iPad tapi belum dipasang ke Layar Utama
-  | "denied" // izin ditolak di pengaturan perangkat
-  | "off" // bisa diaktifkan
-  | "on";
+// ---------------------------------------------------------------------------
+// Constants / helpers
+// ---------------------------------------------------------------------------
 
-const SYNC_KEY = "kita-push-synced";
+export const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
 
-export function usePush() {
-  const [status, setStatus] = useState<PushStatus>("loading");
-  const [busy, setBusy] = useState(false);
+export function detectPushEnv() {
+  if (typeof window === "undefined") return { supported: false, reason: "ssr" };
+  if (!("serviceWorker" in navigator)) return { supported: false, reason: "no-sw" };
+  if (!("PushManager" in window)) return { supported: false, reason: "no-push" };
+  if (!VAPID_PUBLIC_KEY) return { supported: false, reason: "no-vapid-key" };
+  return { supported: true, reason: null };
+}
+
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; i++) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
+export type PushStatus = "idle" | "loading" | "subscribed" | "unsubscribed" | "error";
+
+export interface UsePushReturn {
+  status: PushStatus;
+  isSupported: boolean;
+  isSubscribed: boolean;
+  isLoading: boolean;
+  error: string | null;
+  testResult: PushTestResult | null;
+  subscribe: () => Promise<void>;
+  unsubscribe: () => Promise<void>;
+  testPush: () => Promise<void>;
+}
+
+export function usePush(): UsePushReturn {
+  const [status, setStatus] = useState<PushStatus>("idle");
+  const [isSupported, setIsSupported] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [test, setTest] = useState<PushTestResult | null>(null);
+  const [testResult, setTestResult] = useState<PushTestResult | null>(null);
 
-  const refresh = useCallback(async () => {
-    try {
-      const env = detectPushEnv();
-      if (!env.hasServiceWorker) return setStatus("unsupported");
-      if (env.isIOS && !env.standalone) return setStatus("ios-install");
-      if (!env.hasPush) return setStatus("unsupported");
-
-      const reg = await registerServiceWorker();
-      if (Notification.permission === "denied") return setStatus("denied");
-
-      let sub = await reg.pushManager.getSubscription();
-
-      // Izin sudah diberikan tapi langganan hilang (browser membersihkannya / kunci berubah): pulihkan diam-diam.
-      if (Notification.permission === "granted" && VAPID_PUBLIC_KEY) {
-        const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-        if (sub && !sameApplicationServerKey(sub, key)) {
-          await sub.unsubscribe();
-          sub = null;
-        }
-        if (!sub) {
-          try {
-            sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
-          } catch {
-            sub = null;
-          }
-        }
-      }
-
-      if (sub && Notification.permission === "granted") {
-        setStatus("on");
-        // Sinkronkan ke server sekali per sesi tab: menjaga baris DB tetap ada dan memindahkan
-        // kepemilikan kalau HP ini dipakai gantian akun.
-        try {
-          if (sessionStorage.getItem(SYNC_KEY) !== sub.endpoint) {
-            const res = await subscribeToPush(sub.toJSON(), navigator.userAgent);
-            if (res.ok) sessionStorage.setItem(SYNC_KEY, sub.endpoint);
-          }
-        } catch {
-          /* tidak kritis */
-        }
-      } else {
-        setStatus("off");
-      }
-    } catch (err) {
-      console.error("[push] refresh:", err);
-      setStatus("unsupported");
+  // Check initial subscription state
+  useEffect(() => {
+    const env = detectPushEnv();
+    if (!env.supported) {
+      setIsSupported(false);
+      setIsLoading(false);
+      return;
     }
+
+    setIsSupported(true);
+
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => reg.pushManager.getSubscription())
+      .then((sub) => {
+        setIsSubscribed(!!sub);
+        setStatus(sub ? "subscribed" : "unsubscribed");
+      })
+      .catch((err) => {
+        console.error("Service worker registration failed:", err);
+        setError("Gagal mendaftarkan service worker.");
+        setStatus("error");
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  /** HARUS dipanggil langsung dari klik/tap — iOS menolak meminta izin di luar gestur user. */
-  const enable = useCallback(async () => {
-    setBusy(true);
+  const subscribe = useCallback(async () => {
+    if (!isSupported) return;
+    setIsLoading(true);
     setError(null);
-    setTest(null);
-    try {
-      if (!VAPID_PUBLIC_KEY) {
-        throw new Error(
-          "NEXT_PUBLIC_VAPID_PUBLIC_KEY belum ada di build ini. Isi di environment hosting lalu Redeploy (variabel NEXT_PUBLIC_ ditanam saat build)."
-        );
-      }
 
+    try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        setStatus(permission === "denied" ? "denied" : "off");
-        throw new Error(
-          permission === "denied"
-            ? "Izin notifikasi ditolak. Aktifkan lewat pengaturan perangkat."
-            : "Izin notifikasi belum diberikan."
-        );
+        throw new Error("Izin notifikasi ditolak oleh browser.");
       }
 
-      const reg = await registerServiceWorker();
-      const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-      let sub = await reg.pushManager.getSubscription();
-      if (sub && !sameApplicationServerKey(sub, key)) {
-        await sub.unsubscribe();
-        sub = null;
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+
+      const result = await subscribeToPush(sub.toJSON());
+      if (!result.ok) {
+        throw new Error((result as { ok: false; error: string }).error);
       }
-      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
 
-      const res = await subscribeToPush(sub.toJSON(), navigator.userAgent);
-      if (!res.ok) throw new Error(res.error);
-
-      sessionStorage.setItem(SYNC_KEY, sub.endpoint);
-      setStatus("on");
-    } catch (err) {
-      setError((err as Error).message || "Gagal mengaktifkan notifikasi.");
+      setIsSubscribed(true);
+      setStatus("subscribed");
+    } catch (err: any) {
+      console.error("Subscribe error:", err);
+      setError(err?.message ?? "Gagal mengaktifkan notifikasi.");
+      setStatus("error");
     } finally {
-      setBusy(false);
+      setIsLoading(false);
     }
-  }, []);
+  }, [isSupported]);
 
-  const disable = useCallback(async () => {
-    setBusy(true);
+  const unsubscribe = useCallback(async () => {
+    if (!isSupported) return;
+    setIsLoading(true);
     setError(null);
-    setTest(null);
+
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
+
       if (sub) {
-        await unsubscribeFromPush(sub.endpoint);
+        const endpoint = sub.endpoint;
         await sub.unsubscribe();
+        await unsubscribeFromPush(endpoint);
       }
-      sessionStorage.removeItem(SYNC_KEY);
-      setStatus("off");
-    } catch (err) {
-      setError((err as Error).message || "Gagal menonaktifkan notifikasi.");
-    } finally {
-      setBusy(false);
-    }
-  }, []);
 
-  const sendTest = useCallback(async () => {
-    setBusy(true);
+      setIsSubscribed(false);
+      setStatus("unsubscribed");
+    } catch (err: any) {
+      console.error("Unsubscribe error:", err);
+      setError(err?.message ?? "Gagal menonaktifkan notifikasi.");
+      setStatus("error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isSupported]);
+
+  const testPush = useCallback(async () => {
+    setIsLoading(true);
     setError(null);
-    setTest(null);
+    setTestResult(null);
+
     try {
-      setTest(await sendTestPush());
-    } catch (err) {
-      setTest({ ok: false, sent: 0, total: 0, message: (err as Error).message });
+      const result = await sendTestPush();
+      setTestResult(result);
+      if (!result.ok) {
+        setError(result.message);
+      }
+    } catch (err: any) {
+      console.error("Test push error:", err);
+      const msg = err?.message ?? "Gagal mengirim notifikasi test.";
+      setError(msg);
+      setTestResult({ ok: false, message: msg });
     } finally {
-      setBusy(false);
+      setIsLoading(false);
     }
   }, []);
 
-  return { status, busy, error, test, enable, disable, sendTest, refresh };
+  return {
+    status,
+    isSupported,
+    isSubscribed,
+    isLoading,
+    error,
+    testResult,
+    subscribe,
+    unsubscribe,
+    testPush,
+  };
 }
