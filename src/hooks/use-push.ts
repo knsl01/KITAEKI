@@ -39,9 +39,13 @@ export interface UsePushReturn {
   isSupported: boolean;
   isSubscribed: boolean;
   isLoading: boolean;
+  /** Alias for isLoading — true while any async operation is in-flight. */
+  busy: boolean;
   error: string | null;
   testResult: PushTestResult | null;
   subscribe: () => Promise<void>;
+  /** Alias for subscribe — request permission and register push subscription. */
+  enable: () => Promise<void>;
   unsubscribe: () => Promise<void>;
   testPush: () => Promise<void>;
 }
@@ -165,9 +169,11 @@ export function usePush(): UsePushReturn {
     isSupported,
     isSubscribed,
     isLoading,
+    busy: isLoading,
     error,
     testResult,
     subscribe,
+    enable: subscribe,
     unsubscribe,
     testPush,
   };
