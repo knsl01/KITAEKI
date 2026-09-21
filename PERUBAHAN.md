@@ -25,3 +25,10 @@
 Ditulis ulang dengan Canvas (hasil PNG 1080×1920 / 1080×1350 sama persis dengan pratinjau, bisa Bagikan/Simpan):
 13 desain × 10 warna × 3 gaya kartu × 6 pola × 2 ukuran, opsi sembunyikan nominal, foto latar, teks kustom, tombol Acak.
 QR dibuat lokal (`src/lib/share/qr.ts`), tidak lagi memakai layanan luar.
+
+## Halaman Masuk / Daftar (baru)
+- `src/components/auth/` — `auth-experience.tsx` (tata letak + teks yang berganti antara Masuk dan Daftar), `auth-card.tsx` (form), `aurora-canvas.tsx` (latar hidup), `auth.css` (semua gaya, berawalan `.kx-`).
+- Tema deep blue × deep purple. Latar Canvas: aurora bergerak, bintang yang tertarik ke kursor/jari, garis rasi, bintang jatuh, dan dua bola cahaya (Eki biru, Dinda ungu) yang mengorbit kartu; di mode Daftar keduanya berjalan berdampingan, saat mengetik/kirim menyala, saat akun berhasil dibuat meledak jadi kilau.
+- Teks hero berubah saat pindah ke Daftar (judul, deskripsi, 3 langkah mulai, kutipan). Di desktop tampil widget melayang (saldo, target, notifikasi) yang bergeser mengikuti kursor.
+- Form: label mengambang, kekuatan password, peringatan Caps Lock, tombol dengan ripple, getar saat error, panel sukses setelah daftar. Nilai isian tidak hilang saat login gagal.
+- Menghormati `prefers-reduced-motion` (tanpa animasi, tampilan tetap utuh). `auth-form.tsx` dan `login-scene.tsx` lama dihapus.
