@@ -1,0 +1,1077 @@
+/* ==========================================================================
+   KITA — halaman Masuk / Daftar (deep blue × deep purple)
+   Semua kelas berawalan .kx- supaya tidak bentrok dengan gaya aplikasi.
+   Keadaan dasar elemen = keadaan AKHIR animasi, jadi kalau animasi dimatikan
+   (prefers-reduced-motion) tampilannya tetap utuh.
+   ========================================================================== */
+
+@property --kx-a {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.kx-shell {
+  --kx-ink: #eef1ff;
+  --kx-soft: rgba(216, 224, 255, 0.72);
+  --kx-mute: rgba(190, 204, 255, 0.56);
+  --kx-line: rgba(150, 165, 255, 0.22);
+  --kx-blue: #5b8cff;
+  --kx-violet: #a05cff;
+  --px: 0;
+  --py: 0;
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  isolation: isolate;
+  color: var(--kx-ink);
+  color-scheme: dark;
+  background: #02040f;
+  font-family: var(--font-jakarta), system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+.kx-shell *,
+.kx-shell *::before,
+.kx-shell *::after {
+  box-sizing: border-box;
+}
+
+.kx-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kx-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(120% 95% at 50% 42%, transparent 52%, rgba(2, 4, 15, 0.72) 100%);
+}
+
+/* Latar di balik halaman (overscroll iOS) ikut gelap walau tema aplikasi terang. */
+html:has(.kx-shell),
+body:has(.kx-shell) {
+  background: #02040f;
+}
+
+/* ── tata letak ───────────────────────────────────────── */
+.kx-content {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  align-items: center;
+  gap: clamp(32px, 5vw, 88px);
+  max-width: 1600px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: clamp(24px, 4vh, 60px) clamp(28px, 6vw, 110px);
+}
+.kx-hero {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 3vh, 38px);
+  min-width: 0;
+}
+.kx-hero-body {
+  display: block;
+  max-width: 44rem;
+}
+.kx-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ── merek ────────────────────────────────────────────── */
+.kx-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: kx-fade 0.8s ease both;
+}
+.kx-logo {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 10px 40px rgba(91, 140, 255, 0.5);
+  animation: kx-logo-in 1s cubic-bezier(0.3, 1.4, 0.5, 1) both, kx-logo-glow 4s ease-in-out 1s infinite;
+}
+.kx-brand-name {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.34em;
+  line-height: 1;
+}
+.kx-brand-tag {
+  margin: 6px 0 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--kx-mute);
+}
+
+/* ── teks hero ────────────────────────────────────────── */
+.kx-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  padding: 7px 14px 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--kx-line);
+  background: rgba(20, 26, 96, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c9d6ff;
+  animation: kx-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.kx-eyebrow i {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7fb0ff;
+  box-shadow: 0 0 12px #7fb0ff;
+}
+.kx-eyebrow i::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid #7fb0ff;
+  animation: kx-ping 2s ease-out infinite;
+}
+
+.kx-title {
+  margin: 0;
+  font-size: clamp(2rem, min(4.1vw, 6.6vh), 3.9rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.kx-word {
+  display: inline-block;
+  animation: kx-word 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i) * 85ms + 120ms);
+}
+.kx-grad {
+  background: linear-gradient(100deg, #7fb0ff, #a78bfa 40%, #e4b8ff 65%, #7fb0ff);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: kx-word 0.95s cubic-bezier(0.2, 0.8, 0.2, 1) both, kx-shine 7s linear infinite;
+  animation-delay: calc(var(--i) * 85ms + 120ms), 0s;
+}
+.kx-lead {
+  max-width: 34rem;
+  margin: 20px 0 0;
+  font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+  line-height: 1.7;
+  color: var(--kx-soft);
+  animation: kx-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s both;
+}
+
+.kx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kx-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--kx-line);
+  background: rgba(18, 24, 92, 0.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d5deff;
+  animation: kx-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.75s + var(--i) * 90ms);
+}
+.kx-chips svg {
+  width: 16px;
+  height: 16px;
+  color: #93b4ff;
+}
+
+.kx-quote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  max-width: 30rem;
+  margin: 30px 0 0;
+  padding: 0 0 0 16px;
+  border-left: 2px solid transparent;
+  border-image: linear-gradient(180deg, #5b8cff, #a05cff) 1;
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.6;
+  color: var(--kx-mute);
+  animation: kx-rise 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 1.1s both;
+}
+.kx-quote svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  color: #b58cff;
+  animation: kx-beat 1.6s ease-in-out infinite;
+}
+
+/* ── langkah (mode Daftar) ────────────────────────────── */
+.kx-steps {
+  display: grid;
+  gap: 4px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.kx-steps li {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 20px;
+  animation: kx-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.65s + var(--i) * 140ms);
+}
+.kx-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: 2px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(120, 140, 255, 0.7), rgba(160, 92, 255, 0.15));
+  transform-origin: top;
+  animation: kx-grow 0.6s ease both;
+  animation-delay: calc(0.9s + var(--i) * 140ms);
+}
+.kx-step-n {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b5bff, #8b4dff);
+  box-shadow: 0 8px 24px -8px rgba(110, 90, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.kx-steps b {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.kx-steps small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.86rem;
+  color: var(--kx-mute);
+}
+
+/* ── widget melayang (desktop) ────────────────────────── */
+.kx-widgets {
+  display: none;
+}
+@media (min-width: 1024px) and (min-height: 800px) {
+  .kx-widgets {
+    position: relative;
+    display: block;
+    height: 252px;
+    max-width: 580px;
+    margin-top: 28px;
+  }
+}
+@media (min-width: 1024px) and (max-height: 899px) {
+  .kx-quote {
+    display: none;
+  }
+}
+.kx-w {
+  position: absolute;
+  transform: translate3d(calc(var(--px, 0) * var(--dx, 0) * 1px), calc(var(--py, 0) * var(--dy, 0) * 1px), 0);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: kx-w-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.kx-w-balance {
+  left: 0;
+  top: 0;
+  width: min(292px, 54%);
+  animation-delay: 0.8s;
+}
+.kx-w-goal {
+  right: 0;
+  top: 40px;
+  width: min(262px, 48%);
+  animation-delay: 1s;
+}
+.kx-w-toast {
+  left: 9%;
+  bottom: 0;
+  width: min(350px, 72%);
+  animation-delay: 1.2s;
+}
+.kx-w-in {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid var(--kx-line);
+  background: linear-gradient(160deg, rgba(24, 32, 112, 0.58), rgba(38, 18, 100, 0.5));
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 24px 50px -22px rgba(20, 10, 90, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+.kx-float {
+  animation: kx-float 7s ease-in-out infinite;
+}
+.kx-w-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kx-mute);
+}
+.kx-w-amount {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.kx-spark {
+  width: 100%;
+  height: 54px;
+  overflow: visible;
+}
+.kx-spark-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: kx-draw 6s ease-in-out infinite;
+}
+.kx-spark-fill {
+  animation: kx-fill 6s ease-in-out infinite;
+}
+.kx-w-pill {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(110, 245, 190, 0.14);
+  border: 1px solid rgba(110, 245, 190, 0.3);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #86f6c8;
+}
+.kx-w-goal .kx-w-in {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+.kx-ring {
+  flex: none;
+  width: 76px;
+  height: 76px;
+}
+.kx-ring-arc {
+  animation: kx-ring 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) 1.1s both;
+}
+.kx-ring-text {
+  fill: #fff;
+  font-size: 19px;
+  font-weight: 800;
+}
+.kx-w-goal-name {
+  display: block;
+  margin-top: 3px;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.kx-w-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.76rem;
+  color: var(--kx-mute);
+}
+.kx-w-toast .kx-w-in {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+}
+.kx-toast-bell {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #3b5bff, #8b4dff);
+  box-shadow: 0 8px 22px -8px rgba(110, 90, 255, 0.9);
+}
+.kx-toast-bell svg {
+  width: 20px;
+  height: 20px;
+  animation: kx-ring-bell 3.4s ease-in-out infinite;
+  transform-origin: 50% 12%;
+}
+.kx-toast-text {
+  min-width: 0;
+  animation: kx-toast 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.kx-toast-text strong {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.kx-toast-text svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  color: #93b4ff;
+}
+
+/* ── kartu form ───────────────────────────────────────── */
+.kx-card-wrap {
+  width: 100%;
+  max-width: 456px;
+  transform: perspective(1300px) rotateX(calc(var(--py, 0) * -2deg)) rotateY(calc(var(--px, 0) * 2.6deg));
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: kx-card-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.15s both;
+  --mx: 50%;
+  --my: 0%;
+}
+.kx-card {
+  position: relative;
+  overflow: hidden;
+  padding: 22px 24px 20px;
+  border-radius: 28px;
+  border: 1px solid rgba(150, 165, 255, 0.16);
+  background: linear-gradient(160deg, rgba(20, 28, 104, 0.62), rgba(34, 16, 96, 0.58));
+  backdrop-filter: blur(26px) saturate(150%);
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  box-shadow: 0 44px 90px -34px rgba(3, 4, 40, 0.95), 0 0 90px -24px rgba(91, 110, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.kx-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 1.5px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: conic-gradient(from var(--kx-a), transparent 0 52%, rgba(91, 140, 255, 0.95) 70%, rgba(168, 92, 255, 0.95) 86%, transparent 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: kx-rot 7s linear infinite;
+}
+.kx-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(360px circle at var(--mx) var(--my), rgba(130, 150, 255, 0.16), transparent 60%);
+}
+.kx-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.kx-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border-radius: 16px;
+  border: 1px solid rgba(150, 165, 255, 0.16);
+  background: rgba(4, 6, 36, 0.55);
+}
+.kx-tabs button {
+  position: relative;
+  z-index: 1;
+  padding: 11px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--kx-soft);
+  font: 700 0.92rem/1 var(--font-jakarta), system-ui, sans-serif;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+.kx-tabs button[aria-selected="true"] {
+  color: #fff;
+}
+.kx-tabs button:focus-visible {
+  outline: 2px solid #9db6ff;
+  outline-offset: 1px;
+}
+.kx-tab-ind {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3457ff, #8b4dff);
+  box-shadow: 0 8px 24px -8px rgba(110, 90, 255, 0.9);
+  transition: transform 0.5s cubic-bezier(0.3, 1.35, 0.5, 1);
+}
+.kx-tabs[data-mode="signup"] .kx-tab-ind {
+  transform: translateX(100%);
+}
+
+.kx-card-body {
+  animation: kx-body 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.kx-card-title {
+  margin: 24px 0 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.kx-card-sub {
+  margin: 6px 0 0;
+  font-size: 0.92rem;
+  color: var(--kx-soft);
+}
+
+.kx-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 22px;
+}
+.kx-field {
+  position: relative;
+  animation: kx-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.kx-field:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.kx-field:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.kx-input {
+  width: 100%;
+  height: 58px;
+  padding: 22px 48px 6px 48px;
+  border-radius: 16px;
+  border: 1px solid rgba(150, 165, 255, 0.22);
+  background: rgba(4, 6, 34, 0.55);
+  color: #fff;
+  font: 600 16px/1 var(--font-jakarta), system-ui, sans-serif;
+  outline: none;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+}
+.kx-input:hover {
+  border-color: rgba(150, 165, 255, 0.4);
+}
+.kx-input:focus {
+  border-color: rgba(130, 152, 255, 0.85);
+  background: rgba(8, 10, 52, 0.72);
+  box-shadow: 0 0 0 4px rgba(91, 110, 255, 0.18);
+}
+.kx-input:-webkit-autofill,
+.kx-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  box-shadow: 0 0 0 100px #0a0e3c inset;
+  transition: background-color 9999s;
+}
+.kx-label {
+  position: absolute;
+  left: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(210, 218, 255, 0.6);
+  font-size: 15px;
+  font-weight: 500;
+  pointer-events: none;
+  transition: top 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.22s, font-size 0.22s, color 0.22s, letter-spacing 0.22s;
+}
+.kx-input:focus ~ .kx-label,
+.kx-input:not(:placeholder-shown) ~ .kx-label,
+.kx-input:-webkit-autofill ~ .kx-label {
+  top: 11px;
+  transform: none;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #9db6ff;
+}
+.kx-field-icon {
+  position: absolute;
+  left: 17px;
+  top: 50%;
+  width: 19px;
+  height: 19px;
+  transform: translateY(-50%);
+  color: rgba(190, 205, 255, 0.55);
+  transition: color 0.25s, transform 0.3s cubic-bezier(0.3, 1.5, 0.5, 1);
+  pointer-events: none;
+}
+.kx-field-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.kx-input:focus ~ .kx-field-icon {
+  color: #a9c0ff;
+  transform: translateY(-50%) scale(1.15);
+}
+.kx-field-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 17px;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: 0 0 32px rgba(120, 100, 255, 0.45);
+  transition: opacity 0.3s;
+}
+.kx-input:focus ~ .kx-field-glow {
+  opacity: 1;
+}
+.kx-eye {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: rgba(190, 205, 255, 0.65);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.kx-eye:hover {
+  color: #fff;
+  background: rgba(130, 150, 255, 0.14);
+}
+.kx-eye svg {
+  width: 19px;
+  height: 19px;
+}
+
+.kx-hint {
+  margin: -4px 0 0;
+  font-size: 0.8rem;
+  color: #ffd27a;
+}
+.kx-strength {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -4px;
+  font-size: 0.78rem;
+  color: var(--kx-mute);
+}
+.kx-strength-bars {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+}
+.kx-strength-bars i {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.35s, box-shadow 0.35s;
+}
+.kx-strength-bars i[data-on="true"] {
+  background: linear-gradient(90deg, #5b8cff, #a05cff);
+  box-shadow: 0 0 10px rgba(130, 110, 255, 0.6);
+}
+.kx-strength-bars[data-score="1"] i[data-on="true"] {
+  background: #ff7a9a;
+  box-shadow: 0 0 10px rgba(255, 122, 154, 0.5);
+}
+
+.kx-alert {
+  margin: 0;
+  padding: 11px 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 110, 140, 0.38);
+  background: rgba(255, 70, 110, 0.12);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #ffb7c8;
+  animation: kx-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.kx-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 56px;
+  margin-top: 4px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  font: 800 1rem/1 var(--font-jakarta), system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  background: linear-gradient(110deg, #2f54ff, #6d3bff 42%, #9b4dff 68%, #2f54ff);
+  background-size: 230% 100%;
+  box-shadow: 0 16px 38px -14px rgba(100, 80, 255, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  animation: kx-flow 6s linear infinite;
+  transition: transform 0.2s, box-shadow 0.25s, filter 0.2s;
+}
+.kx-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -60%;
+  width: 40%;
+  transform: skewX(-20deg);
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+  animation: kx-sheen 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.kx-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 46px -14px rgba(110, 90, 255, 1), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+.kx-btn:active:not(:disabled) {
+  transform: scale(0.985);
+}
+.kx-btn:disabled {
+  cursor: progress;
+  filter: saturate(0.8) brightness(0.92);
+}
+.kx-btn:focus-visible {
+  outline: 2px solid #c6d4ff;
+  outline-offset: 3px;
+}
+.kx-btn svg {
+  width: 19px;
+  height: 19px;
+  transition: transform 0.25s;
+}
+.kx-btn:hover:not(:disabled) svg {
+  transform: translateX(4px);
+}
+.kx-btn .kx-spin {
+  animation: kx-rotate 0.9s linear infinite;
+}
+.kx-ripple {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%) scale(0);
+  animation: kx-ripple 0.7s ease-out forwards;
+  pointer-events: none;
+}
+
+.kx-switch {
+  margin: 18px 0 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--kx-soft);
+}
+.kx-switch button {
+  padding: 2px 0;
+  border: 0;
+  background: linear-gradient(90deg, #8fb2ff, #c9a0ff) left bottom / 100% 1.5px no-repeat;
+  color: #fff;
+  font: 700 0.9rem/1.3 var(--font-jakarta), system-ui, sans-serif;
+  cursor: pointer;
+  transition: background-size 0.3s;
+}
+.kx-switch button:hover {
+  background-size: 100% 100%;
+  color: #0a0e3c;
+}
+.kx-foot {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--kx-mute);
+  animation: kx-fade 1s ease 1.2s both;
+}
+
+.kx-done {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 26px 2px 6px;
+  text-align: center;
+}
+.kx-done h3 {
+  margin: 8px 0 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.kx-done p {
+  margin: 0 0 8px;
+  max-width: 22rem;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--kx-soft);
+}
+.kx-done-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3457ff, #8b4dff);
+  box-shadow: 0 16px 40px -10px rgba(110, 90, 255, 0.95);
+  animation: kx-pop 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.kx-done-icon::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(140, 150, 255, 0.6);
+  animation: kx-ping 2s ease-out infinite;
+}
+.kx-done-icon svg {
+  width: 34px;
+  height: 34px;
+}
+
+/* ── keyframes ────────────────────────────────────────── */
+@keyframes kx-fade {
+  from { opacity: 0; }
+}
+@keyframes kx-rise {
+  from { opacity: 0; transform: translateY(16px); }
+}
+@keyframes kx-word {
+  from { opacity: 0; transform: translateY(0.45em) scale(0.96); filter: blur(10px); }
+}
+@keyframes kx-shine {
+  to { background-position: 260% 0; }
+}
+@keyframes kx-logo-in {
+  from { opacity: 0; transform: scale(0.5) rotate(-14deg); }
+}
+@keyframes kx-logo-glow {
+  50% { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16), 0 12px 56px rgba(140, 100, 255, 0.75); }
+}
+@keyframes kx-ping {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes kx-beat {
+  0%, 60%, 100% { transform: scale(1); }
+  20% { transform: scale(1.3); }
+  40% { transform: scale(1.1); }
+}
+@keyframes kx-grow {
+  from { transform: scaleY(0); }
+}
+@keyframes kx-w-in {
+  from { opacity: 0; translate: 0 34px; scale: 0.92; }
+}
+@keyframes kx-float {
+  50% { transform: translateY(-11px); }
+}
+@keyframes kx-draw {
+  0% { stroke-dashoffset: 1; }
+  45%, 90% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1; }
+}
+@keyframes kx-fill {
+  0%, 20% { opacity: 0; }
+  50%, 88% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes kx-ring {
+  from { stroke-dashoffset: 188.5; }
+}
+@keyframes kx-ring-bell {
+  0%, 70%, 100% { transform: rotate(0); }
+  74% { transform: rotate(14deg); }
+  80% { transform: rotate(-12deg); }
+  86% { transform: rotate(8deg); }
+  92% { transform: rotate(-4deg); }
+}
+@keyframes kx-toast {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+}
+@keyframes kx-card-in {
+  from { opacity: 0; translate: 0 40px; scale: 0.96; }
+}
+@keyframes kx-rot {
+  to { --kx-a: 360deg; }
+}
+@keyframes kx-body {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes kx-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(3px); }
+  30%, 50%, 70% { transform: translateX(-5px); }
+  40%, 60% { transform: translateX(5px); }
+}
+@keyframes kx-flow {
+  to { background-position: 230% 0; }
+}
+@keyframes kx-sheen {
+  0% { left: -60%; }
+  35%, 100% { left: 140%; }
+}
+@keyframes kx-ripple {
+  to { transform: translate(-50%, -50%) scale(46); opacity: 0; }
+}
+@keyframes kx-rotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes kx-pop {
+  from { opacity: 0; transform: scale(0.4); }
+}
+
+/* ── ponsel & layar sempit ────────────────────────────── */
+@media (max-width: 1023px) {
+  .kx-content {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    justify-items: center;
+    gap: 22px;
+    padding: max(22px, env(safe-area-inset-top)) 18px max(30px, env(safe-area-inset-bottom));
+  }
+  .kx-hero {
+    width: 100%;
+    max-width: 456px;
+    gap: 20px;
+  }
+  .kx-brand-name {
+    font-size: 1.15rem;
+  }
+  .kx-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .kx-eyebrow {
+    margin-bottom: 14px;
+    padding: 6px 12px 6px 10px;
+    font-size: 0.66rem;
+  }
+  .kx-title {
+    font-size: clamp(1.9rem, 8.6vw, 2.5rem);
+  }
+  .kx-lead {
+    margin-top: 14px;
+    font-size: 0.93rem;
+    line-height: 1.6;
+  }
+  .kx-quote {
+    display: none;
+  }
+  .kx-chips {
+    margin-top: 16px;
+    gap: 8px;
+  }
+  .kx-chips li {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+  .kx-steps {
+    margin-top: 18px;
+  }
+  .kx-steps li {
+    padding-bottom: 14px;
+  }
+  .kx-card {
+    padding: 18px 18px 16px;
+    border-radius: 26px;
+  }
+  .kx-card-title {
+    margin-top: 20px;
+    font-size: 1.5rem;
+  }
+  .kx-form {
+    margin-top: 18px;
+  }
+  .kx-foot {
+    padding-bottom: 6px;
+  }
+}
+@media (max-width: 380px) {
+  .kx-content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .kx-card {
+    padding: 16px 14px 14px;
+  }
+}
+/* Layar pendek (ponsel landscape / keyboard terbuka): padatkan hero */
+@media (max-height: 640px) and (max-width: 1023px) {
+  .kx-lead,
+  .kx-chips {
+    display: none;
+  }
+}
+/* Perangkat sentuh: tanpa kemiringan 3D */
+@media (hover: none) {
+  .kx-card-wrap {
+    transform: none;
+  }
+}
+
+/* ── hormati "kurangi gerakan" ────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .kx-shell *,
+  .kx-shell *::before,
+  .kx-shell *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .kx-card-wrap {
+    transform: none;
+  }
+}
