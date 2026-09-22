@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MOBILE_NAV_ITEMS } from "@/lib/nav";
+import { MOBILE_NAV_ITEMS, NAV_ITEMS } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 
 /** Bar melayang di bawah, khusus layar kecil. */
-export function MobileNav({ action, menu }: { action?: React.ReactNode; menu?: React.ReactNode }) {
+export function MobileNav({ action, menu, items = MOBILE_NAV_ITEMS.map((item) => item.href) }: { action?: React.ReactNode; menu?: React.ReactNode; items?: readonly string[] }) {
   const pathname = usePathname();
   const [isHidden, setIsHidden] = useState(false);
+  const navItems = NAV_ITEMS.filter((item) => items.includes(item.href));
 
   useEffect(() => {
     let lastScroll = window.scrollY;
@@ -49,7 +50,7 @@ export function MobileNav({ action, menu }: { action?: React.ReactNode; menu?: R
       )}
     >
       <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-border bg-card/95 p-1.5 shadow-[0_8px_30px_-12px_hsl(var(--foreground)/0.35)] backdrop-blur">
-        {MOBILE_NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
           return (

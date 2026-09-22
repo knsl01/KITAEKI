@@ -16,22 +16,22 @@ export function FlipCard({
 
   return (
     <div
-      className={cn("group relative h-full w-full [perspective:1000px]", className)}
+      className={cn("group relative h-full w-full overflow-hidden [isolation:isolate] [perspective:1000px]", className)}
       onDoubleClick={() => setFlipped(!flipped)}
     >
       <div
         className={cn(
-          "relative h-full w-full transition-all duration-700 [transform-style:preserve-3d]",
+        "relative grid h-full w-full touch-manipulation transition-transform duration-700 [transform-style:preserve-3d]",
           flipped ? "[transform:rotateY(180deg)]" : ""
         )}
       >
         {/* Front */}
-        <div className="w-full [backface-visibility:hidden]">
+        <div className="flip-card-face relative col-start-1 row-start-1 h-full w-full overflow-hidden">
           {front}
         </div>
         
         {/* Back */}
-        <div className="absolute top-0 left-0 h-full w-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+        <div className="flip-card-face absolute inset-0 h-full w-full overflow-hidden [transform:rotateY(180deg)]">
           {back}
         </div>
       </div>

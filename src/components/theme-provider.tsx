@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { getUserPreferences, saveUserPreferences } from "@/app/actions/preferences";
 
 export const THEMES = [
@@ -37,6 +37,34 @@ export const DEFAULT_RADIUS: RadiusId = "soft";
 export const THEME_KEY = "kita-theme";
 export const MODE_KEY = "kita-mode";
 export const RADIUS_KEY = "kita-radius";
+const THEME_SYNC_KEY = "kita-theme-sync";
+
+let preferenceSaveQueue: Promise<unknown> = Promise.resolve();
+
+function queuePreferenceSave(input: Parameters<typeof saveUserPreferences>[0]) {
+  const request = preferenceSaveQueue.catch(() => undefined).then(() => saveUserPreferences(input));
+  preferenceSaveQueue = request.catch(() => undefined);
+  void request.then((result) => {
+    if (!result.ok) console.warn("Preferensi belum tersimpan ke akun:", result.error);
+  }).catch((error) => console.warn("Preferensi belum tersimpan ke akun:", error));
+}
+
+function rememberThemeSync(theme: ThemeId, userId: string | null, updatedAt = Date.now()) {
+  try {
+    localStorage.setItem(THEME_SYNC_KEY, JSON.stringify({ theme, userId, updatedAt }));
+  } catch {
+    // Tema tetap berlaku pada sesi ini walau penyimpanan browser diblokir.
+  }
+}
+
+function readThemeSync(): { theme?: string; userId?: string | null; updatedAt?: number } | null {
+  try {
+    const raw = localStorage.getItem(THEME_SYNC_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Dijalankan sebelum halaman digambar supaya tidak ada kedip warna atau huruf. */
 export const themeBootstrapScript = `(function(){try{
@@ -100,6 +128,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [resolvedMode, setResolved] = useState<"light" | "dark">("light");
   const [positiveColor, setPositiveColor] = useState<FlowColor | null>(null);
   const [negativeColor, setNegativeColor] = useState<FlowColor | null>(null);
+  const userIdRef = useRef<string | null>(null);
+  const themeRevisionRef = useRef(0);
+  const themeRef = useRef<ThemeId>(DEFAULT_THEME);
 
   useEffect(() => {
     // Skrip bootstrap sudah memasang atribut; state React tinggal menyamakan diri.
@@ -117,14 +148,29 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setResolved(resolve(storedMode));
     // Sinkronkan preferensi dari akun login. Ini membuat dua user pada browser
     // yang sama tetap memiliki tema, mode, dan radius masing-masing.
+    const revisionAtStart = themeRevisionRef.current;
     void getUserPreferences().then((preferences) => {
       if (!preferences) return;
-      const nextTheme = pickFrom(THEMES, preferences.theme, DEFAULT_THEME) as ThemeId;
+      userIdRef.current = preferences.user_id;
+      const serverTheme = pickFrom(THEMES, preferences.theme, DEFAULT_THEME) as ThemeId;
+      const localTheme = readThemeSync();
+      const serverUpdatedAt = Date.parse(String(preferences.updated_at ?? ""));
+      const localThemeIsNewer = localTheme !== null
+        && localTheme.userId === preferences.user_id
+        && THEMES.some((item) => item.id === localTheme.theme)
+        && Number(localTheme.updatedAt) > (Number.isFinite(serverUpdatedAt) ? serverUpdatedAt : 0);
+      const changedWhileLoading = themeRevisionRef.current !== revisionAtStart;
+      const nextTheme = changedWhileLoading
+        ? themeRef.current
+        : localThemeIsNewer
+          ? localTheme?.theme as ThemeId
+          : serverTheme;
       const nextRadius = pickFrom(RADII, preferences.radius, DEFAULT_RADIUS) as RadiusId;
       const nextMode = (MODES.includes(preferences.mode as ModeId) ? preferences.mode : "system") as ModeId;
       const nextPositive = preferences.positive_color as FlowColor | null;
       const nextNegative = preferences.negative_color as FlowColor | null;
       setThemeState(nextTheme);
+      themeRef.current = nextTheme;
       setRadiusState(nextRadius);
       setModeState(nextMode);
       setResolved(resolve(nextMode));
@@ -133,6 +179,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.dataset.theme = nextTheme;
       document.documentElement.dataset.radius = nextRadius;
       document.documentElement.dataset.mode = resolve(nextMode);
+      remember(THEME_KEY, nextTheme);
+      rememberThemeSync(nextTheme, preferences.user_id, localThemeIsNewer || changedWhileLoading ? Date.now() : (Number.isFinite(serverUpdatedAt) ? serverUpdatedAt : Date.now()));
       if (nextPositive) {
         document.documentElement.style.setProperty("--positive", nextPositive);
         document.documentElement.style.setProperty("--chart-income", `hsl(${nextPositive})`);
@@ -141,6 +189,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         document.documentElement.style.setProperty("--negative", nextNegative);
         document.documentElement.style.setProperty("--chart-expense", `hsl(${nextNegative})`);
       }
+      if (localThemeIsNewer || changedWhileLoading) queuePreferenceSave({ theme: nextTheme });
     });
   }, []);
 
@@ -158,10 +207,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [mode]);
 
   const setTheme = useCallback((next: ThemeId) => {
+    themeRevisionRef.current += 1;
+    themeRef.current = next;
     setThemeState(next);
     document.documentElement.dataset.theme = next;
     remember(THEME_KEY, next);
-    void saveUserPreferences({ theme: next });
+    rememberThemeSync(next, userIdRef.current);
+    queuePreferenceSave({ theme: next });
   }, []);
 
   const setRadius = useCallback((next: RadiusId) => {

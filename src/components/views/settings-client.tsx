@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { OWNER_LABEL, type MemberOwner } from "@/lib/types";
+import { NAV_ITEMS, MOBILE_NAV_DEFAULTS } from "@/lib/nav";
+import { saveUserPreferences } from "@/app/actions/preferences";
 
 function Avatar({ name, url, className }: { name: string; url?: string | null; className?: string }) {
   const initial = (name || "?").charAt(0).toUpperCase();
@@ -39,6 +41,7 @@ export function SettingsClient({
   inviteCode,
   memberKey,
   members,
+  mobileNav,
 }: {
   email: string;
   fullName: string;
@@ -49,12 +52,38 @@ export function SettingsClient({
   inviteCode: string | null;
   memberKey: MemberOwner;
   members: { user_id: string; member_key: MemberOwner; full_name: string | null; email: string | null; avatar_url: string | null }[];
+  mobileNav: string[] | null;
 }) {
   const router = useRouter();
   const [profileState, setProfileState] = useState<{ ok?: boolean; message?: string }>({});
   const [passwordState, setPasswordState] = useState<{ ok?: boolean; message?: string }>({});
   const [profilePending, startProfile] = useTransition();
   const [passwordPending, startPassword] = useTransition();
+  const [mobileNavPending, startMobileNav] = useTransition();
+  const [mobileNavState, setMobileNavState] = useState<string[]>(mobileNav?.length ? mobileNav : [...MOBILE_NAV_DEFAULTS]);
+  const [mobileNavMessage, setMobileNavMessage] = useState("");
+
+  function toggleMobilePage(path: string) {
+    const next = mobileNavState.includes(path)
+      ? mobileNavState.filter((item) => item !== path)
+      : [...mobileNavState, path];
+    if (next.length < 1) {
+      setMobileNavMessage("Pilih minimal 1 halaman untuk bar HP.");
+      return;
+    }
+    if (next.length > 4) {
+      setMobileNavMessage("Bar HP maksimal menampilkan 4 halaman.");
+      return;
+    }
+    setMobileNavState(next);
+    setMobileNavMessage("Menyimpan perubahan bar HP…");
+    startMobileNav(async () => {
+      const result = await saveUserPreferences({ mobileNav: next });
+      if (!result.ok) setMobileNavState(mobileNavState);
+      setMobileNavMessage(result.ok ? "Bar HP berhasil disimpan." : result.error);
+      if (result.ok) router.refresh();
+    });
+  }
 
   const me = members.find(m => m.member_key === memberKey) || { full_name: fullName, email: email, avatar_url: null };
   const partner = members.find(m => m.member_key !== memberKey && m.member_key !== "shared");
@@ -193,6 +222,25 @@ export function SettingsClient({
         </div>
 
         <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Bar mengambang di HP</CardTitle>
+              <CardDescription>Pilih 1 sampai 4 halaman untuk akses cepat di bagian bawah layar. Menu dan tombol tambah transaksi tetap tersedia.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const selected = mobileNavState.includes(item.href);
+                  return <button key={item.href} type="button" onClick={() => toggleMobilePage(item.href)} disabled={mobileNavPending || (!selected && mobileNavState.length >= 4)} aria-pressed={selected} className={`flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-left text-xs transition-colors ${selected ? "border-primary bg-primary/10 text-foreground" : "border-border text-muted-foreground hover:bg-muted"}`}>
+                    <Icon className="h-4 w-4 shrink-0" /><span className="truncate">{item.label}</span>
+                  </button>;
+                })}
+              </div>
+              {mobileNavMessage ? <p role="status" className="text-xs text-muted-foreground">{mobileNavPending ? "Menyimpan…" : mobileNavMessage}</p> : null}
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Ganti password</CardTitle>

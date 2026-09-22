@@ -43,12 +43,10 @@ export function Sidebar({ householdName }: { householdName: string }) {
       )}
     >
       <div className={cn("flex items-center gap-2 px-2", collapsed ? "justify-center" : "justify-between")}>
-        {collapsed ? null : (
-          <div className="overflow-hidden">
-            <img src="/kita-logo.png" alt="KITA" className="h-10 w-auto max-w-[9rem] object-contain object-left" />
-            <p className="mt-1 truncate text-xs text-sidebar-foreground/55">{householdName}</p>
-          </div>
-        )}
+        <div className={cn("overflow-hidden", collapsed ? "w-0" : "w-36")}>
+          <img src="/kita-logo.png" alt="KITA" width={142} height={49} className="mx-auto block h-auto w-36 max-w-none object-contain" />
+          <p className="mt-1 truncate text-center text-xs text-sidebar-foreground/55">{householdName}</p>
+        </div>
         <button
           type="button"
           onClick={() => setCollapsed((v) => !v)}

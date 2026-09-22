@@ -305,17 +305,6 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
           </CardContent>
         </Card>
 
-        <Card className="print-report-card">
-          <CardHeader><CardTitle>Pemasukan terbesar berdasarkan kategori</CardTitle></CardHeader>
-          <CardContent>
-            {topIncomeCategory ? (
-              <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4">
-                <div><p className="text-sm text-muted-foreground">Kategori terbesar</p><p className="mt-1 text-lg font-semibold">{topIncomeCategory.name}</p></div>
-                <p className="tabular text-xl font-bold text-[hsl(var(--positive))]">{formatCurrency(topIncomeCategory.value)}</p>
-              </div>
-            ) : <EmptyState title="Belum ada pemasukan berkategori" description="Tambahkan kategori pada transaksi pemasukan untuk melihat laporan ini." />}
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
