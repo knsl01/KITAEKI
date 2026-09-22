@@ -99,6 +99,8 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
     const csv = [
       ["REKAP KEUANGAN KITA", "", "", "", ""],
       [`Periode ${start} sampai ${end}`, "", "", "", ""],
+      ["Pemasukan terbesar", topIncomeCategory?.name ?? "Belum ada kategori", topIncomeCategory?.value ?? 0, "", ""],
+      ["Pengeluaran terbesar", topCategory?.name ?? "Belum ada kategori", topCategory?.value ?? 0, "", ""],
       [],
       ["Tanggal", "Jenis", "Nominal (Rp)", "Milik", "Kategori"],
       ...exportRows.map((row) => [row.date, row.type, row.amount, row.owner, row.category]),
@@ -109,7 +111,8 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
   function exportToExcel() {
     const esc = (value: string | number) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] ?? char));
     const body = exportRows.map((row) => `<tr><td>${esc(row.date)}</td><td>${esc(row.type)}</td><td class="num">${row.amount}</td><td>${esc(row.owner)}</td><td>${esc(row.category)}</td></tr>`).join("");
-    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial;color:#202124}h1{color:#49327a}table{border-collapse:collapse;min-width:760px}th{background:#49327a;color:#fff;padding:10px;text-align:left}td{border:1px solid #d9d4e8;padding:8px}.num{text-align:right;mso-number-format:"#,##0"}tr:nth-child(even){background:#f7f4fc}.meta{color:#666;margin-bottom:16px}</style></head><body><h1>Rekap Keuangan KITA</h1><p class="meta">Periode ${esc(start)} sampai ${esc(end)} · Dibuat ${esc(new Date().toLocaleDateString("id-ID"))}</p><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Nominal (Rp)</th><th>Milik</th><th>Kategori</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
+    const summary = `<div class="summary"><b>Ringkasan kategori</b><br>Pemasukan terbesar: ${esc(topIncomeCategory?.name ?? "Belum ada kategori")} — ${topIncomeCategory ? formatCurrency(topIncomeCategory.value) : "Rp 0"}<br>Pengeluaran terbesar: ${esc(topCategory?.name ?? "Belum ada kategori")} — ${topCategory ? formatCurrency(topCategory.value) : "Rp 0"}</div>`;
+    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial;color:#202124}h1{color:#49327a}table{border-collapse:collapse;min-width:760px}th{background:#49327a;color:#fff;padding:10px;text-align:left}td{border:1px solid #d9d4e8;padding:8px}.num{text-align:right;mso-number-format:"#,##0"}tr:nth-child(even){background:#f7f4fc}.meta{color:#666;margin-bottom:16px}.summary{border:1px solid #d9d4e8;background:#f7f4fc;padding:12px;line-height:1.7;margin-bottom:16px}</style></head><body><h1>Rekap Keuangan KITA</h1><p class="meta">Periode ${esc(start)} sampai ${esc(end)} · Dibuat ${esc(new Date().toLocaleDateString("id-ID"))}</p>${summary}<table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Nominal (Rp)</th><th>Milik</th><th>Kategori</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
     download(html, `Rekap_KITA_${start}_${end}.xls`, "application/vnd.ms-excel;charset=utf-8");
   }
 
@@ -141,6 +144,17 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
       .sort((a, b) => b.value - a.value);
   }, [transactions, categories]);
 
+  const incomeCategoryData = useMemo(() => {
+    const map = new Map<string, number>();
+    transactions.filter((t) => t.type === "income" && t.category_id).forEach((t) => {
+      if (t.category_id) map.set(t.category_id, (map.get(t.category_id) ?? 0) + Number(t.amount));
+    });
+    return Array.from(map.entries()).map(([id, value]) => ({
+      name: categories.find((category) => category.id === id)?.name ?? "Lainnya",
+      value,
+    })).sort((a, b) => b.value - a.value);
+  }, [transactions, categories]);
+
   const memberExpenseData = useMemo(() => {
     return owners.map(owner => {
       const ownerTotals = sumTotals(transactions.filter((t) => t.owner === owner));
@@ -158,6 +172,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
   }).filter((row) => row.income > 0 || row.expense > 0), [transactions, owners]);
 
   const topCategory = categoryData[0];
+  const topIncomeCategory = incomeCategoryData[0];
   const reportAdvice = totals.expense === 0
     ? "Belum ada pengeluaran pada periode ini. Pertahankan pencatatan agar pola keuangan mulai terlihat."
     : totals.net < 0
@@ -194,7 +209,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
           <div><span>Total pengeluaran</span><strong className="expense-print">{formatCurrency(totals.expense)}</strong></div>
           <div><span>Selisih bersih</span><strong>{formatCurrency(totals.net)}</strong></div>
         </div>
-        <section><h2>Ringkasan grafik</h2><p>Grafik arus kas menunjukkan perubahan pemasukan dan pengeluaran sepanjang periode. Grafik kategori menunjukkan pos pengeluaran terbesar{topCategory ? `, yaitu ${topCategory.name} sebesar ${formatCurrency(topCategory.value)}` : ""}. Grafik per orang membandingkan kontribusi pemasukan dan pengeluaran tiap anggota.</p></section>
+        <section><h2>Ringkasan grafik</h2><p>Grafik arus kas menunjukkan perubahan pemasukan dan pengeluaran sepanjang periode. Kategori pemasukan terbesar adalah {topIncomeCategory ? `${topIncomeCategory.name} sebesar ${formatCurrency(topIncomeCategory.value)}` : "belum tersedia"}; kategori pengeluaran terbesar adalah {topCategory ? `${topCategory.name} sebesar ${formatCurrency(topCategory.value)}` : "belum tersedia"}. Grafik per orang membandingkan kontribusi pemasukan dan pengeluaran tiap anggota.</p></section>
         <section><h2>Saran KITA</h2><p>{reportAdvice}</p></section>
       </div>
 
@@ -253,6 +268,14 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         </Card>
       </div>
 
+      <Card className="mb-4 print-report-card">
+        <CardHeader><CardTitle>Laporan kategori terbesar</CardTitle></CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-border bg-positive/5 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pemasukan terbesar</p><div className="mt-2 flex items-baseline justify-between gap-3"><span className="font-semibold">{topIncomeCategory?.name ?? "Belum ada kategori"}</span><span className="tabular font-bold text-[hsl(var(--positive))]">{topIncomeCategory ? formatCurrency(topIncomeCategory.value) : "Rp 0"}</span></div></div>
+          <div className="rounded-xl border border-border bg-negative/5 p-4"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pengeluaran terbesar</p><div className="mt-2 flex items-baseline justify-between gap-3"><span className="font-semibold">{topCategory?.name ?? "Belum ada kategori"}</span><span className="tabular font-bold text-[hsl(var(--negative))]">{topCategory ? formatCurrency(topCategory.value) : "Rp 0"}</span></div></div>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-4 lg:grid-cols-2 mb-4">
         <Card>
           <CardHeader>
@@ -279,6 +302,18 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
               <EmptyState title="Tidak ada data" />
             )}
             <p className="print-only print-chart-note">Pengeluaran terbesar{topCategory ? ` ada di ${topCategory.name} sebesar ${formatCurrency(topCategory.value)}` : " belum tersedia"}. Prioritaskan peninjauan pos ini terlebih dahulu.</p>
+          </CardContent>
+        </Card>
+
+        <Card className="print-report-card">
+          <CardHeader><CardTitle>Pemasukan terbesar berdasarkan kategori</CardTitle></CardHeader>
+          <CardContent>
+            {topIncomeCategory ? (
+              <div className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4">
+                <div><p className="text-sm text-muted-foreground">Kategori terbesar</p><p className="mt-1 text-lg font-semibold">{topIncomeCategory.name}</p></div>
+                <p className="tabular text-xl font-bold text-[hsl(var(--positive))]">{formatCurrency(topIncomeCategory.value)}</p>
+              </div>
+            ) : <EmptyState title="Belum ada pemasukan berkategori" description="Tambahkan kategori pada transaksi pemasukan untuk melihat laporan ini." />}
           </CardContent>
         </Card>
       </div>

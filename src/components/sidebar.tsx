@@ -45,7 +45,7 @@ export function Sidebar({ householdName }: { householdName: string }) {
       <div className={cn("flex items-center gap-2 px-2", collapsed ? "justify-center" : "justify-between")}>
         {collapsed ? null : (
           <div className="overflow-hidden">
-            <p className="font-serif text-2xl leading-none tracking-tight">KITA.</p>
+            <img src="/kita-logo.png" alt="KITA" className="h-10 w-auto max-w-[9rem] object-contain object-left" />
             <p className="mt-1 truncate text-xs text-sidebar-foreground/55">{householdName}</p>
           </div>
         )}

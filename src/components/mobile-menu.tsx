@@ -69,8 +69,8 @@ export function MobileMenu({
         >
           <div className="flex items-start justify-between gap-3 px-2">
             <div className="min-w-0">
-              <DialogPrimitive.Title className="font-serif text-2xl font-extrabold leading-none tracking-tight">
-                KITA.
+              <DialogPrimitive.Title asChild>
+                <img src="/kita-logo.png" alt="KITA" className="h-10 w-auto max-w-[9rem] object-contain object-left" />
               </DialogPrimitive.Title>
               <p className="mt-1 truncate text-xs text-sidebar-foreground/60">{householdName}</p>
             </div>

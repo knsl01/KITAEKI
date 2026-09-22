@@ -8,6 +8,7 @@ import {
   type ModeId,
   type RadiusId,
   type ThemeId,
+  type FlowColor,
 } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -30,12 +31,21 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+const FLOW_COLORS: { id: FlowColor; label: string; swatch: string }[] = [
+  { id: "145 72% 38%", label: "Emerald", swatch: "#168a4a" },
+  { id: "145 82% 28%", label: "Forest", swatch: "#0d6b38" },
+  { id: "95 72% 36%", label: "Lime green", swatch: "#4c9d20" },
+  { id: "351 78% 48%", label: "Ruby", swatch: "#d51f45" },
+  { id: "0 78% 42%", label: "Crimson", swatch: "#bf2020" },
+  { id: "12 82% 48%", label: "Coral", swatch: "#df4b2f" },
+];
+
 /**
  * Pilihan tampilan dalam satu panel: warna, terang/gelap, dan sudut. Hurufnya tetap Plus Jakarta Sans.
  * Setiap pilihan langsung berlaku dan tersimpan di browser ini.
  */
 export function ThemePicker() {
-  const { theme, mode, radius, setTheme, setMode, setRadius } = useTheme();
+  const { theme, mode, radius, setTheme, setMode, setRadius, positiveColor, negativeColor, setFlowColors } = useTheme();
 
   return (
     <div className="space-y-6">
@@ -82,6 +92,23 @@ export function ThemePicker() {
               </button>
             );
           })}
+        </div>
+      </Section>
+
+      <Section title="Warna pemasukan & pengeluaran">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="space-y-1.5 text-sm">
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-positive" />Pemasukan</span>
+            <select value={positiveColor ?? ""} onChange={(event) => setFlowColors((event.target.value || null) as FlowColor | null, negativeColor)} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm">
+              <option value="">Ikuti tema</option>{FLOW_COLORS.slice(0, 3).map((color) => <option key={color.id} value={color.id}>{color.label}</option>)}
+            </select>
+          </label>
+          <label className="space-y-1.5 text-sm">
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-negative" />Pengeluaran</span>
+            <select value={negativeColor ?? ""} onChange={(event) => setFlowColors(positiveColor, (event.target.value || null) as FlowColor | null)} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm">
+              <option value="">Ikuti tema</option>{FLOW_COLORS.slice(3).map((color) => <option key={color.id} value={color.id}>{color.label}</option>)}
+            </select>
+          </label>
         </div>
       </Section>
 

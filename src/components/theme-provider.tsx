@@ -29,6 +29,7 @@ export const RADII = [
 export type ThemeId = (typeof THEMES)[number]["id"];
 export type RadiusId = (typeof RADII)[number]["id"];
 export type ModeId = "light" | "dark" | "system";
+export type FlowColor = "145 72% 38%" | "145 82% 28%" | "95 72% 36%" | "351 78% 48%" | "0 78% 42%" | "12 82% 48%";
 const MODES: ModeId[] = ["light", "dark", "system"];
 
 export const DEFAULT_THEME: ThemeId = "sage";
@@ -56,6 +57,9 @@ type ThemeContextValue = {
   setTheme: (theme: ThemeId) => void;
   setMode: (mode: ModeId) => void;
   setRadius: (radius: RadiusId) => void;
+  positiveColor: FlowColor | null;
+  negativeColor: FlowColor | null;
+  setFlowColors: (positive: FlowColor | null, negative: FlowColor | null) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -66,6 +70,9 @@ const ThemeContext = createContext<ThemeContextValue>({
   setTheme: () => {},
   setMode: () => {},
   setRadius: () => {},
+  positiveColor: null,
+  negativeColor: null,
+  setFlowColors: () => {},
 });
 
 function resolve(mode: ModeId): "light" | "dark" {
@@ -91,6 +98,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [radius, setRadiusState] = useState<RadiusId>(DEFAULT_RADIUS);
   const [mode, setModeState] = useState<ModeId>("system");
   const [resolvedMode, setResolved] = useState<"light" | "dark">("light");
+  const [positiveColor, setPositiveColor] = useState<FlowColor | null>(null);
+  const [negativeColor, setNegativeColor] = useState<FlowColor | null>(null);
 
   useEffect(() => {
     // Skrip bootstrap sudah memasang atribut; state React tinggal menyamakan diri.
@@ -113,13 +122,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const nextTheme = pickFrom(THEMES, preferences.theme, DEFAULT_THEME) as ThemeId;
       const nextRadius = pickFrom(RADII, preferences.radius, DEFAULT_RADIUS) as RadiusId;
       const nextMode = (MODES.includes(preferences.mode as ModeId) ? preferences.mode : "system") as ModeId;
+      const nextPositive = preferences.positive_color as FlowColor | null;
+      const nextNegative = preferences.negative_color as FlowColor | null;
       setThemeState(nextTheme);
       setRadiusState(nextRadius);
       setModeState(nextMode);
       setResolved(resolve(nextMode));
+      setPositiveColor(nextPositive);
+      setNegativeColor(nextNegative);
       document.documentElement.dataset.theme = nextTheme;
       document.documentElement.dataset.radius = nextRadius;
       document.documentElement.dataset.mode = resolve(nextMode);
+      if (nextPositive) {
+        document.documentElement.style.setProperty("--positive", nextPositive);
+        document.documentElement.style.setProperty("--chart-income", `hsl(${nextPositive})`);
+      }
+      if (nextNegative) {
+        document.documentElement.style.setProperty("--negative", nextNegative);
+        document.documentElement.style.setProperty("--chart-expense", `hsl(${nextNegative})`);
+      }
     });
   }, []);
 
@@ -159,8 +180,29 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     void saveUserPreferences({ mode: next });
   }, []);
 
+  const setFlowColors = useCallback((positive: FlowColor | null, negative: FlowColor | null) => {
+    setPositiveColor(positive);
+    setNegativeColor(negative);
+    const root = document.documentElement;
+    if (positive) {
+      root.style.setProperty("--positive", positive);
+      root.style.setProperty("--chart-income", `hsl(${positive})`);
+    } else {
+      root.style.removeProperty("--positive");
+      root.style.removeProperty("--chart-income");
+    }
+    if (negative) {
+      root.style.setProperty("--negative", negative);
+      root.style.setProperty("--chart-expense", `hsl(${negative})`);
+    } else {
+      root.style.removeProperty("--negative");
+      root.style.removeProperty("--chart-expense");
+    }
+    void saveUserPreferences({ positiveColor: positive, negativeColor: negative });
+  }, []);
+
   return (
-    <ThemeContext.Provider value={{ theme, mode, radius, resolvedMode, setTheme, setMode, setRadius }}>
+    <ThemeContext.Provider value={{ theme, mode, radius, resolvedMode, setTheme, setMode, setRadius, positiveColor, negativeColor, setFlowColors }}>
       {children}
     </ThemeContext.Provider>
   );
