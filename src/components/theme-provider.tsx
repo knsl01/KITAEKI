@@ -6,6 +6,8 @@ export const THEMES = [
   { id: "sage", label: "Sage", swatch: "#3F5540", dark: "#14201A" },
   { id: "deep-purple", label: "Deep purple", swatch: "#4B2E70", dark: "#1B1226" },
   { id: "deep-blue", label: "Deep blue", swatch: "#24406B", dark: "#0F1724" },
+  // Perpaduan biru + ungu tua, senada dengan latar Aurora di halaman Masuk/Daftar — lebih neon & hidup dari Deep blue/Deep purple biasa.
+  { id: "nebula", label: "Nebula", swatch: "#2B4EDB", dark: "#150B33", accent: "#9B6BFF" },
   { id: "burgundy", label: "Burgundy", swatch: "#6B2036", dark: "#1F0F15" },
   { id: "ocean", label: "Ocean", swatch: "#196978", dark: "#0C1719" },
   { id: "honey", label: "Honey", swatch: "#8D5311", dark: "#16110D" },
