@@ -152,7 +152,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     void getUserPreferences().then((preferences) => {
       if (!preferences) return;
       userIdRef.current = preferences.user_id;
-      const serverTheme = pickFrom(THEMES, preferences.theme, DEFAULT_THEME) as ThemeId;
+      const serverTheme = pickFrom(THEMES, preferences.theme ?? undefined, DEFAULT_THEME) as ThemeId;
       const localTheme = readThemeSync();
       const serverUpdatedAt = Date.parse(String(preferences.updated_at ?? ""));
       const localThemeIsNewer = localTheme !== null
@@ -165,7 +165,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         : localThemeIsNewer
           ? localTheme?.theme as ThemeId
           : serverTheme;
-      const nextRadius = pickFrom(RADII, preferences.radius, DEFAULT_RADIUS) as RadiusId;
+      const nextRadius = pickFrom(RADII, preferences.radius ?? undefined, DEFAULT_RADIUS) as RadiusId;
       const nextMode = (MODES.includes(preferences.mode as ModeId) ? preferences.mode : "system") as ModeId;
       const nextPositive = preferences.positive_color as FlowColor | null;
       const nextNegative = preferences.negative_color as FlowColor | null;
