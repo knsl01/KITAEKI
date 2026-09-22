@@ -26,7 +26,7 @@ import {
   type TransactionWithRelations,
 } from "@/lib/types";
 
-type BudgetPost = { id: string; category_id: string; category?: { id: string; name: string } | null };
+type BudgetPost = { id: string; account_id?: string | null; category_id: string; category?: { id: string; name: string } | null };
 
 type Props = {
   transactions: TransactionWithRelations[];

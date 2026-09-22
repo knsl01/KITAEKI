@@ -18,7 +18,7 @@ export function Topbar({
 }: {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
-  budgets?: (Pick<Budget, "id" | "category_id"> & { category?: Pick<Category, "id" | "name"> | null })[];
+  budgets?: (Pick<Budget, "id" | "category_id" | "account_id"> & { category?: Pick<Category, "id" | "name"> | null })[];
   defaultOwner: MemberOwner;
   name: string;
   householdName: string;

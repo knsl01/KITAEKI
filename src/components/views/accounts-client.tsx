@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Plus, Target, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { createAccount, deleteAccount, updateAccount } from "@/app/actions/accounts";
 import { BrandMarkTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
@@ -142,20 +142,14 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
         title="Akun"
         description="Rekening, e-wallet, dan uang tunai yang kalian pakai."
         action={
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={() => router.push("/dashboard/budget")}>
-              <Target className="h-4 w-4" />
-              Alokasi
-            </Button>
-            <AccountDialog
-              trigger={
-                <Button>
-                  <Plus className="h-4 w-4" />
-                  Tambah akun
-                </Button>
-              }
-            />
-          </div>
+          <AccountDialog
+            trigger={
+              <Button>
+                <Plus className="h-4 w-4" />
+                Tambah akun
+              </Button>
+            }
+          />
         }
       />
 

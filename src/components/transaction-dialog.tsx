@@ -30,7 +30,7 @@ import {
   type TransactionType,
 } from "@/lib/types";
 
-type BudgetPost = Pick<Budget, "id" | "category_id"> & {
+type BudgetPost = Pick<Budget, "id" | "category_id" | "account_id"> & {
   category?: Pick<Category, "id" | "name"> | null;
 };
 
@@ -68,6 +68,10 @@ export function TransactionDialog({
   const visibleCategories = useMemo(
     () => categories.filter((c) => (type === "income" ? c.kind === "income" : c.kind === "expense")),
     [categories, type]
+  );
+  const visibleBudgets = useMemo(
+    () => budgets.filter((budget) => budget.account_id === selectedAccountId),
+    [budgets, selectedAccountId]
   );
 
   const isEdit = Boolean(transaction);
@@ -231,7 +235,10 @@ export function TransactionDialog({
                   id="account_id"
                   name="account_id"
                   value={selectedAccountId}
-                  onChange={(e) => setSelectedAccountId(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedAccountId(e.target.value);
+                    setSelectedBudgetId("");
+                  }}
                   required
                 >
                   <option value="">Pilih akun</option>
@@ -264,7 +271,7 @@ export function TransactionDialog({
             </div>
 
             {/* Pos Anggaran - muncul saat pengeluaran */}
-            {type === "expense" && selectedAccountId && budgets.length > 0 && (
+            {type === "expense" && selectedAccountId && visibleBudgets.length > 0 && (
               <div className="space-y-2">
                 <Label htmlFor="budget_id">Pos Anggaran <span className="text-muted-foreground font-normal">(opsional)</span></Label>
                 <Select
@@ -274,7 +281,7 @@ export function TransactionDialog({
                   onChange={(e) => handleBudgetChange(e.target.value)}
                 >
                   <option value="">Tanpa pos anggaran</option>
-                  {budgets.map((b) => (
+                  {visibleBudgets.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.category?.name ?? "Pos tanpa kategori"}
                     </option>
