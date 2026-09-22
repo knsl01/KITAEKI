@@ -446,7 +446,7 @@ export function BalanceHeroCard({
               <span className="mr-[0.25em] font-normal tracking-normal text-muted-foreground" style={{ fontSize: "0.5em" }}>
                 Rp
               </span>
-              <span>
+              <span className="balance-figure">
                 {negative ? "−" : ""}
                 {digits}
               </span>
