@@ -23,26 +23,45 @@ import {
   OWNER_LABEL,
   TYPE_LABEL,
   type Account,
+  type Budget,
   type Category,
   type MemberOwner,
   type Transaction,
   type TransactionType,
 } from "@/lib/types";
 
+type BudgetPost = Pick<Budget, "id" | "category_id"> & {
+  category?: Pick<Category, "id" | "name"> | null;
+};
+
 type Props = {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
+  budgets?: BudgetPost[];
   transaction?: Transaction;
   defaultOwner?: MemberOwner;
   trigger?: React.ReactNode;
 };
 
 const TYPES: TransactionType[] = ["expense", "income", "transfer"];
+const LAINNYA_VALUE = "__lainnya__";
 
-export function TransactionDialog({ accounts, categories, transaction, defaultOwner = "shared", trigger }: Props) {
+export function TransactionDialog({
+  accounts,
+  categories,
+  budgets = [],
+  transaction,
+  defaultOwner = "shared",
+  trigger,
+}: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<TransactionType>(transaction?.type ?? "expense");
+  const [selectedAccountId, setSelectedAccountId] = useState(transaction?.account_id ?? "");
+  const [selectedBudgetId, setSelectedBudgetId] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(transaction?.category_id ?? "");
+  const [isLainnya, setIsLainnya] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -54,8 +73,37 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
   const isEdit = Boolean(transaction);
   const today = new Date().toISOString().slice(0, 10);
 
+  function handleBudgetChange(budgetId: string) {
+    setSelectedBudgetId(budgetId);
+    if (budgetId) {
+      const budget = budgets.find((b) => b.id === budgetId);
+      if (budget?.category_id) {
+        setSelectedCategoryId(budget.category_id);
+        setIsLainnya(false);
+        setCustomCategory("");
+      }
+    }
+  }
+
+  function handleCategoryChange(value: string) {
+    if (value === LAINNYA_VALUE) {
+      setIsLainnya(true);
+      setSelectedCategoryId("");
+      setCustomCategory("");
+    } else {
+      setIsLainnya(false);
+      setSelectedCategoryId(value);
+      setCustomCategory("");
+    }
+  }
+
   function onSubmit(formData: FormData) {
     setError(null);
+    // If custom category, append it to the form
+    if (isLainnya && customCategory.trim()) {
+      formData.set("custom_category", customCategory.trim());
+      formData.delete("category_id");
+    }
     startTransition(async () => {
       const result = isEdit
         ? await updateTransaction(transaction!.id, formData)
@@ -70,15 +118,22 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
     });
   }
 
+  function resetState() {
+    setType(transaction?.type ?? "expense");
+    setSelectedAccountId(transaction?.account_id ?? "");
+    setSelectedBudgetId("");
+    setSelectedCategoryId(transaction?.category_id ?? "");
+    setIsLainnya(false);
+    setCustomCategory("");
+    setError(null);
+  }
+
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         setOpen(next);
-        if (next) {
-          setType(transaction?.type ?? "expense");
-          setError(null);
-        }
+        if (next) resetState();
       }}
     >
       <DialogTrigger asChild>
@@ -101,9 +156,9 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
         {accounts.length === 0 ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">
-              Belum ada akun. Buat akun dulu di halaman Akun &amp; Saldo supaya transaksi bisa dicatat.
+              Belum ada akun. Buat akun dulu di halaman Akun supaya transaksi bisa dicatat.
             </p>
-            <Button onClick={() => router.push("/dashboard/accounts")}>Buka Akun &amp; Saldo</Button>
+            <Button onClick={() => router.push("/dashboard/accounts")}>Buka Akun</Button>
           </div>
         ) : (
           <form action={onSubmit} className="space-y-4">
@@ -114,7 +169,12 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setType(t)}
+                  onClick={() => {
+                    setType(t);
+                    setSelectedBudgetId("");
+                    setIsLainnya(false);
+                    setCustomCategory("");
+                  }}
                   className={cn(
                     "rounded-md border px-3 py-2 text-sm transition-colors",
                     type === t
@@ -167,7 +227,13 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="account_id">{type === "transfer" ? "Dari akun" : "Akun"}</Label>
-                <Select id="account_id" name="account_id" defaultValue={transaction?.account_id ?? ""} required>
+                <Select
+                  id="account_id"
+                  name="account_id"
+                  value={selectedAccountId}
+                  onChange={(e) => setSelectedAccountId(e.target.value)}
+                  required
+                >
                   <option value="">Pilih akun</option>
                   {accounts.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -194,20 +260,66 @@ export function TransactionDialog({ accounts, categories, transaction, defaultOw
                     ))}
                   </Select>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="category_id">Kategori</Label>
-                  <Select id="category_id" name="category_id" defaultValue={transaction?.category_id ?? ""}>
-                    <option value="">Tanpa kategori</option>
-                    {visibleCategories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-              )}
+              ) : null}
             </div>
+
+            {/* Pos Anggaran - muncul saat pengeluaran */}
+            {type === "expense" && selectedAccountId && budgets.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="budget_id">Pos Anggaran <span className="text-muted-foreground font-normal">(opsional)</span></Label>
+                <Select
+                  id="budget_id"
+                  name="budget_id"
+                  value={selectedBudgetId}
+                  onChange={(e) => handleBudgetChange(e.target.value)}
+                >
+                  <option value="">Tanpa pos anggaran</option>
+                  {budgets.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.category?.name ?? "Pos tanpa kategori"}
+                    </option>
+                  ))}
+                </Select>
+                {selectedBudgetId && (
+                  <p className="text-xs text-muted-foreground">
+                    Kategori otomatis disesuaikan dengan pos anggaran.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {type !== "transfer" && (
+              <div className="space-y-2">
+                <Label htmlFor="category_id">Kategori</Label>
+                <Select
+                  id="category_id"
+                  name="category_id"
+                  value={isLainnya ? LAINNYA_VALUE : selectedCategoryId}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                >
+                  <option value="">Tanpa kategori</option>
+                  {visibleCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                  <option value={LAINNYA_VALUE}>Lainnya (ketik sendiri)</option>
+                </Select>
+                {isLainnya && (
+                  <Input
+                    name="custom_category"
+                    placeholder="Ketik nama kategori..."
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    className="mt-2"
+                    autoFocus
+                  />
+                )}
+                {type === "expense" && selectedAccountId && !selectedBudgetId && (
+                  <p className="text-xs text-muted-foreground">Pilih kategori sendiri, atau pilih pos anggaran di atas untuk mengisinya otomatis.</p>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="description">Catatan</Label>

@@ -26,13 +26,16 @@ import {
   type TransactionWithRelations,
 } from "@/lib/types";
 
+type BudgetPost = { id: string; category_id: string; category?: { id: string; name: string } | null };
+
 type Props = {
   transactions: TransactionWithRelations[];
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind" | "color">[];
+  budgets?: BudgetPost[];
 };
 
-export function TransactionsClient({ transactions, accounts, categories }: Props) {
+export function TransactionsClient({ transactions, accounts, categories, budgets = [] }: Props) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<TransactionType | "">("");
   const [owner, setOwner] = useState<MemberOwner | "">("");
@@ -85,7 +88,7 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
       <PageHeader
         title="Transaksi"
         description="Semua pemasukan, pengeluaran, dan transfer antar akun."
-        action={<TransactionDialog accounts={accounts} categories={categories} />}
+        action={<TransactionDialog accounts={accounts} categories={categories} budgets={budgets} />}
       />
 
       <Card className="mb-4">
@@ -221,6 +224,7 @@ export function TransactionsClient({ transactions, accounts, categories }: Props
                       <TransactionDialog
                         accounts={accounts}
                         categories={categories}
+                        budgets={budgets}
                         transaction={t}
                         trigger={
                           <Button variant="ghost" size="icon" aria-label="Ubah transaksi">

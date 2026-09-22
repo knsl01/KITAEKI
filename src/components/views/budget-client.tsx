@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { deleteBudget, upsertBudget } from "@/app/actions/budgets";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { PageHeader } from "@/components/page-header";
@@ -31,7 +31,7 @@ type Props = {
   transactions: Pick<Transaction, "amount" | "type" | "category_id">[];
 };
 
-function BudgetDialog({ month, categories }: { month: string; categories: Category[] }) {
+function BudgetDialog({ month, categories, budget, trigger }: { month: string; categories: Category[]; budget?: Budget; trigger?: React.ReactNode }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,16 +53,18 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4" />
-          Atur alokasi
-        </Button>
+        {trigger ?? (
+          <Button>
+            <Plus className="h-4 w-4" />
+            Tambah pos
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Atur alokasi</DialogTitle>
+          <DialogTitle>{budget ? "Atur pos anggaran" : "Tambah pos anggaran"}</DialogTitle>
           <DialogDescription>
-            Satu kategori punya satu alokasi per bulan. Mengisi ulang kategori yang sama akan menimpa nilainya.
+            {budget ? "Ubah batas pos ini sesuai kebutuhan bulan berjalan." : "Satu kategori punya satu pos anggaran per bulan. Mengisi ulang kategori yang sama akan menimpa nilainya."}
           </DialogDescription>
         </DialogHeader>
 
@@ -71,7 +73,7 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
 
           <div className="space-y-2">
             <Label htmlFor="category_id">Kategori</Label>
-            <Select id="category_id" name="category_id" required>
+            <Select id="category_id" name="category_id" defaultValue={budget?.category_id ?? ""} required>
               <option value="">Pilih kategori</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -83,7 +85,7 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
 
           <div className="space-y-2">
             <Label htmlFor="amount">Batas bulan ini</Label>
-            <MoneyInput id="amount" name="amount" min={1} placeholder="1.500.000" required />
+            <MoneyInput id="amount" name="amount" min={1} placeholder="1.500.000" defaultValue={budget?.amount ?? ""} required />
           </div>
 
           {error ? <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
@@ -94,7 +96,7 @@ function BudgetDialog({ month, categories }: { month: string; categories: Catego
             </Button>
             <Button type="submit" disabled={pending}>
               {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Simpan
+              {budget ? "Simpan perubahan" : "Simpan"}
             </Button>
           </div>
         </form>
@@ -132,8 +134,8 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
   return (
     <div>
       <PageHeader
-        title="Alokasi"
-        description="Batas belanja per kategori supaya pengeluaran tetap terkendali."
+        title="Pos Anggaran"
+        description="Atur pos-pos anggaran untuk setiap keperluan pengeluaran."
         action={<BudgetDialog month={month} categories={categories} />}
       />
 
@@ -155,7 +157,7 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
       <Card className="mb-4">
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <div>
-            <p className="text-sm text-muted-foreground">Total alokasi</p>
+            <p className="text-sm text-muted-foreground">Total anggaran</p>
             <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget)}</p>
           </div>
           <div>
@@ -172,7 +174,7 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
       {budgets.length === 0 && otherSpent === 0 ? (
         <Card>
           <EmptyState
-            title={`Belum ada alokasi untuk ${monthLabel(month)}`}
+            title={`Belum ada pos anggaran untuk ${monthLabel(month)}`}
             description="Tentukan batas belanja per kategori untuk bulan ini."
           />
         </Card>
@@ -187,9 +189,9 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
                 </span>
               </div>
               <p className="tabular mt-4 text-lg font-bold">{formatCurrency(otherSpent)}</p>
-              <p className="tabular text-xs text-muted-foreground">Pengeluaran di luar alokasi</p>
+              <p className="tabular text-xs text-muted-foreground">Pengeluaran di luar pos anggaran</p>
               <Progress value={100} className="mt-3" barClassName="bg-muted-foreground" />
-              <p className="mt-2 text-xs text-muted-foreground">Tidak ada batas alokasi</p>
+              <p className="mt-2 text-xs text-muted-foreground">Tidak ada batas pos</p>
             </Card>
           )}
           {budgets.map((budget) => {
@@ -208,11 +210,21 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
                     <span className="truncate font-medium">{budget.category?.name ?? "Kategori dihapus"}</span>
                   </span>
                   <ConfirmDelete
-                    title="Hapus alokasi?"
+                    title="Hapus pos anggaran?"
                     onConfirm={async () => deleteBudget(budget.id)}
                     trigger={
-                      <Button variant="ghost" size="icon" aria-label="Hapus alokasi">
+                      <Button variant="ghost" size="icon" aria-label="Hapus pos anggaran">
                         <Trash2 className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    }
+                  />
+                  <BudgetDialog
+                    month={month}
+                    categories={categories}
+                    budget={budget}
+                    trigger={
+                      <Button variant="ghost" size="icon" aria-label={`Atur pos ${budget.category?.name ?? "anggaran"}`}>
+                        <Pencil className="h-4 w-4 text-muted-foreground" />
                       </Button>
                     }
                   />

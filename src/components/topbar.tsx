@@ -1,15 +1,15 @@
-import { cookies } from "next/headers";
 import { MemberSwitcher, type ViewKey } from "@/components/member-switcher";
 import { Plus } from "lucide-react";
 import { MobileMenu } from "@/components/mobile-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { TransactionDialog } from "@/components/transaction-dialog";
 import { Button } from "@/components/ui/button";
-import type { Account, Category, MemberOwner } from "@/lib/types";
+import type { Account, Budget, Category, MemberOwner } from "@/lib/types";
 
 export function Topbar({
   accounts,
   categories,
+  budgets = [],
   defaultOwner,
   name,
   householdName,
@@ -18,6 +18,7 @@ export function Topbar({
 }: {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
+  budgets?: (Pick<Budget, "id" | "category_id"> & { category?: Pick<Category, "id" | "name"> | null })[];
   defaultOwner: MemberOwner;
   name: string;
   householdName: string;
@@ -42,6 +43,7 @@ export function Topbar({
         <TransactionDialog
           accounts={accounts}
           categories={categories}
+          budgets={budgets}
           defaultOwner={defaultOwner}
           trigger={
             <Button size="sm">

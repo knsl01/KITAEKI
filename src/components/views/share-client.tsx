@@ -273,7 +273,7 @@ export function ShareClient({ data }: { data: ShareData }) {
       <div className="grid gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* pratinjau */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="relative mx-auto w-full max-w-[320px] lg:max-w-none">
+          <div className="relative mx-auto w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] lg:max-w-none">
             <canvas
               ref={mainRef}
               aria-label="Pratinjau kartu"
@@ -283,7 +283,7 @@ export function ShareClient({ data }: { data: ShareData }) {
             {!ready && <div className="absolute inset-0 animate-pulse rounded-[1.6rem] bg-muted/60" />}
           </div>
 
-          <div className="mx-auto mt-4 flex max-w-[320px] gap-2 lg:max-w-none">
+          <div className="mx-auto mt-4 flex w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] gap-2 lg:max-w-none">
             <Button variant="outline" className="flex-1" onClick={shuffle} disabled={!ready}>
               <Shuffle className="h-4 w-4" /> Acak
             </Button>
@@ -295,7 +295,7 @@ export function ShareClient({ data }: { data: ShareData }) {
             </Button>
           </div>
           {notice && (
-            <p role="status" className="mx-auto mt-3 max-w-[320px] text-center text-xs text-muted-foreground lg:max-w-none">
+            <p role="status" className="mx-auto mt-3 w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] text-center text-xs text-muted-foreground lg:max-w-none">
               {notice}
             </p>
           )}

@@ -86,7 +86,7 @@ export function AccountsWidget({ accounts }: { accounts: AccountRow[] }) {
           </ul>
 
           {extra > 0 ? (
-            <p className="shrink-0 pt-1 text-center text-xs text-muted-foreground">+{extra} akun lain di halaman Akun & Saldo</p>
+            <p className="shrink-0 pt-1 text-center text-xs text-muted-foreground">+{extra} akun lain di halaman Akun</p>
           ) : null}
         </div>
       )}

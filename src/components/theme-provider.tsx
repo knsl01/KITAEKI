@@ -14,6 +14,8 @@ export const THEMES = [
   { id: "graphite", label: "Graphite", swatch: "#272B35", dark: "#111319" },
   // accent = warna sorotan di separuh gelap pratinjau (tema lain memakai putih)
   { id: "blackpink", label: "Black Pink", swatch: "#0A0A0A", dark: "#0A0A0A", accent: "#FF2E93" },
+  { id: "midnight-rose", label: "Midnight Rose", swatch: "#8F2454", dark: "#160812", accent: "#FF8AB8" },
+  { id: "matcha", label: "Matcha", swatch: "#527A43", dark: "#101B12", accent: "#B7EA8A" },
 ] as const;
 
 export const RADII = [

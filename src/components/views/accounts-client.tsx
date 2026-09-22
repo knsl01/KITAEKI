@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Plus, Target, Trash2 } from "lucide-react";
 import { createAccount, deleteAccount, updateAccount } from "@/app/actions/accounts";
 import { BrandMarkTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
@@ -133,22 +133,29 @@ function AccountDialog({ account, trigger }: { account?: Account; trigger: React
 }
 
 export function AccountsClient({ accounts }: { accounts: Account[] }) {
+  const router = useRouter();
   const total = accounts.filter((a) => a.is_active).reduce((sum, a) => sum + Number(a.balance), 0);
 
   return (
     <div>
       <PageHeader
-        title="Akun & Saldo"
+        title="Akun"
         description="Rekening, e-wallet, dan uang tunai yang kalian pakai."
         action={
-          <AccountDialog
-            trigger={
-              <Button>
-                <Plus className="h-4 w-4" />
-                Tambah akun
-              </Button>
-            }
-          />
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => router.push("/dashboard/budget")}>
+              <Target className="h-4 w-4" />
+              Alokasi
+            </Button>
+            <AccountDialog
+              trigger={
+                <Button>
+                  <Plus className="h-4 w-4" />
+                  Tambah akun
+                </Button>
+              }
+            />
+          </div>
         }
       />
 
@@ -169,7 +176,17 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
       ) : (
         <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {accounts.map((account) => (
-            <Card key={account.id} className="p-5">
+            <Card
+              key={account.id}
+              className="card-interactive cursor-pointer p-5"
+              onDoubleClick={() => router.push(`/dashboard/accounts/${account.id}`)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Buka detail akun ${account.name}`}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") router.push(`/dashboard/accounts/${account.id}`);
+              }}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex min-w-0 items-start gap-3">
                   <BrandMarkTile iconKey={account.icon_key} name={account.name} />
@@ -189,8 +206,9 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
               <p className="tabular mt-1 text-xs text-muted-foreground">
                 Saldo awal {formatCurrency(Number(account.initial_balance))}
               </p>
+              <p className="mt-3 text-xs text-muted-foreground">Klik dua kali untuk melihat detail akun</p>
 
-              <div className="mt-4 flex gap-1 border-t border-border pt-3">
+              <div className="mt-4 flex gap-1 border-t border-border pt-3" onClick={(e) => e.stopPropagation()}>
                 <AccountDialog
                   account={account}
                   trigger={
