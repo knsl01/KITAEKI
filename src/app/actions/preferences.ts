@@ -8,11 +8,22 @@ const MODES = ["light", "dark", "system"] as const;
 const RADII = ["sharp", "soft", "round"] as const;
 const MOBILE_NAV_PATHS = ["/dashboard", "/dashboard/ai", "/dashboard/transactions", "/dashboard/accounts", "/dashboard/finance", "/dashboard/savings", "/dashboard/recurring", "/dashboard/calendar", "/dashboard/routes", "/dashboard/shopping", "/dashboard/budget", "/dashboard/categories", "/dashboard/wishlist", "/dashboard/share", "/dashboard/settings"] as const;
 
-export async function getUserPreferences() {
+type UserPreferencesRecord = {
+  user_id: string;
+  theme: string | null;
+  mode: string | null;
+  radius: string | null;
+  positive_color: string | null;
+  negative_color: string | null;
+  mobile_nav: string[] | null;
+  updated_at: string | null;
+};
+
+export async function getUserPreferences(): Promise<UserPreferencesRecord | null> {
   const { supabase, user } = await getUserClient();
   if (!user) return null;
-  const { data } = await supabase.from("user_preferences").select("theme, mode, radius, positive_color, negative_color, mobile_nav").eq("user_id", user.id).maybeSingle();
-  return data;
+  const { data } = await supabase.from("user_preferences").select("user_id, theme, mode, radius, positive_color, negative_color, mobile_nav, updated_at").eq("user_id", user.id).maybeSingle();
+  return (data ?? null) as UserPreferencesRecord | null;
 }
 
 export async function saveUserPreferences(input: { theme?: string; mode?: string; radius?: string; positiveColor?: string | null; negativeColor?: string | null; mobileNav?: string[] }): Promise<ActionResult> {
