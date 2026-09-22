@@ -113,8 +113,9 @@
     --ring: 245 75% 52%;
     --sidebar: 245 55% 12%;
     --sidebar-foreground: 236 35% 92%;
-    --positive: 152 82% 27%;
-    --negative: 353 82% 47%;
+    --positive: 234 40% 12%;
+    /* Nebula terang: pemasukan hitam, pengeluaran ungu-biru yang tegas. */
+    --negative: 258 62% 35%;
     --chart-income: hsl(223 85% 56%);
     --chart-expense: hsl(268 80% 60%);
     --chart-grid: hsl(230 28% 90%);
@@ -259,8 +260,9 @@
     --ring: 248 90% 66%;
     --sidebar: 244 55% 6%;
     --sidebar-foreground: 236 30% 92%;
-    --positive: 152 70% 50%;
-    --negative: 355 90% 66%;
+    /* Kontras tinggi agar angka arus kas dan saldo selalu terbaca. */
+    --positive: 0 0% 100%;
+    --negative: 258 82% 72%;
     --chart-income: hsl(223 92% 66%);
     --chart-expense: hsl(268 88% 72%);
     --chart-grid: hsl(240 28% 18%);
@@ -539,6 +541,40 @@
     --neon: 328 100% 64%;
   }
 
+  /* Midnight Rose: gelap, romantis, dan hangat. */
+  [data-theme="midnight-rose"] {
+    --background: 340 28% 97%; --foreground: 335 30% 12%; --card: 0 0% 100%; --card-foreground: 335 30% 12%;
+    --muted: 335 22% 94%; --muted-foreground: 335 10% 43%; --accent: 336 42% 92%; --accent-foreground: 335 30% 12%;
+    --primary: 336 58% 32%; --primary-foreground: 340 45% 98%; --secondary: 335 22% 94%; --secondary-foreground: 335 30% 12%;
+    --destructive: 2 65% 50%; --destructive-foreground: 0 0% 100%; --border: 335 17% 89%; --input: 335 17% 89%; --ring: 336 58% 44%;
+    --sidebar: 335 42% 14%; --sidebar-foreground: 340 24% 92%; --positive: 152 72% 27%; --negative: 336 62% 42%;
+    --chart-income: hsl(152 56% 35%); --chart-expense: hsl(336 62% 50%); --chart-grid: hsl(335 17% 89%); --chart-axis: hsl(335 10% 43%);
+  }
+  [data-theme="midnight-rose"][data-mode="dark"] {
+    --background: 335 34% 7%; --foreground: 340 24% 94%; --card: 335 30% 10%; --card-foreground: 340 24% 94%;
+    --muted: 335 22% 16%; --muted-foreground: 336 10% 64%; --accent: 336 30% 18%; --accent-foreground: 340 24% 94%;
+    --primary: 336 82% 72%; --primary-foreground: 335 36% 9%; --secondary: 335 22% 16%; --secondary-foreground: 340 24% 94%;
+    --destructive: 2 72% 66%; --border: 335 18% 20%; --input: 335 18% 20%; --ring: 336 72% 60%; --sidebar: 335 38% 9%; --sidebar-foreground: 340 20% 90%;
+    --positive: 152 70% 52%; --negative: 336 82% 72%; --chart-income: hsl(152 56% 52%); --chart-expense: hsl(336 76% 68%); --chart-grid: hsl(335 18% 20%); --chart-axis: hsl(336 10% 64%);
+  }
+
+  /* Matcha: hijau lembut dengan aksen citrus untuk fokus yang tenang. */
+  [data-theme="matcha"] {
+    --background: 88 26% 97%; --foreground: 113 25% 12%; --card: 0 0% 100%; --card-foreground: 113 25% 12%;
+    --muted: 92 20% 94%; --muted-foreground: 105 9% 42%; --accent: 90 34% 91%; --accent-foreground: 113 25% 12%;
+    --primary: 108 36% 31%; --primary-foreground: 92 45% 98%; --secondary: 92 20% 94%; --secondary-foreground: 113 25% 12%;
+    --destructive: 4 62% 50%; --destructive-foreground: 0 0% 100%; --border: 94 16% 88%; --input: 94 16% 88%; --ring: 108 42% 40%;
+    --sidebar: 111 31% 14%; --sidebar-foreground: 92 24% 91%; --positive: 145 67% 28%; --negative: 4 63% 46%;
+    --chart-income: hsl(109 42% 37%); --chart-expense: hsl(4 58% 53%); --chart-grid: hsl(94 16% 88%); --chart-axis: hsl(105 9% 42%);
+  }
+  [data-theme="matcha"][data-mode="dark"] {
+    --background: 112 25% 7%; --foreground: 92 22% 94%; --card: 112 22% 10%; --card-foreground: 92 22% 94%;
+    --muted: 112 17% 15%; --muted-foreground: 96 9% 63%; --accent: 110 24% 18%; --accent-foreground: 92 22% 94%;
+    --primary: 91 72% 68%; --primary-foreground: 112 28% 9%; --secondary: 112 17% 15%; --secondary-foreground: 92 22% 94%;
+    --destructive: 4 66% 65%; --border: 112 15% 19%; --input: 112 15% 19%; --ring: 91 60% 53%; --sidebar: 112 27% 9%; --sidebar-foreground: 92 18% 90%;
+    --positive: 145 65% 52%; --negative: 4 74% 68%; --chart-income: hsl(91 56% 58%); --chart-expense: hsl(4 62% 66%); --chart-grid: hsl(112 15% 19%); --chart-axis: hsl(96 9% 63%);
+  }
+
   /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
   :root,
   [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
@@ -550,6 +586,8 @@
   [data-theme="honey"] { --glow-1: 40 92% 56%; --glow-2: 22 78% 62%; }
   [data-theme="graphite"] { --glow-1: 220 22% 56%; --glow-2: 250 20% 66%; }
   [data-theme="blackpink"] { --glow-1: 328 100% 68%; --glow-2: 300 70% 60%; }
+  [data-theme="midnight-rose"] { --glow-1: 336 70% 58%; --glow-2: 12 60% 66%; }
+  [data-theme="matcha"] { --glow-1: 106 48% 48%; --glow-2: 72 62% 62%; }
 
   [data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
   [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
@@ -561,6 +599,8 @@
   [data-theme="honey"][data-mode="dark"] { --glow-1: 40 90% 40%; --glow-2: 22 70% 40%; }
   [data-theme="graphite"][data-mode="dark"] { --glow-1: 220 22% 40%; --glow-2: 250 20% 44%; }
   [data-theme="blackpink"][data-mode="dark"] { --glow-1: 328 100% 46%; --glow-2: 292 80% 34%; }
+  [data-theme="midnight-rose"][data-mode="dark"] { --glow-1: 336 64% 42%; --glow-2: 12 52% 38%; }
+  [data-theme="matcha"][data-mode="dark"] { --glow-1: 106 42% 34%; --glow-2: 72 52% 36%; }
 
   /* ── Huruf: satu keluarga untuk seluruh aplikasi (Plus Jakarta Sans lewat next/font) ── */
   :root {
@@ -773,17 +813,13 @@
     filter: drop-shadow(0 0 7px hsl(var(--neon) / 0.6));
   }
   /* Nebula: angka saldo utama (bukan Pemasukan/Pengeluaran di sebelahnya) berkilau biru → ungu */
-  @supports (background-clip: text) or (-webkit-background-clip: text) {
-    [data-theme="nebula"] .balance-figure {
-      background-image: linear-gradient(100deg, hsl(var(--chart-income)) 0%, hsl(var(--foreground)) 35%, hsl(var(--chart-expense)) 70%, hsl(var(--chart-income)) 100%);
-      background-size: 220% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
-      animation: nebula-shimmer 7s linear infinite;
-    }
+  [data-theme="nebula"] .balance-figure {
+    color: hsl(var(--foreground));
+    /* Cadangan solid untuk browser yang gagal menggambar text-gradient. */
+    -webkit-text-fill-color: currentColor;
   }
+  /* Jangan memakai text-fill transparan di sini: pada beberapa browser Android
+     angka saldo menjadi hilang saat animasi gradient belum siap dirender. */
 }
 
 /* Recharts Styles */
@@ -931,6 +967,23 @@
     transform: none;
   }
 }
+
+@keyframes account-detail-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes account-detail-card-enter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes account-detail-row-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.account-detail-enter { animation: account-detail-enter .35s cubic-bezier(.22,1,.36,1) both; }
+.account-detail-card-enter { animation: account-detail-card-enter .4s .05s cubic-bezier(.22,1,.36,1) both; }
+.account-detail-list-enter { animation: account-detail-enter .35s .15s cubic-bezier(.22,1,.36,1) both; }
+.account-detail-row { animation: account-detail-row-enter .25s cubic-bezier(.22,1,.36,1) both; }
 
 @keyframes slot-in {
   from {

@@ -23,9 +23,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const workspace = await getWorkspace();
 
-  const [{ data: accounts }, { data: categories }] = await Promise.all([
+  const monthStart = `${new Date().toISOString().slice(0, 7)}-01`;
+  const [{ data: accounts }, { data: categories }, { data: budgets }] = await Promise.all([
     supabase.from("accounts").select("id, name, icon_key").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, icon_key, color").order("name"),
+    supabase.from("budgets").select("id, category_id, category:categories(id, name)").eq("period_month", monthStart),
   ]);
 
   const cookieStore = await cookies();
@@ -43,6 +45,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Topbar
           accounts={accounts ?? []}
           categories={categories ?? []}
+          budgets={budgets ?? []}
           defaultOwner={workspace?.memberKey ?? "shared"}
           name={workspace?.displayName ?? "Kita"}
           householdName={workspace?.householdName ?? "KITA"}
@@ -68,6 +71,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <TransactionDialog
             accounts={accounts ?? []}
             categories={categories ?? []}
+            budgets={budgets ?? []}
             defaultOwner={workspace?.memberKey ?? "shared"}
             trigger={
               <button

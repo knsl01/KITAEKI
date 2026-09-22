@@ -5,7 +5,7 @@ import { getView } from "@/lib/workspace";
 import type { Budget, Category, Transaction } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Alokasi — KITA" };
+export const metadata = { title: "Pos Anggaran — KITA" };
 
 export default async function BudgetPage({
   searchParams,

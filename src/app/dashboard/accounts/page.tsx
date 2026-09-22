@@ -4,7 +4,7 @@ import { getView } from "@/lib/workspace";
 import type { Account } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Akun & Saldo — KITA" };
+export const metadata = { title: "Akun — KITA" };
 
 export default async function AccountsPage() {
   const currentView = await getView();

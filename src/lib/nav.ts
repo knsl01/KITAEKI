@@ -1,6 +1,5 @@
 import {
   ArrowLeftRight,
-  Gift,
   ListChecks,
   LayoutDashboard,
   PiggyBank,
@@ -11,7 +10,6 @@ import {
   Tags,
   Target,
   Wallet,
-  BarChart3,
   Bot,
 } from "lucide-react";
 
@@ -19,9 +17,8 @@ export const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/ai", label: "KITA AI", icon: Bot },
   { href: "/dashboard/transactions", label: "Transaksi", icon: ArrowLeftRight },
-  { href: "/dashboard/accounts", label: "Akun & Saldo", icon: Wallet },
+  { href: "/dashboard/accounts", label: "Akun", icon: Wallet },
   { href: "/dashboard/finance", label: "Keuangan", icon: Receipt },
-  { href: "/dashboard/budget", label: "Alokasi", icon: Target },
   { href: "/dashboard/savings", label: "Tabungan & Target", icon: PiggyBank },
   { href: "/dashboard/recurring", label: "Berlangganan", icon: Repeat },
   { href: "/dashboard/calendar", label: "Calendar KITA", icon: ListChecks },

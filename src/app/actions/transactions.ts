@@ -44,12 +44,45 @@ function parseTransaction(formData: FormData) {
   } as const;
 }
 
+/** Kategori "Lainnya" disimpan sebagai kategori sungguhan agar tetap bisa dipakai
+ * pada transaksi berikutnya, laporan, dan pos anggaran. */
+async function resolveCustomCategory(formData: FormData, type: TransactionType, householdId: string) {
+  if (type === "transfer") return;
+  const name = optionalStr(formData, "custom_category");
+  if (!name) return;
+
+  const { supabase, user } = await getUserClient();
+  if (!user) return;
+  const kind = type === "income" ? "income" : "expense";
+  const { data: found } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("household_id", householdId)
+    .eq("kind", kind)
+    .ilike("name", name)
+    .maybeSingle();
+
+  if (found) {
+    formData.set("category_id", found.id);
+    return;
+  }
+
+  const { data: created, error } = await supabase
+    .from("categories")
+    .insert({ user_id: user.id, household_id: householdId, name, kind, color: kind === "income" ? "#2E8B57" : "#6D4CC6" })
+    .select("id")
+    .single();
+  if (!error && created) formData.set("category_id", created.id);
+}
+
 export async function createTransaction(formData: FormData): Promise<ActionResult> {
   const session = await getUserClient();
   const { supabase, user, householdId } = session;
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
+  const type = str(formData, "type") as TransactionType;
+  await resolveCustomCategory(formData, type, householdId);
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
 
@@ -73,6 +106,8 @@ export async function updateTransaction(id: string, formData: FormData): Promise
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
 
+  const type = str(formData, "type") as TransactionType;
+  await resolveCustomCategory(formData, type, householdId);
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
 
