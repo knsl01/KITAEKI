@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider, themeBootstrapScript } from "@/components/theme-provider";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 
 // Satu-satunya keluarga huruf aplikasi. Bobot 400–800 untuk hierarki teks; miring dipakai untuk kutipan.

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ArrowLeftRight, Bot, ClipboardList, Heart, ListChecks, MapPinned, Receipt, Repeat, Settings, ShoppingCart, Tags, Target, Wallet } from "lucide-react";
 import { BalanceHero, BalanceHeroSkeleton } from "@/components/dashboard/balance-hero";
 import { DashboardBanner, type BannerSettings } from "@/components/dashboard/banner";
 import { DashboardEditProvider, EditWidgetsButton } from "@/components/dashboard/edit-context";
@@ -10,6 +11,7 @@ import { GoalsWidget } from "@/components/dashboard/widgets/goals-widget";
 import { ShoppingWidget, TasksWidget, WishlistWidget } from "@/components/dashboard/widgets/life-widgets";
 import { RecentWidget, type RecentRow } from "@/components/dashboard/widgets/recent-widget";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
+import { PageShortcutWidget } from "@/components/dashboard/widgets/page-shortcut-widget";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspace } from "@/lib/workspace";
 import { isoDateInZone } from "@/lib/balance-history";
@@ -276,6 +278,20 @@ export default async function DashboardPage() {
           .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])}
       />
     ),
+    "page-ai": <PageShortcutWidget title="KITA AI" description="Tanya tentang uang dan rencana bersama." href="/dashboard/ai" icon={Bot} />,
+    "page-transactions": <PageShortcutWidget title="Transaksi" description="Catat dan tinjau pemasukan, pengeluaran, dan transfer." href="/dashboard/transactions" icon={ArrowLeftRight} />,
+    "page-accounts": <PageShortcutWidget title="Akun" description="Kelola rekening, e-wallet, dan saldo tunai." href="/dashboard/accounts" icon={Wallet} />,
+    "page-finance": <PageShortcutWidget title="Keuangan" description="Buka grafik dan laporan arus kas." href="/dashboard/finance" icon={Receipt} />,
+    "page-savings": <PageShortcutWidget title="Tabungan & Target" description="Pantau kemajuan tujuan tabungan." href="/dashboard/savings" icon={Target} />,
+    "page-recurring": <PageShortcutWidget title="Berlangganan" description="Lihat tagihan dan transaksi rutin." href="/dashboard/recurring" icon={Repeat} />,
+    "page-calendar": <PageShortcutWidget title="Calendar KITA" description="Buka agenda, tugas, dan kegiatan." href="/dashboard/calendar" icon={ListChecks} />,
+    "page-routes": <PageShortcutWidget title="Rute & Rencana" description="Lihat peta dan tujuan perjalanan harian." href="/dashboard/routes" icon={MapPinned} />,
+    "page-shopping": <PageShortcutWidget title="Belanja" description="Buka daftar belanja bersama." href="/dashboard/shopping" icon={ShoppingCart} />,
+    "page-budget": <PageShortcutWidget title="Anggaran" description="Atur pos anggaran dan cek pemakaiannya." href="/dashboard/budget" icon={ClipboardList} />,
+    "page-categories": <PageShortcutWidget title="Kategori" description="Kelola kategori transaksi." href="/dashboard/categories" icon={Tags} />,
+    "page-wishlist": <PageShortcutWidget title="Wishlist" description="Lihat barang yang ingin diwujudkan." href="/dashboard/wishlist" icon={Heart} />,
+    "page-share": <PageShortcutWidget title="Share Story" description="Buat cerita visual untuk dibagikan." href="/dashboard/share" icon={Target} />,
+    "page-settings": <PageShortcutWidget title="Pengaturan" description="Atur tampilan, profil, dan preferensi." href="/dashboard/settings" icon={Settings} />,
   };
 
   return (

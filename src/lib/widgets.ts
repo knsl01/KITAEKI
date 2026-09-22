@@ -38,10 +38,24 @@ export const WIDGET_KEYS = [
   "recent",
   "shopping",
   "wishlist",
+  "page-ai",
+  "page-transactions",
+  "page-accounts",
+  "page-finance",
+  "page-savings",
+  "page-recurring",
+  "page-calendar",
+  "page-routes",
+  "page-shopping",
+  "page-budget",
+  "page-categories",
+  "page-wishlist",
+  "page-share",
+  "page-settings",
 ] as const;
 export type WidgetKey = (typeof WIDGET_KEYS)[number];
 
-export type WidgetGroup = "keuangan" | "kehidupan";
+export type WidgetGroup = "keuangan" | "kehidupan" | "halaman";
 
 export type WidgetDef = {
   key: WidgetKey;
@@ -190,6 +204,20 @@ export const WIDGETS: Record<WidgetKey, WidgetDef> = {
     defaultRows: 2,
     defaultVisible: false,
   },
+  "page-ai": { key: "page-ai", title: "KITA AI", description: "Pintasan untuk bertanya dan mengelola rencana bersama KITA AI.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-transactions": { key: "page-transactions", title: "Transaksi", description: "Buka catatan pemasukan, pengeluaran, dan transfer.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-accounts": { key: "page-accounts", title: "Akun", description: "Lihat dan kelola rekening, dompet digital, serta uang tunai.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-finance": { key: "page-finance", title: "Keuangan", description: "Lihat grafik arus kas dan laporan keuangan.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-savings": { key: "page-savings", title: "Tabungan & Target", description: "Pantau target tabungan dan rencana masa depan.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-recurring": { key: "page-recurring", title: "Berlangganan", description: "Kelola tagihan dan transaksi rutin.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-calendar": { key: "page-calendar", title: "Calendar KITA", description: "Buka agenda dan daftar tugas bersama.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-routes": { key: "page-routes", title: "Rute & Rencana", description: "Buka peta tujuan dan jadwal perjalanan harian.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-shopping": { key: "page-shopping", title: "Belanja", description: "Lihat daftar belanja yang belum selesai.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-budget": { key: "page-budget", title: "Anggaran", description: "Atur dan pantau pos anggaran bulanan.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-categories": { key: "page-categories", title: "Kategori", description: "Kelola kategori pemasukan dan pengeluaran.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-wishlist": { key: "page-wishlist", title: "Wishlist", description: "Buka daftar barang impian dan prioritasnya.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-share": { key: "page-share", title: "Share Story", description: "Buat cerita visual untuk dibagikan.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
+  "page-settings": { key: "page-settings", title: "Pengaturan", description: "Atur akun, tema, notifikasi, dan tampilan aplikasi.", group: "halaman", spans: ["xs", "sm", "md"], rows: [1, 2], defaultSpan: "xs", defaultRows: 1, defaultVisible: false },
 };
 
 export function isWidgetKey(value: unknown): value is WidgetKey {

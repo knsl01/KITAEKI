@@ -20,9 +20,10 @@ export default async function SettingsPage() {
     .eq("id", user!.id)
     .maybeSingle();
 
-  const [{ count: accountCount }, { count: transactionCount }] = await Promise.all([
+  const [{ count: accountCount }, { count: transactionCount }, { data: preferences }] = await Promise.all([
     supabase.from("accounts").select("id", { count: "exact", head: true }),
     supabase.from("transactions").select("id", { count: "exact", head: true }),
+    supabase.from("user_preferences").select("mobile_nav").eq("user_id", user!.id).maybeSingle(),
   ]);
 
   return (
@@ -36,6 +37,7 @@ export default async function SettingsPage() {
       inviteCode={workspace?.inviteCode ?? null}
       memberKey={workspace?.memberKey ?? "eki"}
       members={workspace?.members ?? []}
+      mobileNav={(preferences?.mobile_nav as string[] | null) ?? null}
     />
   );
 }
