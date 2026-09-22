@@ -20,7 +20,7 @@ export default async function SharePage() {
   const data = await getShareData(supabase, workspace);
 
   return (
-    <div className="mx-auto w-full max-w-6xl pb-24">
+    <div className="mx-auto min-w-0 w-full max-w-6xl overflow-x-hidden pb-24">
       <ShareClient data={data} />
     </div>
   );

@@ -996,7 +996,19 @@
 }
 
 @media print {
-  body.print-finance-report { background: white !important; color: #111 !important; }
+  body.print-finance-report {
+    background: #fff !important;
+    color: #111 !important;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    --muted-foreground: 0 0% 24%;
+    --border: 0 0% 78%;
+    --chart-grid: #cbd5e1;
+    --chart-axis: #334155;
+    --positive: 145 70% 28%;
+    --negative: 351 72% 40%;
+  }
   body.print-finance-report header,
   body.print-finance-report aside,
   body.print-finance-report nav,
@@ -1007,7 +1019,28 @@
   body.print-finance-report main { padding: 0 !important; }
   body.print-finance-report .widget-card,
   body.print-finance-report [class*="border"] { box-shadow: none !important; break-inside: avoid; }
+  body.print-finance-report .print-only { display: block !important; }
+  body.print-finance-report .print-report-summary {
+    margin: 0 0 22px;
+    padding: 0 0 16px;
+    border-bottom: 2px solid #4f46e5;
+    color: #111827 !important;
+  }
+  body.print-finance-report .print-report-summary h1 { margin: 0; color: #312e81 !important; font-size: 25px; }
+  body.print-finance-report .print-report-period { margin: 4px 0 14px; color: #475569 !important; font-size: 12px; }
+  body.print-finance-report .print-report-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-bottom: 15px; }
+  body.print-finance-report .print-report-kpis > div { border: 1px solid #cbd5e1; border-radius: 9px; padding: 10px; background: #f8fafc !important; }
+  body.print-finance-report .print-report-kpis span { display: block; color: #475569 !important; font-size: 10px; }
+  body.print-finance-report .print-report-kpis strong { display: block; margin-top: 5px; color: #111827 !important; font-size: 14px; }
+  body.print-finance-report .print-report-kpis .income-print { color: #166534 !important; }
+  body.print-finance-report .print-report-kpis .expense-print { color: #b91c1c !important; }
+  body.print-finance-report .print-report-summary h2 { margin: 12px 0 4px; color: #312e81 !important; font-size: 14px; }
+  body.print-finance-report .print-report-summary p { color: #334155 !important; font-size: 11px; line-height: 1.55; }
+  body.print-finance-report .print-chart-note { display: block !important; margin: 8px 0 0; color: #334155 !important; font-size: 10px; line-height: 1.45; }
 }
+
+.print-only { display: none; }
+@media print { .print-only { display: block !important; } }
 
 @keyframes page-enter {
   from {
