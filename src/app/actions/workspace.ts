@@ -14,16 +14,16 @@ export async function updateBanner(formData: FormData): Promise<ActionResult> {
   const banner_quote = str(formData, "banner_quote");
   const banner_image_url = optionalStr(formData, "banner_image_url");
 
-  const { error } = await supabase.from("workspace_settings").upsert(
+  const { error } = await supabase.from("user_preferences").upsert(
     {
-      household_id: householdId,
+      user_id: user.id,
       banner_title,
       banner_subtitle,
       banner_quote,
       banner_image_url,
       updated_at: new Date().toISOString(),
     },
-    { onConflict: "household_id" }
+    { onConflict: "user_id" }
   );
   if (error) return fail(error.message);
 

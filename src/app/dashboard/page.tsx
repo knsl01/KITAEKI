@@ -42,6 +42,7 @@ export default async function DashboardPage() {
 
   const supabase = await createClient();
   const workspace = await getWorkspace();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const months = lastMonths(6);
   const rangeStart = monthRange(months[0]).start;
@@ -74,7 +75,7 @@ export default async function DashboardPage() {
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(30),
-    supabase.from("workspace_settings").select("*").maybeSingle(),
+    user ? supabase.from("user_preferences").select("*").eq("user_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
     // Susunan widget milik user ini (RLS: hanya barisnya sendiri). Error → susunan bawaan.
     supabase.from("dashboard_widgets").select("widget_key, position, span, row_span, is_visible, config"),
     supabase

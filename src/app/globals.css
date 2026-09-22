@@ -575,6 +575,23 @@
     --positive: 91 70% 66%; --negative: 35 92% 68%; --chart-income: hsl(91 64% 62%); --chart-expense: hsl(35 86% 64%); --chart-grid: hsl(112 15% 19%); --chart-axis: hsl(96 9% 63%);
   }
 
+  /* Amethyst Night: ungu amethyst premium, sementara arus kas tetap hijau-merah. */
+  [data-theme="amethyst-night"] {
+    --background: 258 34% 97%; --foreground: 256 32% 13%; --card: 0 0% 100%; --card-foreground: 256 32% 13%;
+    --muted: 258 25% 94%; --muted-foreground: 255 11% 44%; --accent: 258 44% 92%; --accent-foreground: 256 32% 13%;
+    --primary: 263 42% 40%; --primary-foreground: 258 45% 98%; --secondary: 258 25% 94%; --secondary-foreground: 256 32% 13%;
+    --destructive: 350 64% 50%; --destructive-foreground: 0 0% 100%; --border: 258 18% 89%; --input: 258 18% 89%; --ring: 263 52% 50%;
+    --sidebar: 258 36% 15%; --sidebar-foreground: 258 24% 92%; --positive: 145 66% 29%; --negative: 351 72% 46%;
+    --chart-income: hsl(145 66% 34%); --chart-expense: hsl(351 72% 52%); --chart-grid: hsl(258 18% 89%); --chart-axis: hsl(255 11% 44%);
+  }
+  [data-theme="amethyst-night"][data-mode="dark"] {
+    --background: 258 40% 7%; --foreground: 258 24% 95%; --card: 258 34% 10%; --card-foreground: 258 24% 95%;
+    --muted: 258 25% 16%; --muted-foreground: 258 12% 65%; --accent: 263 28% 19%; --accent-foreground: 258 24% 95%;
+    --primary: 263 82% 75%; --primary-foreground: 258 40% 9%; --secondary: 258 25% 16%; --secondary-foreground: 258 24% 95%;
+    --destructive: 350 72% 66%; --border: 258 20% 21%; --input: 258 20% 21%; --ring: 263 76% 62%; --sidebar: 258 38% 9%; --sidebar-foreground: 258 20% 91%;
+    --positive: 145 72% 58%; --negative: 351 86% 70%; --chart-income: hsl(145 72% 58%); --chart-expense: hsl(351 86% 70%); --chart-grid: hsl(258 20% 21%); --chart-axis: hsl(258 12% 65%);
+  }
+
   /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
   :root,
   [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
@@ -588,6 +605,7 @@
   [data-theme="blackpink"] { --glow-1: 328 100% 68%; --glow-2: 300 70% 60%; }
   [data-theme="midnight-rose"] { --glow-1: 336 70% 58%; --glow-2: 12 60% 66%; }
   [data-theme="matcha"] { --glow-1: 106 48% 48%; --glow-2: 72 62% 62%; }
+  [data-theme="amethyst-night"] { --glow-1: 263 62% 58%; --glow-2: 305 52% 64%; }
 
   [data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
   [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
@@ -601,6 +619,7 @@
   [data-theme="blackpink"][data-mode="dark"] { --glow-1: 328 100% 46%; --glow-2: 292 80% 34%; }
   [data-theme="midnight-rose"][data-mode="dark"] { --glow-1: 336 64% 42%; --glow-2: 12 52% 38%; }
   [data-theme="matcha"][data-mode="dark"] { --glow-1: 106 42% 34%; --glow-2: 72 52% 36%; }
+  [data-theme="amethyst-night"][data-mode="dark"] { --glow-1: 263 62% 42%; --glow-2: 305 52% 38%; }
 
   /* ── Huruf: satu keluarga untuk seluruh aplikasi (Plus Jakarta Sans lewat next/font) ── */
   :root {
@@ -817,6 +836,15 @@
   [data-theme="matcha"] aside {
     background-image: radial-gradient(105% 80% at 0% 0%, hsl(92 70% 42% / .32), transparent 63%), radial-gradient(85% 85% at 100% 100%, hsl(38 82% 46% / .18), transparent 68%);
   }
+  [data-theme="amethyst-night"] .balance-aurora {
+    background-image: radial-gradient(115% 120% at 100% 0%, hsl(263 78% 62% / .32), transparent 58%), radial-gradient(95% 105% at 0% 100%, hsl(305 70% 58% / .22), transparent 64%);
+  }
+  [data-theme="amethyst-night"] aside {
+    background-image: radial-gradient(105% 80% at 0% 0%, hsl(263 72% 54% / .34), transparent 64%), radial-gradient(85% 85% at 100% 100%, hsl(305 66% 50% / .2), transparent 68%);
+  }
+  [data-theme="amethyst-night"] .transaction-amount {
+    animation: amethyst-flow-glow 2.8s ease-in-out infinite;
+  }
   /* Nebula: tautan menu aktif ikut menyala (sidebar desktop, menu geser mobile, bar bawah) */
   [data-theme="nebula"] aside nav a.font-semibold svg,
   [data-theme="nebula"] [role="dialog"] nav a.font-semibold svg {
@@ -876,6 +904,8 @@
   }
   /* Nebula memakai napas cahaya yang stabil, bukan kedipan tajam. */
   [data-theme="nebula"] .chart-dot {
+    /* De stip heeft al translate(-50%, -50%) voor zijn coördinaten. Animasi
+       tidak boleh mengubah transform, kalau tidak stip tampak jatuh ke bawah. */
     animation: nebula-dot-breathe 2.8s ease-in-out infinite;
     box-shadow: 0 0 7px 2px hsl(var(--chart-line) / 0.42), 0 0 18px 5px hsl(var(--chart-line) / 0.18);
   }
@@ -965,6 +995,20 @@
   }
 }
 
+@media print {
+  body.print-finance-report { background: white !important; color: #111 !important; }
+  body.print-finance-report header,
+  body.print-finance-report aside,
+  body.print-finance-report nav,
+  body.print-finance-report form,
+  body.print-finance-report button,
+  body.print-finance-report select { display: none !important; }
+  body.print-finance-report .app-shell { margin: 0 !important; }
+  body.print-finance-report main { padding: 0 !important; }
+  body.print-finance-report .widget-card,
+  body.print-finance-report [class*="border"] { box-shadow: none !important; break-inside: avoid; }
+}
+
 @keyframes page-enter {
   from {
     opacity: 0;
@@ -1033,8 +1077,13 @@
 }
 
 @keyframes nebula-dot-breathe {
-  0%, 100% { opacity: .88; transform: scale(.94); }
-  50% { opacity: 1; transform: scale(1.06); }
+  0%, 100% { opacity: .84; box-shadow: 0 0 5px 1px hsl(var(--chart-line) / .28), 0 0 14px 4px hsl(var(--chart-line) / .12); }
+  50% { opacity: 1; box-shadow: 0 0 9px 2px hsl(var(--chart-line) / .5), 0 0 22px 7px hsl(var(--chart-line) / .22); }
+}
+
+@keyframes amethyst-flow-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  50% { filter: drop-shadow(0 0 5px currentColor); }
 }
 
 @keyframes bar-grow {
