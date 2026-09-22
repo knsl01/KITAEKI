@@ -90,6 +90,38 @@
     --radius: 0.75rem;
   }
 
+  /* Nebula: perpaduan biru + ungu tua, senada dengan latar Aurora di halaman Masuk/Daftar.
+     Pemasukan condong biru ("Eki"), pengeluaran condong ungu ("Dinda"). Lebih neon & jenuh
+     warnanya dibanding Deep blue / Deep purple biasa. */
+  [data-theme="nebula"] {
+    --background: 230 45% 97%;
+    --foreground: 234 40% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 234 40% 12%;
+    --muted: 230 35% 95%;
+    --muted-foreground: 233 14% 46%;
+    --accent: 245 45% 93%;
+    --accent-foreground: 234 40% 12%;
+    --primary: 245 70% 42%;
+    --primary-foreground: 240 40% 98%;
+    --secondary: 230 35% 95%;
+    --secondary-foreground: 234 40% 12%;
+    --destructive: 350 75% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 230 28% 90%;
+    --input: 230 28% 90%;
+    --ring: 245 75% 52%;
+    --sidebar: 245 55% 12%;
+    --sidebar-foreground: 236 35% 92%;
+    --positive: 152 82% 27%;
+    --negative: 353 82% 47%;
+    --chart-income: hsl(223 85% 56%);
+    --chart-expense: hsl(268 80% 60%);
+    --chart-grid: hsl(230 28% 90%);
+    --chart-axis: hsl(233 14% 46%);
+    --radius: 0.75rem;
+  }
+
   [data-theme="burgundy"] {
     --background: 20 24% 98%;
     --foreground: 345 22% 14%;
@@ -205,6 +237,34 @@
     --chart-grid: hsl(217 20% 21%);
     --chart-axis: hsl(215 12% 64%);
     --radius: 0.75rem;
+  }
+
+  [data-theme="nebula"][data-mode="dark"] {
+    --background: 240 48% 6%;
+    --foreground: 235 35% 94%;
+    --card: 240 40% 9%;
+    --card-foreground: 235 35% 94%;
+    --muted: 240 32% 14%;
+    --muted-foreground: 233 16% 66%;
+    --accent: 245 38% 18%;
+    --accent-foreground: 235 35% 94%;
+    --primary: 248 92% 70%;
+    --primary-foreground: 240 45% 8%;
+    --secondary: 240 32% 14%;
+    --secondary-foreground: 235 35% 94%;
+    --destructive: 350 80% 64%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 28% 18%;
+    --input: 240 28% 18%;
+    --ring: 248 90% 66%;
+    --sidebar: 244 55% 6%;
+    --sidebar-foreground: 236 30% 92%;
+    --positive: 152 70% 50%;
+    --negative: 355 90% 66%;
+    --chart-income: hsl(223 92% 66%);
+    --chart-expense: hsl(268 88% 72%);
+    --chart-grid: hsl(240 28% 18%);
+    --chart-axis: hsl(233 16% 66%);
   }
 
   [data-theme="burgundy"][data-mode="dark"] {
@@ -484,6 +544,7 @@
   [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
   [data-theme="deep-purple"] { --glow-1: 266 50% 62%; --glow-2: 322 46% 68%; }
   [data-theme="deep-blue"] { --glow-1: 214 60% 58%; --glow-2: 190 50% 62%; }
+  [data-theme="nebula"] { --glow-1: 223 85% 62%; --glow-2: 268 75% 65%; }
   [data-theme="burgundy"] { --glow-1: 345 54% 55%; --glow-2: 22 60% 64%; }
   [data-theme="ocean"] { --glow-1: 186 58% 50%; --glow-2: 160 46% 60%; }
   [data-theme="honey"] { --glow-1: 40 92% 56%; --glow-2: 22 78% 62%; }
@@ -494,6 +555,7 @@
   [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
   [data-theme="deep-purple"][data-mode="dark"] { --glow-1: 266 50% 46%; --glow-2: 322 44% 44%; }
   [data-theme="deep-blue"][data-mode="dark"] { --glow-1: 214 62% 44%; --glow-2: 190 50% 38%; }
+  [data-theme="nebula"][data-mode="dark"] { --glow-1: 223 85% 48%; --glow-2: 268 75% 50%; }
   [data-theme="burgundy"][data-mode="dark"] { --glow-1: 345 54% 42%; --glow-2: 22 56% 42%; }
   [data-theme="ocean"][data-mode="dark"] { --glow-1: 186 60% 34%; --glow-2: 160 46% 34%; }
   [data-theme="honey"][data-mode="dark"] { --glow-1: 40 90% 40%; --glow-2: 22 70% 40%; }
@@ -688,6 +750,39 @@
       radial-gradient(120% 100% at 100% 0%, hsl(var(--glow-1) / 0.34) 0%, transparent 58%),
       radial-gradient(90% 90% at 0% 100%, hsl(var(--glow-2) / 0.28) 0%, transparent 62%);
   }
+  /* Nebula: cahaya aurora ikut bergeser pelan, senada dengan latar halaman Masuk/Daftar */
+  [data-theme="nebula"] .balance-aurora {
+    background-size: 160% 160%;
+    animation: nebula-aurora-drift 14s ease-in-out infinite alternate;
+  }
+  /* Nebula: sisi kiri (menu) punya cahaya biru–ungu yang perlahan hidup */
+  [data-theme="nebula"] aside {
+    background-image:
+      radial-gradient(120% 70% at 10% -10%, hsl(223 85% 45% / 0.35) 0%, transparent 60%),
+      radial-gradient(100% 80% at 105% 115%, hsl(268 75% 45% / 0.32) 0%, transparent 60%);
+    background-color: hsl(var(--sidebar));
+    background-size: 160% 160%;
+    animation: nebula-aurora-drift 18s ease-in-out infinite alternate;
+  }
+  /* Nebula: tautan menu aktif ikut menyala (sidebar desktop, menu geser mobile, bar bawah) */
+  [data-theme="nebula"] aside nav a.font-semibold svg,
+  [data-theme="nebula"] [role="dialog"] nav a.font-semibold svg {
+    filter: drop-shadow(0 0 6px hsl(var(--neon) / 0.75));
+  }
+  [data-theme="nebula"] nav a.bg-primary svg {
+    filter: drop-shadow(0 0 7px hsl(var(--neon) / 0.6));
+  }
+  /* Nebula: angka saldo utama berkilau biru → ungu secara perlahan */
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    [data-theme="nebula"] .balance-aurora .numeral {
+      background-image: linear-gradient(100deg, hsl(var(--chart-income)) 0%, hsl(var(--foreground)) 35%, hsl(var(--chart-expense)) 70%, hsl(var(--chart-income)) 100%);
+      background-size: 220% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: nebula-shimmer 7s linear infinite;
+    }
+  }
 }
 
 /* Recharts Styles */
@@ -714,22 +809,26 @@
     overflow: visible;
     animation: chart-reveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  /* Lapisan cahaya di bawah garis grafik: tersembunyi kecuali di tema Black Pink */
+  /* Lapisan cahaya di bawah garis grafik: tersembunyi kecuali di tema Black Pink & Nebula */
   .chart-glow {
     display: none;
   }
-  [data-theme="blackpink"] .chart-glow {
+  [data-theme="blackpink"] .chart-glow,
+  [data-theme="nebula"] .chart-glow {
     display: inline;
   }
   /* Titik di ujung grafik berkedip halus bersama cahayanya */
-  [data-theme="blackpink"] .chart-dot {
+  [data-theme="blackpink"] .chart-dot,
+  [data-theme="nebula"] .chart-dot {
     animation: neon-blink 2.2s ease-in-out infinite;
     box-shadow: 0 0 6px 1px hsl(var(--neon) / 0.95), 0 0 18px 6px hsl(var(--neon) / 0.55);
   }
-  [data-theme="blackpink"] .dot-ping {
+  [data-theme="blackpink"] .dot-ping,
+  [data-theme="nebula"] .dot-ping {
     animation-iteration-count: infinite;
   }
-  [data-theme="blackpink"] .bar-grow {
+  [data-theme="blackpink"] .bar-grow,
+  [data-theme="nebula"] .bar-grow {
     filter: drop-shadow(0 0 5px hsl(var(--neon) / 0.5));
   }
 
@@ -784,6 +883,11 @@
     box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 8px 24px -12px hsl(var(--foreground) / 0.12);
     transform: translateY(-2px);
   }
+  /* Nebula: kartu yang bisa disentuh memberi cahaya biru–ungu, bukan cuma naik sedikit */
+  [data-theme="nebula"] .card-interactive:hover {
+    border-color: hsl(var(--ring) / 0.5);
+    box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 0 0 1px hsl(var(--ring) / 0.14), 0 16px 40px -16px hsl(var(--ring) / 0.5);
+  }
 
   /* Ikon ikut hidup saat tombol induknya di-hover */
   .icon-lift svg {
@@ -791,6 +895,10 @@
   }
   .icon-lift:hover svg {
     transform: translateY(-1px) scale(1.08);
+  }
+  /* Nebula: ikon menyala lembut saat disentuh, bukan cuma naik sedikit */
+  [data-theme="nebula"] .icon-lift:hover svg {
+    filter: drop-shadow(0 0 6px hsl(var(--neon) / 0.55));
   }
   .icon-spin:hover svg {
     transform: rotate(90deg);
@@ -879,9 +987,28 @@
   }
 }
 
+/* Nebula: cahaya aurora di sidebar & kartu Total saldo bergeser pelan-pelan */
+@keyframes nebula-aurora-drift {
+  0% {
+    background-position: 0% 0%, 100% 100%;
+  }
+  100% {
+    background-position: 18% 12%, 82% 88%;
+  }
+}
+
+/* Nebula: kilau biru → ungu yang berjalan di angka saldo utama */
+@keyframes nebula-shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   [data-theme="blackpink"] .chart-dot,
-  [data-theme="blackpink"] .dot-ping {
+  [data-theme="blackpink"] .dot-ping,
+  [data-theme="nebula"] .chart-dot,
+  [data-theme="nebula"] .dot-ping {
     animation: none !important;
   }
   *,
