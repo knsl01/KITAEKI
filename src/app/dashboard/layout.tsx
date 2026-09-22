@@ -14,6 +14,8 @@ import { getWorkspace } from "@/lib/workspace";
 import { cookies } from "next/headers";
 import type { ViewKey } from "@/components/member-switcher";
 
+type BudgetPost = { id: string; category_id: string; category: { id: string; name: string } | null };
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
@@ -27,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [{ data: accounts }, { data: categories }, { data: budgets }] = await Promise.all([
     supabase.from("accounts").select("id, name, icon_key").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, icon_key, color").order("name"),
-    supabase.from("budgets").select("id, category_id, category:categories(id, name)").eq("period_month", monthStart),
+    supabase.from("budgets").select("id, category_id").eq("period_month", monthStart),
   ]);
 
   const cookieStore = await cookies();
@@ -36,6 +38,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     eki: workspace?.member1Name || "Eki",
     dinda: workspace?.member2Name || "Dinda",
   };
+  const categoryNames = new Map((categories ?? []).map((category) => [category.id, category.name]));
+  const budgetPosts: BudgetPost[] = (budgets ?? []).map((budget) => ({
+    id: budget.id,
+    category_id: budget.category_id,
+    category: categoryNames.has(budget.category_id)
+      ? { id: budget.category_id, name: categoryNames.get(budget.category_id)! }
+      : null,
+  }));
 
   return (
     <div className="min-h-screen">
@@ -45,7 +55,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Topbar
           accounts={accounts ?? []}
           categories={categories ?? []}
-          budgets={budgets ?? []}
+          budgets={budgetPosts}
           defaultOwner={workspace?.memberKey ?? "shared"}
           name={workspace?.displayName ?? "Kita"}
           householdName={workspace?.householdName ?? "KITA"}
@@ -71,7 +81,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <TransactionDialog
             accounts={accounts ?? []}
             categories={categories ?? []}
-            budgets={budgets ?? []}
+            budgets={budgetPosts}
             defaultOwner={workspace?.memberKey ?? "shared"}
             trigger={
               <button
