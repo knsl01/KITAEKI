@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { getUserPreferences, saveUserPreferences } from "@/app/actions/preferences";
 
 export const THEMES = [
   { id: "sage", label: "Sage", swatch: "#3F5540", dark: "#14201A" },
@@ -16,6 +17,7 @@ export const THEMES = [
   { id: "blackpink", label: "Black Pink", swatch: "#0A0A0A", dark: "#0A0A0A", accent: "#FF2E93" },
   { id: "midnight-rose", label: "Midnight Rose", swatch: "#8F2454", dark: "#160812", accent: "#FF8AB8" },
   { id: "matcha", label: "Matcha", swatch: "#527A43", dark: "#101B12", accent: "#B7EA8A" },
+  { id: "amethyst-night", label: "Amethyst Night", swatch: "#6E4AA8", dark: "#100C1E", accent: "#C4A2FF" },
 ] as const;
 
 export const RADII = [
@@ -27,6 +29,7 @@ export const RADII = [
 export type ThemeId = (typeof THEMES)[number]["id"];
 export type RadiusId = (typeof RADII)[number]["id"];
 export type ModeId = "light" | "dark" | "system";
+const MODES: ModeId[] = ["light", "dark", "system"];
 
 export const DEFAULT_THEME: ThemeId = "sage";
 export const DEFAULT_RADIUS: RadiusId = "soft";
@@ -103,6 +106,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
     setModeState(storedMode);
     setResolved(resolve(storedMode));
+    // Sinkronkan preferensi dari akun login. Ini membuat dua user pada browser
+    // yang sama tetap memiliki tema, mode, dan radius masing-masing.
+    void getUserPreferences().then((preferences) => {
+      if (!preferences) return;
+      const nextTheme = pickFrom(THEMES, preferences.theme, DEFAULT_THEME) as ThemeId;
+      const nextRadius = pickFrom(RADII, preferences.radius, DEFAULT_RADIUS) as RadiusId;
+      const nextMode = (MODES.includes(preferences.mode as ModeId) ? preferences.mode : "system") as ModeId;
+      setThemeState(nextTheme);
+      setRadiusState(nextRadius);
+      setModeState(nextMode);
+      setResolved(resolve(nextMode));
+      document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.dataset.radius = nextRadius;
+      document.documentElement.dataset.mode = resolve(nextMode);
+    });
   }, []);
 
   // Ikut berubah kalau sistem ganti terang/gelap dan mode masih "system"
@@ -122,12 +140,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(next);
     document.documentElement.dataset.theme = next;
     remember(THEME_KEY, next);
+    void saveUserPreferences({ theme: next });
   }, []);
 
   const setRadius = useCallback((next: RadiusId) => {
     setRadiusState(next);
     document.documentElement.dataset.radius = next;
     remember(RADIUS_KEY, next);
+    void saveUserPreferences({ radius: next });
   }, []);
 
   const setMode = useCallback((next: ModeId) => {
@@ -136,6 +156,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.mode = actual;
     setResolved(actual);
     remember(MODE_KEY, next);
+    void saveUserPreferences({ mode: next });
   }, []);
 
   return (

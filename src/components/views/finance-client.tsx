@@ -11,6 +11,7 @@ import { Progress } from "@/components/ui/progress";
 import { IncomeExpenseChart } from "@/components/charts/income-expense-chart";
 import { CategoryDonut } from "@/components/charts/category-donut";
 import { MemberExpenseChart } from "@/components/charts/member-expense-chart";
+import { MemberCashflowCompareChart } from "@/components/charts/member-cashflow-compare-chart";
 import { sumTotals } from "@/lib/analytics";
 import { formatCurrency, formatDate, percent } from "@/lib/format";
 import { ACCOUNT_TYPE_LABEL, OWNER_LABEL, type Account, type Category, type MemberOwner, type RecurringTransaction, type Transaction } from "@/lib/types";
@@ -74,28 +75,48 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
       }));
   }, [transactions, start, end]);
 
-  function exportToCSV() {
-    const headers = ["Tanggal", "Tipe", "Nominal", "Milik", "Kategori"];
-    const rows = transactions.map(t => {
-      const cat = categories.find(c => c.id === t.category_id)?.name ?? "Lainnya";
-      return [
-        t.occurred_on,
-        t.type,
-        t.amount,
-        OWNER_LABEL[t.owner],
-        cat
-      ].join(",");
-    });
-    
-    const csvContent = [headers.join(","), ...rows].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const exportRows = transactions.map((t) => ({
+    date: t.occurred_on,
+    type: t.type === "income" ? "Pemasukan" : t.type === "expense" ? "Pengeluaran" : "Transfer",
+    amount: Number(t.amount),
+    owner: OWNER_LABEL[t.owner],
+    category: categories.find((c) => c.id === t.category_id)?.name ?? "Lainnya",
+  }));
+
+  function download(content: string, name: string, type: string) {
+    const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", `Rekap_KITA_${start}_${end}.csv`);
+    link.setAttribute("download", name);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  function exportToSheets() {
+    const esc = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+    const csv = [
+      ["REKAP KEUANGAN KITA", "", "", "", ""],
+      [`Periode ${start} sampai ${end}`, "", "", "", ""],
+      [],
+      ["Tanggal", "Jenis", "Nominal (Rp)", "Milik", "Kategori"],
+      ...exportRows.map((row) => [row.date, row.type, row.amount, row.owner, row.category]),
+    ].map((row) => row.map((cell) => esc(cell ?? "")).join(",")).join("\r\n");
+    download("\ufeff" + csv, `Rekap_KITA_${start}_${end}_Google_Sheets.csv`, "text/csv;charset=utf-8");
+  }
+
+  function exportToExcel() {
+    const esc = (value: string | number) => String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char] ?? char));
+    const body = exportRows.map((row) => `<tr><td>${esc(row.date)}</td><td>${esc(row.type)}</td><td class="num">${row.amount}</td><td>${esc(row.owner)}</td><td>${esc(row.category)}</td></tr>`).join("");
+    const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial;color:#202124}h1{color:#49327a}table{border-collapse:collapse;min-width:760px}th{background:#49327a;color:#fff;padding:10px;text-align:left}td{border:1px solid #d9d4e8;padding:8px}.num{text-align:right;mso-number-format:"#,##0"}tr:nth-child(even){background:#f7f4fc}.meta{color:#666;margin-bottom:16px}</style></head><body><h1>Rekap Keuangan KITA</h1><p class="meta">Periode ${esc(start)} sampai ${esc(end)} · Dibuat ${esc(new Date().toLocaleDateString("id-ID"))}</p><table><thead><tr><th>Tanggal</th><th>Jenis</th><th>Nominal (Rp)</th><th>Milik</th><th>Kategori</th></tr></thead><tbody>${body}</tbody></table></body></html>`;
+    download(html, `Rekap_KITA_${start}_${end}.xls`, "application/vnd.ms-excel;charset=utf-8");
+  }
+
+  function exportToPdf() {
+    document.body.classList.add("print-finance-report");
+    window.print();
+    window.setTimeout(() => document.body.classList.remove("print-finance-report"), 500);
   }
 
   // Category donut chart (expenses)
@@ -130,6 +151,11 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
       };
     }).filter(d => d.amount > 0);
   }, [transactions, owners]);
+
+  const memberCashflowData = useMemo(() => owners.map((owner) => {
+    const ownerTotals = sumTotals(transactions.filter((t) => t.owner === owner));
+    return { name: OWNER_LABEL[owner], income: ownerTotals.income, expense: ownerTotals.expense };
+  }).filter((row) => row.income > 0 || row.expense > 0), [transactions, owners]);
 
   function handleDateChange(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -174,9 +200,12 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         <button type="submit" className="h-9 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
           Terapkan
         </button>
-        <button type="button" onClick={exportToCSV} className="h-9 inline-flex items-center justify-center rounded-md border border-input bg-transparent px-4 py-2 text-sm font-medium shadow-sm hover:bg-muted">
-          Unduh Laporan (CSV)
-        </button>
+        <select aria-label="Format unduhan laporan" defaultValue="" onChange={(event) => { const value = event.target.value; event.currentTarget.value = ""; if (value === "excel") exportToExcel(); if (value === "sheets") exportToSheets(); if (value === "pdf") exportToPdf(); }} className="h-9 rounded-md border border-input bg-background px-3 text-sm font-medium shadow-sm">
+          <option value="">Unduh laporan…</option>
+          <option value="excel">Excel (.xls) — template rapi</option>
+          <option value="sheets">Google Sheets (.csv)</option>
+          <option value="pdf">PDF — cetak / simpan PDF</option>
+        </select>
       </form>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-4">
@@ -285,6 +314,15 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
                   );
                 })}
               </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Perbandingan pemasukan & pengeluaran</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-2">
+              {memberCashflowData.length > 0 ? <MemberCashflowCompareChart data={memberCashflowData} /> : <EmptyState title="Tidak ada data" />}
             </CardContent>
           </Card>
 
