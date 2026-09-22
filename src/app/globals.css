@@ -772,13 +772,14 @@
   [data-theme="nebula"] nav a.bg-primary svg {
     filter: drop-shadow(0 0 7px hsl(var(--neon) / 0.6));
   }
-  /* Nebula: angka saldo utama berkilau biru → ungu secara perlahan */
+  /* Nebula: angka saldo utama (bukan Pemasukan/Pengeluaran di sebelahnya) berkilau biru → ungu */
   @supports (background-clip: text) or (-webkit-background-clip: text) {
-    [data-theme="nebula"] .balance-aurora .numeral {
+    [data-theme="nebula"] .balance-figure {
       background-image: linear-gradient(100deg, hsl(var(--chart-income)) 0%, hsl(var(--foreground)) 35%, hsl(var(--chart-expense)) 70%, hsl(var(--chart-income)) 100%);
       background-size: 220% auto;
       -webkit-background-clip: text;
       background-clip: text;
+      -webkit-text-fill-color: transparent;
       color: transparent;
       animation: nebula-shimmer 7s linear infinite;
     }
@@ -817,11 +818,12 @@
   [data-theme="nebula"] .chart-glow {
     display: inline;
   }
-  /* Titik di ujung grafik berkedip halus bersama cahayanya */
+  /* Titik di ujung grafik berkedip halus bersama cahayanya (warnanya ikut warna titiknya sendiri,
+     jadi titik pemasukan/pengeluaran tetap hijau/merah, bukan ketiban warna primer tema) */
   [data-theme="blackpink"] .chart-dot,
   [data-theme="nebula"] .chart-dot {
     animation: neon-blink 2.2s ease-in-out infinite;
-    box-shadow: 0 0 6px 1px hsl(var(--neon) / 0.95), 0 0 18px 6px hsl(var(--neon) / 0.55);
+    box-shadow: 0 0 6px 1px color-mix(in srgb, currentColor 95%, transparent), 0 0 18px 6px color-mix(in srgb, currentColor 55%, transparent);
   }
   [data-theme="blackpink"] .dot-ping,
   [data-theme="nebula"] .dot-ping {
@@ -950,11 +952,11 @@
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 6px 1px hsl(var(--neon) / 0.95), 0 0 18px 6px hsl(var(--neon) / 0.55);
+    box-shadow: 0 0 6px 1px color-mix(in srgb, currentColor 95%, transparent), 0 0 18px 6px color-mix(in srgb, currentColor 55%, transparent);
   }
   50% {
     opacity: 0.4;
-    box-shadow: 0 0 3px 0 hsl(var(--neon) / 0.6), 0 0 8px 2px hsl(var(--neon) / 0.25);
+    box-shadow: 0 0 3px 0 color-mix(in srgb, currentColor 60%, transparent), 0 0 8px 2px color-mix(in srgb, currentColor 25%, transparent);
   }
 }
 
