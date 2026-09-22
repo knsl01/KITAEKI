@@ -157,6 +157,15 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
     return { name: OWNER_LABEL[owner], income: ownerTotals.income, expense: ownerTotals.expense };
   }).filter((row) => row.income > 0 || row.expense > 0), [transactions, owners]);
 
+  const topCategory = categoryData[0];
+  const reportAdvice = totals.expense === 0
+    ? "Belum ada pengeluaran pada periode ini. Pertahankan pencatatan agar pola keuangan mulai terlihat."
+    : totals.net < 0
+      ? "Pengeluaran lebih besar dari pemasukan. Tinjau pos terbesar dan tetapkan batas mingguan sebelum menambah pengeluaran baru."
+      : totals.income > 0 && totals.expense / totals.income > 0.7
+        ? "Pengeluaran sudah memakai lebih dari 70% pemasukan. Sisihkan dana tabungan lebih dulu dan kurangi pos yang paling besar."
+        : "Arus kas masih positif. Pertahankan batas pos terbesar dan alokasikan sebagian sisa ke tabungan atau target bersama.";
+
   function handleDateChange(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -175,6 +184,19 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         title="Keuangan & Laporan"
         description="Posisi saldo, arus kas, dan laporan keuangan."
       />
+
+      <div className="print-only print-report-summary" aria-hidden="true">
+        <h1>Ringkasan Keuangan KITA</h1>
+        <p className="print-report-period">Periode {start} sampai {end}</p>
+        <div className="print-report-kpis">
+          <div><span>Total saldo</span><strong>{formatCurrency(totalBalance)}</strong></div>
+          <div><span>Total pemasukan</span><strong className="income-print">{formatCurrency(totals.income)}</strong></div>
+          <div><span>Total pengeluaran</span><strong className="expense-print">{formatCurrency(totals.expense)}</strong></div>
+          <div><span>Selisih bersih</span><strong>{formatCurrency(totals.net)}</strong></div>
+        </div>
+        <section><h2>Ringkasan grafik</h2><p>Grafik arus kas menunjukkan perubahan pemasukan dan pengeluaran sepanjang periode. Grafik kategori menunjukkan pos pengeluaran terbesar{topCategory ? `, yaitu ${topCategory.name} sebesar ${formatCurrency(topCategory.value)}` : ""}. Grafik per orang membandingkan kontribusi pemasukan dan pengeluaran tiap anggota.</p></section>
+        <section><h2>Saran KITA</h2><p>{reportAdvice}</p></section>
+      </div>
 
       <form onSubmit={handleDateChange} className="mb-6 flex flex-wrap items-end gap-3">
         <div className="space-y-1">
@@ -242,6 +264,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
             ) : (
               <EmptyState title="Tidak ada data" />
             )}
+            <p className="print-only print-chart-note">Total periode: pemasukan {formatCurrency(totals.income)} dan pengeluaran {formatCurrency(totals.expense)}. Grafik ini membantu melihat hari/bulan saat arus kas naik atau turun.</p>
           </CardContent>
         </Card>
 
@@ -255,6 +278,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
             ) : (
               <EmptyState title="Tidak ada data" />
             )}
+            <p className="print-only print-chart-note">Pengeluaran terbesar{topCategory ? ` ada di ${topCategory.name} sebesar ${formatCurrency(topCategory.value)}` : " belum tersedia"}. Prioritaskan peninjauan pos ini terlebih dahulu.</p>
           </CardContent>
         </Card>
       </div>
@@ -323,6 +347,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
             </CardHeader>
             <CardContent className="pt-2">
               {memberCashflowData.length > 0 ? <MemberCashflowCompareChart data={memberCashflowData} /> : <EmptyState title="Tidak ada data" />}
+              <p className="print-only print-chart-note">Perbandingan anggota: pemasukan dan pengeluaran ditampilkan berdampingan agar kontribusi dan beban tiap user mudah dibandingkan.</p>
             </CardContent>
           </Card>
 

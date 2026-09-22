@@ -267,23 +267,23 @@ export function ShareClient({ data }: { data: ShareData }) {
   const needsRange = style.template === "balance" || style.template === "trend";
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden">
       <PageHeader title="Share Story" description="Pilih desain, atur tampilannya, lalu bagikan pencapaian kalian ke Instagram." />
 
-      <div className="grid gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-8 lg:grid-cols-[360px_minmax(0,1fr)]">
         {/* pratinjau */}
         <div className="lg:sticky lg:top-24 lg:self-start">
-          <div className="relative mx-auto w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] lg:max-w-none">
+          <div className="relative mx-auto w-full max-w-[320px] sm:w-full sm:max-w-[320px] lg:max-w-none" style={{ width: "min(78vw, 320px)", maxWidth: "100%" }}>
             <canvas
               ref={mainRef}
               aria-label="Pratinjau kartu"
-              className="block w-full rounded-[1.6rem] border border-border shadow-2xl"
+              className="block h-auto w-full max-w-full rounded-[1.6rem] border border-border shadow-2xl"
               style={{ aspectRatio: `${fw} / ${fh}`, background: "hsl(var(--muted))" }}
             />
             {!ready && <div className="absolute inset-0 animate-pulse rounded-[1.6rem] bg-muted/60" />}
           </div>
 
-          <div className="mx-auto mt-4 flex w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] gap-2 lg:max-w-none">
+          <div className="mx-auto mt-4 flex w-full max-w-[320px] gap-2 sm:w-full sm:max-w-[320px] lg:max-w-none" style={{ width: "min(78vw, 320px)", maxWidth: "100%" }}>
             <Button variant="outline" className="flex-1" onClick={shuffle} disabled={!ready}>
               <Shuffle className="h-4 w-4" /> Acak
             </Button>
@@ -295,14 +295,14 @@ export function ShareClient({ data }: { data: ShareData }) {
             </Button>
           </div>
           {notice && (
-            <p role="status" className="mx-auto mt-3 w-[min(78vw,320px)] sm:w-full sm:max-w-[320px] text-center text-xs text-muted-foreground lg:max-w-none">
+            <p role="status" className="mx-auto mt-3 w-full max-w-[320px] text-center text-xs text-muted-foreground sm:w-full sm:max-w-[320px] lg:max-w-none" style={{ width: "min(78vw, 320px)", maxWidth: "100%" }}>
               {notice}
             </p>
           )}
         </div>
 
         {/* kontrol */}
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <Section title={`Desain (${TEMPLATE_IDS.length})`}>
             <div className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-2 lg:grid lg:grid-cols-4 lg:overflow-visible xl:grid-cols-5">
               {TEMPLATE_IDS.map((id: TemplateId) => (
