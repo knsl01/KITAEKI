@@ -547,15 +547,15 @@
     --muted: 335 22% 94%; --muted-foreground: 335 10% 43%; --accent: 336 42% 92%; --accent-foreground: 335 30% 12%;
     --primary: 336 58% 32%; --primary-foreground: 340 45% 98%; --secondary: 335 22% 94%; --secondary-foreground: 335 30% 12%;
     --destructive: 2 65% 50%; --destructive-foreground: 0 0% 100%; --border: 335 17% 89%; --input: 335 17% 89%; --ring: 336 58% 44%;
-    --sidebar: 335 42% 14%; --sidebar-foreground: 340 24% 92%; --positive: 152 72% 27%; --negative: 336 62% 42%;
-    --chart-income: hsl(152 56% 35%); --chart-expense: hsl(336 62% 50%); --chart-grid: hsl(335 17% 89%); --chart-axis: hsl(335 10% 43%);
+    --sidebar: 335 42% 14%; --sidebar-foreground: 340 24% 92%; --positive: 8 72% 38%; --negative: 324 66% 34%;
+    --chart-income: hsl(8 72% 46%); --chart-expense: hsl(324 66% 44%); --chart-grid: hsl(335 17% 89%); --chart-axis: hsl(335 10% 43%);
   }
   [data-theme="midnight-rose"][data-mode="dark"] {
     --background: 335 34% 7%; --foreground: 340 24% 94%; --card: 335 30% 10%; --card-foreground: 340 24% 94%;
     --muted: 335 22% 16%; --muted-foreground: 336 10% 64%; --accent: 336 30% 18%; --accent-foreground: 340 24% 94%;
     --primary: 336 82% 72%; --primary-foreground: 335 36% 9%; --secondary: 335 22% 16%; --secondary-foreground: 340 24% 94%;
     --destructive: 2 72% 66%; --border: 335 18% 20%; --input: 335 18% 20%; --ring: 336 72% 60%; --sidebar: 335 38% 9%; --sidebar-foreground: 340 20% 90%;
-    --positive: 152 70% 52%; --negative: 336 82% 72%; --chart-income: hsl(152 56% 52%); --chart-expense: hsl(336 76% 68%); --chart-grid: hsl(335 18% 20%); --chart-axis: hsl(336 10% 64%);
+    --positive: 12 92% 72%; --negative: 326 92% 76%; --chart-income: hsl(12 82% 68%); --chart-expense: hsl(326 86% 72%); --chart-grid: hsl(335 18% 20%); --chart-axis: hsl(336 10% 64%);
   }
 
   /* Matcha: hijau lembut dengan aksen citrus untuk fokus yang tenang. */
@@ -564,15 +564,15 @@
     --muted: 92 20% 94%; --muted-foreground: 105 9% 42%; --accent: 90 34% 91%; --accent-foreground: 113 25% 12%;
     --primary: 108 36% 31%; --primary-foreground: 92 45% 98%; --secondary: 92 20% 94%; --secondary-foreground: 113 25% 12%;
     --destructive: 4 62% 50%; --destructive-foreground: 0 0% 100%; --border: 94 16% 88%; --input: 94 16% 88%; --ring: 108 42% 40%;
-    --sidebar: 111 31% 14%; --sidebar-foreground: 92 24% 91%; --positive: 145 67% 28%; --negative: 4 63% 46%;
-    --chart-income: hsl(109 42% 37%); --chart-expense: hsl(4 58% 53%); --chart-grid: hsl(94 16% 88%); --chart-axis: hsl(105 9% 42%);
+    --sidebar: 111 31% 14%; --sidebar-foreground: 92 24% 91%; --positive: 109 54% 25%; --negative: 31 78% 34%;
+    --chart-income: hsl(109 54% 34%); --chart-expense: hsl(31 78% 43%); --chart-grid: hsl(94 16% 88%); --chart-axis: hsl(105 9% 42%);
   }
   [data-theme="matcha"][data-mode="dark"] {
     --background: 112 25% 7%; --foreground: 92 22% 94%; --card: 112 22% 10%; --card-foreground: 92 22% 94%;
     --muted: 112 17% 15%; --muted-foreground: 96 9% 63%; --accent: 110 24% 18%; --accent-foreground: 92 22% 94%;
     --primary: 91 72% 68%; --primary-foreground: 112 28% 9%; --secondary: 112 17% 15%; --secondary-foreground: 92 22% 94%;
     --destructive: 4 66% 65%; --border: 112 15% 19%; --input: 112 15% 19%; --ring: 91 60% 53%; --sidebar: 112 27% 9%; --sidebar-foreground: 92 18% 90%;
-    --positive: 145 65% 52%; --negative: 4 74% 68%; --chart-income: hsl(91 56% 58%); --chart-expense: hsl(4 62% 66%); --chart-grid: hsl(112 15% 19%); --chart-axis: hsl(96 9% 63%);
+    --positive: 91 70% 66%; --negative: 35 92% 68%; --chart-income: hsl(91 64% 62%); --chart-expense: hsl(35 86% 64%); --chart-grid: hsl(112 15% 19%); --chart-axis: hsl(96 9% 63%);
   }
 
   /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
@@ -804,6 +804,19 @@
     background-size: 160% 160%;
     animation: nebula-aurora-drift 18s ease-in-out infinite alternate;
   }
+  /* Karakter visual khusus untuk dua tema baru. */
+  [data-theme="midnight-rose"] .balance-aurora {
+    background-image: radial-gradient(115% 120% at 100% 0%, hsl(336 88% 58% / .32), transparent 56%), radial-gradient(95% 105% at 0% 100%, hsl(16 82% 56% / .24), transparent 62%);
+  }
+  [data-theme="midnight-rose"] aside {
+    background-image: radial-gradient(100% 75% at 0% 0%, hsl(336 80% 52% / .34), transparent 65%), radial-gradient(80% 80% at 100% 100%, hsl(14 78% 50% / .2), transparent 68%);
+  }
+  [data-theme="matcha"] .balance-aurora {
+    background-image: radial-gradient(115% 120% at 100% 0%, hsl(83 76% 48% / .3), transparent 58%), radial-gradient(95% 105% at 0% 100%, hsl(35 88% 52% / .2), transparent 64%);
+  }
+  [data-theme="matcha"] aside {
+    background-image: radial-gradient(105% 80% at 0% 0%, hsl(92 70% 42% / .32), transparent 63%), radial-gradient(85% 85% at 100% 100%, hsl(38 82% 46% / .18), transparent 68%);
+  }
   /* Nebula: tautan menu aktif ikut menyala (sidebar desktop, menu geser mobile, bar bawah) */
   [data-theme="nebula"] aside nav a.font-semibold svg,
   [data-theme="nebula"] [role="dialog"] nav a.font-semibold svg {
@@ -861,6 +874,12 @@
     animation: neon-blink 2.2s ease-in-out infinite;
     box-shadow: 0 0 6px 1px color-mix(in srgb, currentColor 95%, transparent), 0 0 18px 6px color-mix(in srgb, currentColor 55%, transparent);
   }
+  /* Nebula memakai napas cahaya yang stabil, bukan kedipan tajam. */
+  [data-theme="nebula"] .chart-dot {
+    animation: nebula-dot-breathe 2.8s ease-in-out infinite;
+    box-shadow: 0 0 7px 2px hsl(var(--chart-line) / 0.42), 0 0 18px 5px hsl(var(--chart-line) / 0.18);
+  }
+  [data-theme="nebula"] .dot-ping { animation: none; opacity: 0; }
   [data-theme="blackpink"] .dot-ping,
   [data-theme="nebula"] .dot-ping {
     animation-iteration-count: infinite;
@@ -1011,6 +1030,11 @@
     opacity: 0.4;
     box-shadow: 0 0 3px 0 color-mix(in srgb, currentColor 60%, transparent), 0 0 8px 2px color-mix(in srgb, currentColor 25%, transparent);
   }
+}
+
+@keyframes nebula-dot-breathe {
+  0%, 100% { opacity: .88; transform: scale(.94); }
+  50% { opacity: 1; transform: scale(1.06); }
 }
 
 @keyframes bar-grow {

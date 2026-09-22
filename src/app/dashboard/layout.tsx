@@ -14,7 +14,7 @@ import { getWorkspace } from "@/lib/workspace";
 import { cookies } from "next/headers";
 import type { ViewKey } from "@/components/member-switcher";
 
-type BudgetPost = { id: string; category_id: string; category: { id: string; name: string } | null };
+type BudgetPost = { id: string; account_id: string | null; category_id: string; category: { id: string; name: string } | null };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -29,7 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const [{ data: accounts }, { data: categories }, { data: budgets }] = await Promise.all([
     supabase.from("accounts").select("id, name, icon_key").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, icon_key, color").order("name"),
-    supabase.from("budgets").select("id, category_id").eq("period_month", monthStart),
+    supabase.from("budgets").select("id, account_id, category_id").eq("period_month", monthStart),
   ]);
 
   const cookieStore = await cookies();
@@ -41,6 +41,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const categoryNames = new Map((categories ?? []).map((category) => [category.id, category.name]));
   const budgetPosts: BudgetPost[] = (budgets ?? []).map((budget) => ({
     id: budget.id,
+    account_id: budget.account_id,
     category_id: budget.category_id,
     category: categoryNames.has(budget.category_id)
       ? { id: budget.category_id, name: categoryNames.get(budget.category_id)! }

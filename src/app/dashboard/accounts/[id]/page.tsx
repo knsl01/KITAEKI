@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import { AccountAllocationClient } from "@/components/views/account-allocation-client";
+import { monthKey, monthRange } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { getView } from "@/lib/workspace";
-import { AccountDetailClient } from "@/components/views/account-detail-client";
-import type { Account, TransactionWithRelations } from "@/lib/types";
+import type { Account, Budget, Category, Transaction } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -10,35 +11,42 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const supabase = await createClient();
   const { data: account } = await supabase.from("accounts").select("name").eq("id", id).maybeSingle();
-  return { title: `${account?.name ?? "Akun"} — KITA` };
+  return { title: `Alokasi ${account?.name ?? "Akun"} — KITA` };
 }
 
-export default async function AccountDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AccountAllocationPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ month?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
+  const month = /^\d{4}-\d{2}$/.test(query.month ?? "") ? query.month! : monthKey();
+  const { start, end } = monthRange(month);
   const supabase = await createClient();
-  const currentView = await getView();
+  const view = await getView();
 
-  const [{ data: account }, { data: transactions }] = await Promise.all([
+  const [{ data: account }, { data: budgets }, { data: categories }, { data: transactions }] = await Promise.all([
     supabase.from("accounts").select("*").eq("id", id).maybeSingle(),
-    supabase
-      .from("transactions")
-      .select("*, category:categories(id, name, color, icon_key), account:accounts!account_id(id, name)")
-      .or(`account_id.eq.${id},to_account_id.eq.${id}`)
-      .order("occurred_on", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(50),
+    supabase.from("budgets").select("*").eq("account_id", id).eq("period_month", start),
+    supabase.from("categories").select("id, name, color").eq("kind", "expense").order("name"),
+    supabase.from("transactions").select("amount, category_id, owner").eq("type", "expense").eq("account_id", id).gte("occurred_on", start).lte("occurred_on", end),
   ]);
 
   if (!account) redirect("/dashboard/accounts");
-
-  const filteredTxs = (transactions ?? []).filter(
-    (t: any) => currentView === "bersama" || t.owner === currentView || t.owner === "shared"
-  ) as unknown as TransactionWithRelations[];
+  const visibleTransactions = (transactions ?? []).filter((transaction) => view === "bersama" || transaction.owner === view || transaction.owner === "shared");
+  const categoryMap = new Map((categories ?? []).map((category) => [category.id, category]));
+  const accountBudgets = ((budgets ?? []) as Budget[]).map((budget) => ({ ...budget, category: categoryMap.get(budget.category_id) ?? null }));
 
   return (
-    <AccountDetailClient
+    <AccountAllocationClient
       account={account as Account}
-      transactions={filteredTxs}
+      month={month}
+      budgets={accountBudgets}
+      categories={(categories ?? []) as Pick<Category, "id" | "name" | "color">[]}
+      transactions={visibleTransactions as Pick<Transaction, "amount" | "category_id">[]}
     />
   );
 }

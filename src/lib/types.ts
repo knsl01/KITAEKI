@@ -61,6 +61,7 @@ export type Budget = {
   id: string;
   user_id: string;
   category_id: string;
+  account_id?: string | null;
   amount: number;
   period_month: string;
   category?: Pick<Category, "id" | "name" | "color"> | null;

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getView } from "@/lib/workspace";
 import type { Account, Category, TransactionWithRelations } from "@/lib/types";
 
-type BudgetPost = { id: string; category_id: string; category: { id: string; name: string } | null };
+type BudgetPost = { id: string; account_id: string | null; category_id: string; category: { id: string; name: string } | null };
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Transaksi — KITA" };
@@ -23,7 +23,7 @@ export default async function TransactionsPage() {
       .limit(500),
     supabase.from("accounts").select("id, name").order("name"),
     supabase.from("categories").select("id, name, kind, color").order("name"),
-    supabase.from("budgets").select("id, category_id").eq("period_month", `${new Date().toISOString().slice(0, 7)}-01`),
+    supabase.from("budgets").select("id, account_id, category_id").eq("period_month", `${new Date().toISOString().slice(0, 7)}-01`),
   ]);
 
   const filteredTxs = (transactions ?? []).filter((t) => {
@@ -33,6 +33,7 @@ export default async function TransactionsPage() {
   const categoryNames = new Map((categories ?? []).map((category) => [category.id, category.name]));
   const budgetPosts: BudgetPost[] = (budgets ?? []).map((budget) => ({
     id: budget.id,
+    account_id: budget.account_id,
     category_id: budget.category_id,
     category: categoryNames.has(budget.category_id)
       ? { id: budget.category_id, name: categoryNames.get(budget.category_id)! }
