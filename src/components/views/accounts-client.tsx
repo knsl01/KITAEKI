@@ -30,7 +30,7 @@ import { Select } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 import { AccountAllocationDialog } from "@/components/views/account-allocation-client";
-import { accountLogoFor } from "@/lib/icons";
+import { accountLogoFor, brandFor } from "@/lib/icons";
 import {
   ACCOUNT_TYPE_LABEL,
   OWNER_LABEL,
@@ -220,6 +220,7 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
 }) {
   const router = useRouter();
   const [flipped, setFlipped] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
   const remaining = (allocation: AccountAllocation) => Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0);
@@ -229,6 +230,8 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   const usagePercent = spentPercent(spentTotal, originalTotal);
   const available = Number(account.balance) - remainingTotal;
   const accountLogo = accountLogoFor(account.icon_key, account.name);
+  const brand = brandFor(account.icon_key, account.name);
+  const BrandIcon = brand.icon;
   const addPos = <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button className="w-full" disabled={!account.is_active}><Plus className="h-4 w-4" />Tambah pos</Button>} />;
   const stop = (event: React.SyntheticEvent) => event.stopPropagation();
   const destination = `/dashboard/accounts/${account.id}`;
@@ -264,14 +267,14 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
     <div className={`account-card-flip-inner relative ${flipped ? "is-flipped" : ""}`}>
       <div className="account-card-face account-card-front overflow-hidden rounded-lg bg-card">
         {accountLogo ? <div aria-hidden className="pointer-events-none absolute -right-12 top-12 z-0 h-60 w-60 select-none opacity-[0.07] blur-[1.5px] mix-blend-soft-light md:-right-14 md:top-14 md:h-72 md:w-72">
-          <Image src={accountLogo} alt="" fill sizes="(max-width: 767px) 240px, 288px" className="object-contain" />
+          {logoFailed ? <div className="relative flex h-full w-full items-center justify-center text-muted-foreground"><BrandIcon className="h-3/4 w-3/4" strokeWidth={1} /><span className="absolute text-3xl font-black tracking-tight">{brand.short}</span></div> : <Image src={accountLogo} alt="" fill sizes="(max-width: 767px) 240px, 288px" className="object-contain" onError={() => setLogoFailed(true)} />}
         </div> : null}
 
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            {accountLogo ? <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 p-1.5 md:h-14 md:w-14">
-              <Image src={accountLogo} alt={`${account.name} logo`} fill sizes="(max-width: 767px) 48px, 56px" className="object-contain p-1" />
-            </span> : <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm md:h-14 md:w-14" />}
+            {accountLogo && !logoFailed ? <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 p-1.5 md:h-14 md:w-14">
+              <Image src={accountLogo} alt={`${account.name} logo`} fill sizes="(max-width: 767px) 48px, 56px" className="object-contain p-1" onError={() => setLogoFailed(true)} />
+            </span> : accountLogo ? <span aria-hidden className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 text-xs font-semibold text-muted-foreground md:h-14 md:w-14">{brand.short}</span> : <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm md:h-14 md:w-14" />}
             <div className="min-w-0">
               <p className="truncate text-base font-semibold tracking-tight">{account.name}</p>
               <p className="mt-1 text-xs text-muted-foreground">{ACCOUNT_TYPE_LABEL[account.type]} · {OWNER_LABEL[account.owner]}</p>
