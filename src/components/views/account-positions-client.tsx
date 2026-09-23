@@ -20,8 +20,10 @@ function percent(value: number, target: number) {
 }
 
 export function AccountPositionsClient({ account, allocations }: { account: Account; allocations: AccountAllocation[] }) {
+  const totalTarget = allocations.reduce((sum, allocation) => sum + Number(allocation.target_amount), 0);
   const totalSpent = allocations.reduce((sum, allocation) => sum + Number(allocation.spent_amount), 0);
   const totalAllocated = allocations.reduce((sum, allocation) => sum + Number(allocation.allocated_amount), 0);
+  const remainingNeed = allocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.target_amount) - Number(allocation.allocated_amount), 0), 0);
   const available = Number(account.balance) - totalAllocated;
 
   return (
@@ -40,7 +42,9 @@ export function AccountPositionsClient({ account, allocations }: { account: Acco
       <Card className="account-detail-card-enter mb-5 overflow-hidden">
         <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
           <div className="flex items-center gap-3"><BrandMarkTile iconKey={account.icon_key} name={account.name} size="lg" /><div><p className="text-xs text-muted-foreground">Saldo akun</p><p className="tabular text-2xl font-bold tracking-tight">{formatCurrency(Number(account.balance))}</p></div></div>
-          <div className="grid grid-cols-3 gap-4 sm:min-w-[420px]">
+          <div className="grid grid-cols-2 gap-3 sm:min-w-[480px]">
+            <div><p className="text-xs text-muted-foreground">Total kebutuhan pos</p><p className="tabular mt-1 font-semibold">{formatCurrency(totalTarget)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Masih dibutuhkan</p><p className="tabular mt-1 font-semibold text-primary">{formatCurrency(remainingNeed)}</p></div>
             <div><p className="text-xs text-muted-foreground">Dicadangkan</p><p className="tabular mt-1 font-semibold">{formatCurrency(totalAllocated)}</p></div>
             <div><p className="text-xs text-muted-foreground">Terpakai</p><p className="tabular mt-1 font-semibold text-negative">{formatCurrency(totalSpent)}</p></div>
             <div><p className="text-xs text-muted-foreground">Tersedia</p><p className={`tabular mt-1 font-semibold ${available < 0 ? "text-negative" : "text-[hsl(var(--positive))]"}`}>{formatCurrency(available)}</p></div>
@@ -49,7 +53,7 @@ export function AccountPositionsClient({ account, allocations }: { account: Acco
       </Card>
 
       <div className="account-detail-list-enter mb-3 flex items-end justify-between gap-3">
-        <div><h2 className="font-serif text-xl">Pos anggaran</h2><p className="mt-1 text-sm text-muted-foreground">Setiap pos menunjukkan target, dana yang masih tersedia, dan pengeluaran aktual.</p></div>
+        <div><h2 className="font-serif text-xl">Pos anggaran</h2><p className="mt-1 text-sm text-muted-foreground">Kebutuhan seluruh pos: {formatCurrency(totalTarget)} · masih dibutuhkan: {formatCurrency(remainingNeed)}. Setiap pos menunjukkan target, dana yang masih tersedia, dan pengeluaran aktual.</p></div>
         <span className="shrink-0 text-sm text-muted-foreground">{allocations.length} pos</span>
       </div>
 

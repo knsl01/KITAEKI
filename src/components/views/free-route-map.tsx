@@ -33,6 +33,20 @@ function styleUrl(dark: boolean): string {
   return `https://maps.geoapify.com/v1/styles/${style}/style.json?apiKey=${encodeURIComponent(key)}`;
 }
 
+function describeMapError(event: { error?: { message?: string }; sourceId?: string; tile?: { request?: { url?: string } }; url?: string }): string {
+  const resourceUrl = event.url ?? event.tile?.request?.url;
+  const resource = resourceUrl
+    ? resourceUrl.replace(/([?&](?:apiKey|key)=)[^&]+/gi, "$1[disamarkan]").replace(/^https?:\/\/[^/]+/, "")
+    : "resource peta";
+  const detail = (event.error?.message ?? "Permintaan gagal").replace(/([?&](?:apiKey|key)=)[^&\s]+/gi, "$1[disamarkan]");
+  const status = detail.match(/\b(401|403|404|429|5\d\d)\b/)?.[0];
+  if (status === "401" || status === "403") return `Geoapify menolak akses ke ${resource} (${status}). Periksa API key dan pembatasan domain.`;
+  if (status === "404") return `Resource Geoapify tidak ditemukan: ${resource} (${status}).`;
+  if (status === "429") return "Batas permintaan Geoapify tercapai. Coba lagi sebentar.";
+  if (/cors|cross-origin/i.test(detail)) return `Browser memblokir resource peta ${resource} karena CORS.`;
+  return `Gagal memuat ${resource}${event.sourceId ? ` (sumber ${event.sourceId})` : ""}: ${detail}`;
+}
+
 function primaryColor(): string {
   return themeColor("--primary", "248 70% 50%");
 }
@@ -125,8 +139,9 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
     const armLoadTimer = () => {
       if (loadTimer !== undefined) window.clearTimeout(loadTimer);
       loadTimer = window.setTimeout(() => {
-        if (cancelled || styleReady) return;
-        setMapError("Peta Geoapify belum merespons. Periksa koneksi dan pastikan NEXT_PUBLIC_GEOAPIFY_API_KEY aktif untuk deployment ini.");
+        if (cancelled || !map) return;
+        setReady(false);
+        setMapError("Peta belum selesai dimuat. Periksa koneksi, izin domain API key, dan permintaan style, glyph, sprite, serta tile Geoapify.");
       }, 15000);
     };
     if (!geoapifyApiKey()) {
@@ -152,17 +167,27 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
         styleReady = true;
         if (loadTimer !== undefined) window.clearTimeout(loadTimer);
         addOverlayLayers(map);
+        map.resize();
         setReady(true);
         setMapError("");
       });
-      map.on("error", () => {
-        if (!cancelled && !styleReady) {
-          if (loadTimer !== undefined) window.clearTimeout(loadTimer);
-          setReady(false);
-          setMapError("Gaya peta Geoapify gagal dimuat. Periksa koneksi, izin domain API key, atau konfigurasi key di Vercel.");
-        }
+      map.on("load", () => {
+        if (cancelled) return;
+        if (loadTimer !== undefined) window.clearTimeout(loadTimer);
+        setReady(true);
+        setMapError("");
+      });
+      map.on("error", (event) => {
+        if (cancelled) return;
+        const message = describeMapError(event);
+        console.error("MapLibre error:", message);
+        setMapError(message);
+        setReady(false);
       });
       mapRef.current = map;
+      const resizeObserver = new ResizeObserver(() => map?.resize());
+      resizeObserver.observe(containerRef.current);
+      map.once("remove", () => resizeObserver.disconnect());
     }).catch(() => {
       if (!cancelled) setMapError("Komponen peta gagal dimuat. Muat ulang halaman setelah memeriksa koneksi.");
     });
@@ -384,7 +409,7 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
         </div>
 
         <div className="relative isolate">
-          <div ref={containerRef} className="h-[330px] w-full overflow-hidden rounded-xl border border-border bg-muted sm:h-[430px]" />
+          <div ref={containerRef} className="h-[330px] min-h-[240px] w-full min-w-0 overflow-hidden rounded-xl border border-border bg-muted sm:h-[430px]" />
           {!ready && !mapError ? <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/75 text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memuat peta…</div> : null}
           {mapError ? <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-background/95 px-5 text-center text-sm text-negative"><p>{mapError}</p><Button type="button" variant="outline" size="sm" onClick={() => { setReady(false); setMapError(""); setMapAttempt((attempt) => attempt + 1); }}>Coba muat ulang peta</Button></div> : null}
           <Button type="button" variant="outline" size="icon" aria-label="Lokasi saya" className="absolute right-2 top-2 z-10 bg-background/95 shadow-md" onClick={locateMe} disabled={locating}>{locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}</Button>

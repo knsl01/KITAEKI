@@ -225,6 +225,7 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
   const allocatedTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.allocated_amount), 0);
   const targetTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.target_amount), 0);
+  const remainingNeed = allocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.target_amount) - Number(allocation.allocated_amount), 0), 0);
   const spentTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.spent_amount), 0);
   const usagePercent = filledPercent(allocatedTotal, targetTotal);
   const available = Number(account.balance) - allocatedTotal;
@@ -302,8 +303,9 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
         <div className="account-card-budget relative z-10 rounded-xl border border-border/70 bg-muted/40 p-3">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">Pos aktif</p><p className="mt-0.5 text-sm font-semibold">{allocations.length} pos</p></div>
-            <div className="text-right"><p className="text-xs text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div>
+            <div className="text-right"><p className="text-xs text-muted-foreground">Total kebutuhan pos</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(targetTotal)}</p></div>
           </div>
+          <div className="mt-2 flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">Masih dibutuhkan</span><span className="tabular font-semibold text-primary">{formatCurrency(remainingNeed)}</span></div>
           <div className="mt-3 flex items-center justify-between gap-2 text-xs">
             <span className="text-muted-foreground">Pemenuhan target</span>
             <span className="tabular font-semibold">{usagePercent.toFixed(1)}% terisi</span>
@@ -330,7 +332,7 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
 
       <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg bg-card" aria-hidden={!flipped}>
         <div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Ringkasan pos</p><p className="text-xs text-muted-foreground">{account.name} · persentase pemakaian</p></div><Button variant="ghost" size="icon" aria-label="Kembali ke akun" onClick={(event) => { stop(event); setFlipped(false); }}><ArrowLeft className="h-4 w-4" /></Button></div>
-        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
+        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Total kebutuhan pos</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(targetTotal)}</p></div><div className="rounded-lg bg-primary/10 p-2.5"><p className="text-[11px] text-muted-foreground">Masih dibutuhkan</p><p className="tabular mt-1 text-sm font-semibold text-primary">{formatCurrency(remainingNeed)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
         <div className="space-y-2">{allocations.length ? allocations.slice(0, 3).map((allocation) => {
           const spent = Number(allocation.spent_amount); const allocated = Number(allocation.allocated_amount); const target = Number(allocation.target_amount); const percent = filledPercent(allocated, target);
           return <div key={allocation.id} className="rounded-lg border border-border/70 px-2.5 py-2"><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium">{allocation.category?.name ?? "Pos"}</span><span className="tabular shrink-0 text-xs font-semibold">{formatCurrency(allocated)} terisi</span></div><Progress value={percent} className="mt-1.5 h-1.5" /><div className="mt-1 text-[10px] text-muted-foreground">{percent.toFixed(1)}% · target {formatCurrency(target)} · terpakai {formatCurrency(spent)}</div></div>;
