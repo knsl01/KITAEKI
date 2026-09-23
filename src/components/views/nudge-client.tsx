@@ -113,7 +113,9 @@ function NudgeRow({ nudge, onDismiss }: { nudge: Nudge; onDismiss: () => void })
         </div>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{nudge.description}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          {nudge.action ? <Button asChild size="sm" variant="outline" className="min-h-11"> <Link href={nudge.action.href}>{nudge.action.label}</Link></Button> : null}
+          {nudge.action ? (
+            <Button asChild size="sm" variant="outline" className="min-h-11"><Link href={nudge.action.href}>{nudge.action.label}</Link></Button>
+          ) : null}
           <span className="text-[11px] text-muted-foreground">{nudge.kind === "warning" ? "Perlu dicek" : nudge.kind === "positive" ? "Kabar baik" : nudge.kind === "informational" ? "Info" : "Saran"}</span>
         </div>
       </div>
