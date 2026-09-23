@@ -13,7 +13,7 @@ export function BrandPicker({ name, defaultValue }: { name: string; defaultValue
     <div className="space-y-2">
       <Label>Bank / e-wallet</Label>
       <input type="hidden" name={name} value={value} />
-      <div className="grid max-h-48 grid-cols-4 gap-2 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-6">
+      <div className="kita-scrollbar grid max-h-48 grid-cols-4 gap-2 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-6">
         {BRANDS.map((brand) => {
           const active = value === brand.key;
           return (
@@ -58,7 +58,7 @@ export function CategoryIconPicker({
     <div className="space-y-2">
       <Label>Ikon</Label>
       <input type="hidden" name={name} value={value} />
-      <div className="grid max-h-40 grid-cols-7 gap-1.5 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-9">
+      <div className="kita-scrollbar grid max-h-40 grid-cols-7 gap-1.5 overflow-y-auto rounded-lg border border-border p-2 sm:grid-cols-9">
         {CATEGORY_ICON_KEYS.map((key) => {
           const Icon = categoryIcon(key);
           const active = value === key;
