@@ -57,7 +57,7 @@ export function Sidebar({ householdName }: { householdName: string }) {
         </button>
       </div>
 
-      <nav className="mt-7 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden">
+      <nav className="kita-scrollbar mt-7 min-h-0 flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden">
         {NAV_ITEMS.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
