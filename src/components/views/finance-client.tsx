@@ -12,7 +12,7 @@ import { IncomeExpenseChart } from "@/components/charts/income-expense-chart";
 import { CategoryDonut } from "@/components/charts/category-donut";
 import { MemberExpenseChart } from "@/components/charts/member-expense-chart";
 import { MemberCashflowCompareChart } from "@/components/charts/member-cashflow-compare-chart";
-import { sumTotals } from "@/lib/analytics";
+import { groupByCategory, sumTotals } from "@/lib/analytics";
 import { formatCurrency, formatDate, percent } from "@/lib/format";
 import { ACCOUNT_TYPE_LABEL, OWNER_LABEL, type Account, type Category, type MemberOwner, type RecurringTransaction, type Transaction } from "@/lib/types";
 
@@ -33,32 +33,33 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
   const owners: MemberOwner[] = ["eki", "dinda", "shared"];
 
   const chartData = useMemo(() => {
-    const sDate = new Date(start);
-    const eDate = new Date(end);
-    const diffDays = Math.round((eDate.getTime() - sDate.getTime()) / (1000 * 3600 * 24));
+    const dateParts = (value: string) => value.split("-").map(Number);
+    const [startYear, startMonth, startDay] = dateParts(start);
+    const [endYear, endMonth, endDay] = dateParts(end);
+    const startUtc = Date.UTC(startYear, startMonth - 1, startDay);
+    const endUtc = Date.UTC(endYear, endMonth - 1, endDay);
+    const diffDays = Math.round((endUtc - startUtc) / 86_400_000);
     const isDaily = diffDays <= 31;
 
     const map = new Map<string, { income: number; expense: number }>();
-    
-    // Fill all dates/months in range to prevent straight lines skipping days
-    const curr = new Date(start);
-    const endObj = new Date(end);
-    
-    while (curr <= endObj) {
-      const y = curr.getFullYear();
-      const m = String(curr.getMonth() + 1).padStart(2, "0");
-      const d = String(curr.getDate()).padStart(2, "0");
-      
-      if (isDaily) {
-        map.set(`${y}-${m}-${d}`, { income: 0, expense: 0 });
-        curr.setDate(curr.getDate() + 1);
-      } else {
-        const monthStr = `${y}-${m}`;
-        if (!map.has(monthStr)) map.set(monthStr, { income: 0, expense: 0 });
-        curr.setMonth(curr.getMonth() + 1);
+
+    // Generate keys from UTC date parts so month ends (29–31) never skip a month.
+    if (isDaily && diffDays >= 0) {
+      for (let day = startUtc; day <= endUtc; day += 86_400_000) {
+        const current = new Date(day);
+        const key = `${current.getUTCFullYear()}-${String(current.getUTCMonth() + 1).padStart(2, "0")}-${String(current.getUTCDate()).padStart(2, "0")}`;
+        map.set(key, { income: 0, expense: 0 });
+      }
+    } else if (diffDays >= 0) {
+      let year = startYear;
+      let month = startMonth;
+      while (year < endYear || (year === endYear && month <= endMonth)) {
+        map.set(`${year}-${String(month).padStart(2, "0")}`, { income: 0, expense: 0 });
+        month += 1;
+        if (month > 12) { month = 1; year += 1; }
       }
     }
-    
+
     for (const t of transactions) {
       const key = isDaily ? t.occurred_on : t.occurred_on.slice(0, 7);
       if (!map.has(key)) map.set(key, { income: 0, expense: 0 });
@@ -66,7 +67,7 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
       if (t.type === "income") current.income += Number(t.amount);
       if (t.type === "expense") current.expense += Number(t.amount);
     }
-    
+
     return Array.from(map.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([key, data]) => ({
@@ -122,38 +123,9 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
     window.setTimeout(() => document.body.classList.remove("print-finance-report"), 500);
   }
 
-  // Category donut chart (expenses)
-  const categoryData = useMemo(() => {
-    const expenses = transactions.filter((t) => t.type === "expense" && t.category_id);
-    const map = new Map<string, number>();
-    for (const t of expenses) {
-      if (t.category_id) {
-        map.set(t.category_id, (map.get(t.category_id) ?? 0) + Number(t.amount));
-      }
-    }
-    
-    return Array.from(map.entries())
-      .map(([id, value]) => {
-        const cat = categories.find((c) => c.id === id);
-        return {
-          name: cat?.name ?? "Lainnya",
-          value,
-          color: cat?.color ?? "#B0B0B0",
-        };
-      })
-      .sort((a, b) => b.value - a.value);
-  }, [transactions, categories]);
-
-  const incomeCategoryData = useMemo(() => {
-    const map = new Map<string, number>();
-    transactions.filter((t) => t.type === "income" && t.category_id).forEach((t) => {
-      if (t.category_id) map.set(t.category_id, (map.get(t.category_id) ?? 0) + Number(t.amount));
-    });
-    return Array.from(map.entries()).map(([id, value]) => ({
-      name: categories.find((category) => category.id === id)?.name ?? "Lainnya",
-      value,
-    })).sort((a, b) => b.value - a.value);
-  }, [transactions, categories]);
+  // Sertakan transaksi tanpa kategori agar total grafik sama dengan total arus kas.
+  const categoryData = useMemo(() => groupByCategory(transactions, categories, "expense"), [transactions, categories]);
+  const incomeCategoryData = useMemo(() => groupByCategory(transactions, categories, "income"), [transactions, categories]);
 
   const memberExpenseData = useMemo(() => {
     return owners.map(owner => {

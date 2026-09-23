@@ -70,7 +70,7 @@ export function TransactionDialog({
     [categories, type]
   );
   const visibleBudgets = useMemo(
-    () => budgets.filter((budget) => budget.account_id === selectedAccountId),
+    () => budgets.filter((budget) => budget.account_id === selectedAccountId || budget.account_id == null),
     [budgets, selectedAccountId]
   );
 
@@ -273,7 +273,7 @@ export function TransactionDialog({
             {/* Pos Anggaran - muncul saat pengeluaran */}
             {type === "expense" && selectedAccountId && visibleBudgets.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="budget_id">Pos Anggaran <span className="text-muted-foreground font-normal">(opsional)</span></Label>
+                <Label htmlFor="budget_id">Pos tetap <span className="text-muted-foreground font-normal">(opsional)</span></Label>
                 <Select
                   id="budget_id"
                   name="budget_id"

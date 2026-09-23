@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import { createAccount, deleteAccount, updateAccount } from "@/app/actions/accounts";
+import { Archive, Loader2, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import { createAccount, deleteAccount, setAccountActive, updateAccount } from "@/app/actions/accounts";
 import { BrandMarkTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { BrandPicker } from "@/components/icon-picker";
@@ -134,7 +134,21 @@ function AccountDialog({ account, trigger }: { account?: Account; trigger: React
 
 export function AccountsClient({ accounts }: { accounts: Account[] }) {
   const router = useRouter();
+  const [showInactive, setShowInactive] = useState(false);
+  const [pending, startTransition] = useTransition();
+  const [actionError, setActionError] = useState("");
   const total = accounts.filter((a) => a.is_active).reduce((sum, a) => sum + Number(a.balance), 0);
+  const inactiveCount = accounts.filter((account) => !account.is_active).length;
+  const visibleAccounts = accounts.filter((account) => account.is_active !== showInactive);
+
+  function changeActive(accountId: string, isActive: boolean) {
+    setActionError("");
+    startTransition(async () => {
+      const result = await setAccountActive(accountId, isActive);
+      if (!result.ok) { setActionError(result.error); return; }
+      router.refresh();
+    });
+  }
 
   return (
     <div>
@@ -160,16 +174,24 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
         </CardContent>
       </Card>
 
-      {accounts.length === 0 ? (
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">{showInactive ? "Akun yang disimpan / nonaktif" : "Akun aktif"}</p>
+        <Button type="button" variant="outline" size="sm" onClick={() => setShowInactive((value) => !value)}>
+          {showInactive ? "Kembali ke akun aktif" : `Lihat akun nonaktif (${inactiveCount})`}
+        </Button>
+      </div>
+      {actionError ? <p role="alert" className="mb-4 rounded-lg bg-negative/10 px-3 py-2 text-sm text-negative">{actionError}</p> : null}
+
+      {visibleAccounts.length === 0 ? (
         <Card>
           <EmptyState
-            title="Belum ada akun"
-            description="Tambah akun pertama supaya transaksi bisa dicatat dan saldonya terhitung."
+            title={showInactive ? "Tidak ada akun nonaktif" : "Belum ada akun aktif"}
+            description={showInactive ? "Akun yang dinonaktifkan akan muncul di sini dan bisa dipulihkan." : "Tambah akun pertama supaya transaksi bisa dicatat dan saldonya terhitung."}
           />
         </Card>
       ) : (
         <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {accounts.map((account) => (
+          {visibleAccounts.map((account) => (
             <Card
               key={account.id}
               className="card-interactive cursor-pointer p-5"
@@ -200,7 +222,7 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
               <p className="tabular mt-1 text-xs text-muted-foreground">
                 Saldo awal {formatCurrency(Number(account.initial_balance))}
               </p>
-              <p className="mt-3 text-xs text-muted-foreground">Klik dua kali untuk melihat detail akun</p>
+              <p className="mt-3 text-xs text-muted-foreground">Klik dua kali untuk melihat pos-pos akun</p>
 
               <div className="mt-4 flex gap-1 border-t border-border pt-3" onClick={(e) => e.stopPropagation()}>
                 <AccountDialog
@@ -212,9 +234,21 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
                     </Button>
                   }
                 />
+                {account.is_active ? (
+                  <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => changeActive(account.id, false)}>
+                    {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Archive className="h-3.5 w-3.5" />}
+                    Nonaktifkan
+                  </Button>
+                ) : (
+                  <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => changeActive(account.id, true)}>
+                    {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                    Pulihkan
+                  </Button>
+                )}
+                {account.is_active ? (
                 <ConfirmDelete
                   title="Hapus akun?"
-                  description="Akun hanya bisa dihapus kalau belum punya transaksi."
+                  description="Jika akun punya transaksi atau pos, akun akan disimpan sebagai nonaktif agar riwayat dan alokasi tidak hilang. Akun kosong akan dihapus permanen."
                   onConfirm={async () => deleteAccount(account.id)}
                   trigger={
                     <Button variant="ghost" size="sm" className="text-muted-foreground">
@@ -223,6 +257,7 @@ export function AccountsClient({ accounts }: { accounts: Account[] }) {
                     </Button>
                   }
                 />
+                ) : null}
               </div>
             </Card>
           ))}
