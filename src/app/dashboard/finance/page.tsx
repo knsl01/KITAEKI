@@ -38,6 +38,7 @@ export default async function FinancePage({
     supabase
       .from("transactions")
       .select("type, amount, owner, occurred_on, category_id")
+      .is("archived_at", null)
       .gte("occurred_on", start)
       .lte("occurred_on", end),
     supabase

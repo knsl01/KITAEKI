@@ -68,12 +68,14 @@ export default async function DashboardPage() {
     supabase
       .from("transactions")
       .select("id, type, amount, occurred_on, category_id, owner")
+      .is("archived_at", null)
       .gte("occurred_on", rangeStart),
     supabase.from("categories").select("id, name, color, kind, icon_key"),
     supabase.from("savings_goals").select("*").eq("is_archived", false).order("created_at").limit(8),
     supabase
       .from("transactions")
       .select("id, type, amount, occurred_on, description, owner, category:categories(id, name, color, icon_key)")
+      .is("archived_at", null)
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(30),

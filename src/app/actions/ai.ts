@@ -28,7 +28,7 @@ export async function askKitaAi(history: { role: "user" | "model"; parts: { text
     
     const [{ data: accounts }, { data: txs }, { data: categories }, { data: recentTasks }] = await Promise.all([
       supabase.from("accounts").select("id, name, balance, owner").eq("household_id", householdId).eq("is_active", true),
-      supabase.from("transactions").select("id, type, amount, owner, description, occurred_on").eq("household_id", householdId).gte("occurred_on", startDateStr).order('occurred_on', { ascending: false }).limit(10),
+      supabase.from("transactions").select("id, type, amount, owner, description, occurred_on").eq("household_id", householdId).is("archived_at", null).gte("occurred_on", startDateStr).order('occurred_on', { ascending: false }).limit(10),
       supabase.from("categories").select("id, name, type").eq("household_id", householdId),
       supabase.from("tasks").select("id, title, due_on, assigned_to").eq("household_id", householdId).order('created_at', { ascending: false }).limit(10)
     ]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Pencil, Search, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Pencil, Search, Trash2 } from "lucide-react";
 import { CategoryIconTile } from "@/components/brand-mark";
 import { ConfirmDelete } from "@/components/confirm-delete";
 import { PageHeader } from "@/components/page-header";
@@ -43,10 +43,12 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
   const [categoryId, setCategoryId] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [showArchived, setShowArchived] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return transactions.filter((t) => {
+      if (!showArchived && t.archived_at) return false;
       if (type && t.type !== type) return false;
       if (owner && t.owner !== owner) return false;
       if (accountId && t.account_id !== accountId && t.to_account_id !== accountId) return false;
@@ -59,19 +61,20 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
       }
       return true;
     });
-  }, [transactions, query, type, owner, accountId, categoryId, from, to]);
+  }, [transactions, query, type, owner, accountId, categoryId, from, to, showArchived]);
 
   const totals = useMemo(() => {
     let income = 0;
     let expense = 0;
     for (const t of filtered) {
+      if (t.archived_at) continue;
       if (t.type === "income") income += Number(t.amount);
       if (t.type === "expense") expense += Number(t.amount);
     }
     return { income, expense, net: income - expense };
   }, [filtered]);
 
-  const hasFilter = Boolean(query || type || owner || accountId || categoryId || from || to);
+  const hasFilter = Boolean(query || type || owner || accountId || categoryId || from || to || showArchived);
 
   function resetFilters() {
     setQuery("");
@@ -81,6 +84,7 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
     setCategoryId("");
     setFrom("");
     setTo("");
+    setShowArchived(false);
   }
 
   return (
@@ -145,15 +149,20 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
           </div>
 
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-3 text-sm">
-            <span className="text-muted-foreground">{filtered.length} transaksi</span>
+            <span className="text-muted-foreground">{filtered.filter((t) => !t.archived_at).length} transaksi aktif</span>
             <span className="tabular text-[hsl(var(--positive))]">+ {formatCurrency(totals.income)}</span>
             <span className="tabular text-[hsl(var(--negative))]">− {formatCurrency(totals.expense)}</span>
             <span className="tabular text-muted-foreground">Selisih {formatCurrency(totals.net)}</span>
+            <Button type="button" variant={showArchived ? "subtle" : "outline"} size="sm" className="ml-auto" onClick={() => setShowArchived((value) => !value)}>
+              {showArchived ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+              {showArchived ? "Sembunyikan arsip" : `Lihat arsip (${transactions.filter((t) => t.archived_at).length})`}
+            </Button>
             {hasFilter ? (
-              <Button variant="ghost" size="sm" className="ml-auto" onClick={resetFilters}>
+              <Button variant="ghost" size="sm" onClick={resetFilters}>
                 Reset filter
               </Button>
             ) : null}
+            {showArchived ? <p className="basis-full text-xs text-muted-foreground">Catatan arsip ditampilkan, tetapi tidak masuk ke total dan ringkasan keuangan.</p> : null}
           </div>
         </CardContent>
       </Card>
@@ -191,7 +200,10 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
                     <div className="md:hidden text-xs font-medium text-muted-foreground mb-1">
                       {formatDate(t.occurred_on)}
                     </div>
-                    <p className="truncate font-medium md:font-normal">{t.description || TYPE_LABEL[t.type]}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="truncate font-medium md:font-normal">{t.description || TYPE_LABEL[t.type]}</p>
+                      {t.archived_at ? <Badge tone="outline" className="shrink-0">Arsip</Badge> : null}
+                    </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     {t.category ? (
@@ -227,7 +239,7 @@ export function TransactionsClient({ transactions, accounts, categories, budgets
                         budgets={budgets}
                         transaction={t}
                         trigger={
-                          <Button variant="ghost" size="icon" aria-label="Ubah transaksi">
+                          <Button variant="ghost" size="icon" aria-label="Ubah transaksi" disabled={Boolean(t.archived_at)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
                         }

@@ -49,6 +49,7 @@ export type Transaction = {
   to_account_id: string | null;
   category_id: string | null;
   budget_post_id?: string | null;
+  archived_at?: string | null;
   created_at: string;
 };
 

@@ -18,6 +18,7 @@ export default async function TransactionsPage() {
       .select(
         "*, account:accounts!transactions_account_id_fkey(id, name), to_account:accounts!transactions_to_account_id_fkey(id, name), category:categories(id, name, color, kind)"
       )
+      .is("archived_at", null)
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(500),

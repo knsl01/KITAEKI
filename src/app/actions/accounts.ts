@@ -4,6 +4,12 @@ import { revalidatePath } from "next/cache";
 import { fail, getUserClient, num, optionalStr, str, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 import { pushActivity } from "@/lib/push";
 
+function revalidateAccountViews() {
+  for (const path of ["/dashboard", "/dashboard/accounts", "/dashboard/budget", "/dashboard/finance", "/dashboard/transactions", "/dashboard/share"]) {
+    revalidatePath(path, path === "/dashboard" ? "layout" : "page");
+  }
+}
+
 export async function createAccount(formData: FormData): Promise<ActionResult> {
   const session = await getUserClient();
   const { supabase, user, householdId } = session;
@@ -30,7 +36,7 @@ export async function createAccount(formData: FormData): Promise<ActionResult> {
     url: "/dashboard/accounts",
   }));
 
-  revalidatePath("/dashboard", "layout");
+  revalidateAccountViews();
   return { ok: true };
 }
 
@@ -59,7 +65,7 @@ export async function updateAccount(id: string, formData: FormData): Promise<Act
   if (error) return fail(error.message);
   if (!data) return fail("Akun tidak ditemukan atau tidak bisa diubah.");
 
-  revalidatePath("/dashboard", "layout");
+  revalidateAccountViews();
   return { ok: true };
 }
 
@@ -79,7 +85,7 @@ export async function setAccountActive(id: string, isActive: boolean): Promise<A
   if (error) return fail(error.message);
   if (!data) return fail("Akun tidak ditemukan atau statusnya tidak bisa diubah.");
 
-  revalidatePath("/dashboard", "layout");
+  revalidateAccountViews();
   return { ok: true };
 }
 
@@ -89,44 +95,10 @@ export async function deleteAccount(id: string): Promise<ActionResult> {
   if (!householdId) return fail(NO_HOUSEHOLD);
   if (!/^[0-9a-f-]{36}$/i.test(id)) return fail("Akun tidak valid.");
 
-  const [transactions, oldBudgets, allocations, recurring] = await Promise.all([
-    supabase
-    .from("transactions")
-    .select("id", { count: "exact", head: true })
-    .eq("household_id", householdId)
-    .or(`account_id.eq.${id},to_account_id.eq.${id}`),
-    supabase.from("budgets").select("id", { count: "exact", head: true }).eq("household_id", householdId).eq("account_id", id),
-    supabase.from("account_allocations").select("id", { count: "exact", head: true }).eq("household_id", householdId).eq("account_id", id),
-    supabase.from("recurring_transactions").select("id", { count: "exact", head: true }).eq("household_id", householdId).or(`account_id.eq.${id},to_account_id.eq.${id}`),
-  ]);
+  const { data: deleted, error } = await supabase.rpc("delete_account_with_history", { p_account_id: id });
+  if (error) return fail(`Tidak bisa menghapus akun dan riwayatnya. Pastikan migrasi arsip akun sudah dijalankan. ${error.message}`);
+  if (!deleted) return fail("Akun tidak ditemukan atau tidak bisa dihapus.");
 
-  // If a query fails (for example migration 0010 has not run), never fall
-  // through to a hard delete: that could orphan history or fixed positions.
-  const countError = transactions.error ?? oldBudgets.error ?? allocations.error ?? recurring.error;
-  if (countError) return fail(`Tidak bisa memeriksa penggunaan akun. Pastikan migrasi database terbaru sudah dijalankan. ${countError.message}`);
-
-  const transactionCount = transactions.count;
-  const oldBudgetCount = oldBudgets.count;
-  const allocationCount = allocations.count;
-  const recurringCount = recurring.count;
-
-  if ((transactionCount ?? 0) > 0 || (oldBudgetCount ?? 0) > 0 || (allocationCount ?? 0) > 0 || (recurringCount ?? 0) > 0) {
-    const { data, error } = await supabase
-      .from("accounts")
-      .update({ is_active: false })
-      .eq("id", id)
-      .eq("household_id", householdId)
-      .select("id")
-      .maybeSingle();
-    if (error) return fail(error.message);
-    if (!data) return fail("Akun tidak ditemukan atau tidak bisa diarsipkan.");
-    revalidatePath("/dashboard", "layout");
-    return { ok: true };
-  }
-
-  const { error } = await supabase.from("accounts").delete().eq("id", id).eq("household_id", householdId);
-  if (error) return fail(error.message);
-
-  revalidatePath("/dashboard", "layout");
+  revalidateAccountViews();
   return { ok: true };
 }

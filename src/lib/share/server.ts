@@ -32,11 +32,12 @@ export async function getShareData(supabase: SupabaseClient, workspace: Workspac
     supabase
       .from("transactions")
       .select("type, amount, occurred_on, category_id, account_id, to_account_id")
+      .is("archived_at", null)
       .gte("occurred_on", winStart)
       .limit(5000),
     supabase.from("categories").select("id, name, color"),
     supabase.from("savings_goals").select("id, name, target_amount, current_amount, target_date, image_url, is_archived").order("created_at"),
-    supabase.from("transactions").select("id", { count: "exact", head: true }),
+    supabase.from("transactions").select("id", { count: "exact", head: true }).is("archived_at", null),
   ]);
 
   const accounts = (accRes.data ?? []) as { id: string; balance: number | string; created_at: string }[];

@@ -30,6 +30,7 @@ async function fetchTransactionsSince(since: string): Promise<BalanceTx[] | null
     const { data, error } = await supabase
       .from("transactions")
       .select("type, amount, occurred_on, account_id, to_account_id")
+      .is("archived_at", null)
       .gte("occurred_on", since)
       .order("occurred_on", { ascending: false })
       .order("id")

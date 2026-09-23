@@ -206,7 +206,7 @@ export function AccountsClient({ accounts, allocations }: { accounts: Account[];
         <div className="account-card-grid stagger">
             {visibleAccounts.map((account) => {
               const accountAllocations = allocations.filter((allocation) => allocation.account_id === account.id);
-              return <AccountCard key={account.id} account={account} allocations={accountAllocations} pending={pending} onToggleActive={changeActive} onDelete={deleteAccount} onRefresh={() => router.refresh()} />;
+              return <AccountCard key={account.id} account={account} allocations={accountAllocations} pending={pending} onToggleActive={changeActive} onDelete={deleteAccount} />;
             })}
         </div>
       )}
@@ -214,9 +214,9 @@ export function AccountsClient({ accounts, allocations }: { accounts: Account[];
   );
 }
 
-function AccountCard({ account, allocations, pending, onToggleActive, onDelete, onRefresh }: {
+function AccountCard({ account, allocations, pending, onToggleActive, onDelete }: {
   account: Account; allocations: AccountAllocation[]; pending: boolean;
-  onToggleActive: (id: string, active: boolean) => void; onDelete: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>; onRefresh: () => void;
+  onToggleActive: (id: string, active: boolean) => void; onDelete: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
   const router = useRouter();
   const [flipped, setFlipped] = useState(false);
@@ -237,30 +237,38 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete, 
 
   function handleCardClick(event: React.MouseEvent<HTMLDivElement>) {
     if ((event.target as HTMLElement).closest("[data-account-card-action]")) return;
-    if (event.detail > 1) {
-      if (clickTimer.current) clearTimeout(clickTimer.current);
+    // Use the click sequence itself instead of onDoubleClick: mobile browsers
+    // don't consistently emit dblclick for touch, but do emit click for each tap.
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
       clickTimer.current = null;
+      setFlipped((value) => !value);
       return;
     }
-    if (clickTimer.current) clearTimeout(clickTimer.current);
-    clickTimer.current = setTimeout(() => router.push(destination), 260);
-  }
-
-  function handleCardDoubleClick(event: React.MouseEvent<HTMLDivElement>) {
-    if ((event.target as HTMLElement).closest("[data-account-card-action]")) return;
-    if (clickTimer.current) clearTimeout(clickTimer.current);
-    clickTimer.current = null;
-    setFlipped((value) => !value);
+    clickTimer.current = setTimeout(() => {
+      clickTimer.current = null;
+      router.push(destination);
+    }, 320);
   }
 
   return <Card
-    className="account-card-shell relative cursor-pointer select-none overflow-hidden border-border bg-card p-0 [perspective:1200px]"
+    className="account-card-shell relative cursor-pointer select-none overflow-hidden border-border bg-card p-0"
     onClick={handleCardClick}
-    onDoubleClick={handleCardDoubleClick}
     role="link" tabIndex={0} aria-label={`${account.name}. Ketuk sekali untuk membuka daftar pos, dua kali untuk ringkasan singkat.`}
     onKeyDown={(event) => {
-      if (event.key === "Enter") { event.preventDefault(); router.push(destination); }
-      if (event.key === " ") { event.preventDefault(); setFlipped((value) => !value); }
+      if ((event.target as HTMLElement).closest("[data-account-card-action]")) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (clickTimer.current) clearTimeout(clickTimer.current);
+        clickTimer.current = null;
+        router.push(destination);
+      }
+      if (event.key === " ") {
+        event.preventDefault();
+        if (clickTimer.current) clearTimeout(clickTimer.current);
+        clickTimer.current = null;
+        setFlipped((value) => !value);
+      }
     }}
   >
     <div className={`account-card-flip-inner relative ${flipped ? "is-flipped" : ""}`}>
@@ -316,7 +324,7 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete, 
 
         <div data-account-card-action onClick={stop} onDoubleClick={stop} className="account-card-utilities relative z-10 flex items-center justify-between gap-2 border-t border-border pt-3">
           {account.is_active ? <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, false)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4" />}Nonaktifkan</Button> : <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, true)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Pulihkan</Button>}
-          {account.is_active ? <ConfirmDelete title="Hapus akun?" description="Akun yang memiliki riwayat atau pos akan diarsipkan agar datanya tetap aman." onConfirm={() => onDelete(account.id)} trigger={<Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="h-4 w-4" />Hapus</Button>} /> : null}
+          <ConfirmDelete title="Hapus akun dan riwayatnya?" description="Akun ini, semua transaksi yang melibatkan akun ini (termasuk transfer), pos, dan transaksi berulang akan dihapus permanen. Tindakan ini tidak bisa dibatalkan." onConfirm={() => onDelete(account.id)} trigger={<Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="h-4 w-4" />Hapus</Button>} />
         </div>
       </div>
 

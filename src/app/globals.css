@@ -1102,6 +1102,11 @@
   min-width: 0;
   justify-self: center;
   container-type: inline-size;
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  isolation: isolate;
 }
 .account-card-flip-inner {
   position: relative;
@@ -1139,20 +1144,22 @@
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
   transition: transform .68s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
 }
 .account-card-flip-inner.is-flipped { transform: rotateY(180deg); }
 .account-card-face {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   background-color: hsl(var(--card));
+  isolation: isolate;
 }
 .account-card-front {
-  transform: rotateY(0deg);
+  transform: rotateY(0deg) translateZ(0.5px);
   visibility: visible;
   transition: visibility 0s linear .34s;
 }
 .account-card-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(0.5px);
   visibility: hidden;
   transition: visibility 0s linear .34s;
 }
@@ -1160,6 +1167,12 @@
 .account-card-flip-inner.is-flipped .account-card-back { visibility: visible; }
 .account-card-flip-inner.is-flipped .account-card-front,
 .account-card-flip-inner:not(.is-flipped) .account-card-back { pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .account-card-flip-inner { transition-duration: .01ms; }
+  .account-card-front,
+  .account-card-back { transition-delay: 0s; }
+}
 
 @keyframes slot-in {
   from {
