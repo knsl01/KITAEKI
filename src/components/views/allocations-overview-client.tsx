@@ -28,6 +28,7 @@ export function AllocationsOverviewClient({
   ownerLabels: Record<MemberOwner, string>;
 }) {
   const activeAccounts = accounts.filter((account) => account.is_active);
+  const totalTarget = allocations.reduce((sum, allocation) => sum + Number(allocation.target_amount), 0);
   const totalSpent = allocations.reduce((sum, allocation) => sum + Number(allocation.spent_amount), 0);
   const totalAllocated = allocations.reduce((sum, allocation) => sum + Number(allocation.allocated_amount), 0);
   const remainingNeed = allocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.target_amount) - Number(allocation.allocated_amount), 0), 0);
@@ -56,6 +57,16 @@ export function AllocationsOverviewClient({
           </div>
         }
       />
+
+      <Card className="mb-4 overflow-hidden border-primary/25 bg-primary/[0.035]">
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">Total kebutuhan semua Pos</p>
+            <p className="mt-1 text-xs text-muted-foreground">Jumlah target seluruh Pos aktif; otomatis berubah saat Pos ditambah, diedit, atau dihapus.</p>
+          </div>
+          <p className="tabular text-2xl font-bold tracking-tight text-primary sm:text-3xl">{formatCurrency(totalTarget)}</p>
+        </CardContent>
+      </Card>
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total anggaran · masih dicadangkan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalAllocated)}</p></CardContent></Card>

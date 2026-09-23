@@ -102,6 +102,7 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
   const routeAbortRef = useRef<AbortController | null>(null);
   const [ready, setReady] = useState(false);
   const [mapError, setMapError] = useState("");
+  const [mapAttempt, setMapAttempt] = useState(0);
   const [locationError, setLocationError] = useState("");
   const [searchMode, setSearchMode] = useState<"address" | "place">("address");
   const [query, setQuery] = useState("");
@@ -119,10 +120,20 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
   useEffect(() => {
     let cancelled = false;
     let map: MapLibreMap | null = null;
+    let styleReady = false;
+    let loadTimer: number | undefined;
+    const armLoadTimer = () => {
+      if (loadTimer !== undefined) window.clearTimeout(loadTimer);
+      loadTimer = window.setTimeout(() => {
+        if (cancelled || styleReady) return;
+        setMapError("Peta Geoapify belum merespons. Periksa koneksi dan pastikan NEXT_PUBLIC_GEOAPIFY_API_KEY aktif untuk deployment ini.");
+      }, 15000);
+    };
     if (!geoapifyApiKey()) {
       setMapError("Peta Geoapify belum dikonfigurasi. Tambahkan NEXT_PUBLIC_GEOAPIFY_API_KEY di Vercel lalu deploy ulang.");
       return;
     }
+    armLoadTimer();
     void import("maplibre-gl").then((maplibregl) => {
       if (cancelled || !containerRef.current) return;
       const isDark = document.documentElement.dataset.mode === "dark";
@@ -136,14 +147,20 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
       map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
-      map.on("load", () => {
+      map.on("style.load", () => {
         if (cancelled || !map) return;
+        styleReady = true;
+        if (loadTimer !== undefined) window.clearTimeout(loadTimer);
         addOverlayLayers(map);
         setReady(true);
         setMapError("");
       });
       map.on("error", () => {
-        if (!cancelled) setMapError("Peta belum dapat dimuat. Periksa koneksi internet dan konfigurasi Geoapify.");
+        if (!cancelled && !styleReady) {
+          if (loadTimer !== undefined) window.clearTimeout(loadTimer);
+          setReady(false);
+          setMapError("Gaya peta Geoapify gagal dimuat. Periksa koneksi, izin domain API key, atau konfigurasi key di Vercel.");
+        }
       });
       mapRef.current = map;
     }).catch(() => {
@@ -157,13 +174,11 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
       const dark = document.documentElement.dataset.mode === "dark";
       if (dark !== currentDarkStyle) {
         currentDarkStyle = dark;
+        styleReady = false;
         setReady(false);
+        setMapError("");
+        armLoadTimer();
         current.setStyle(styleUrl(dark));
-        current.once("style.load", () => {
-          if (cancelled || mapRef.current !== current) return;
-          addOverlayLayers(current);
-          setReady(true);
-        });
       } else {
         const lineLayer = current.getLayer("kita-route-line");
         if (lineLayer) current.setPaintProperty("kita-route-line", "line-color", primaryColor());
@@ -183,13 +198,14 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
     return () => {
       cancelled = true;
       observer.disconnect();
+      if (loadTimer !== undefined) window.clearTimeout(loadTimer);
       searchAbortRef.current?.abort();
       routeAbortRef.current?.abort();
       map?.remove();
       mapRef.current = null;
       setReady(false);
     };
-  }, []);
+  }, [mapAttempt]);
 
   useEffect(() => {
     const source = mapRef.current?.getSource(MAP_SOURCE) as GeoJSONSource | undefined;
@@ -370,7 +386,7 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
         <div className="relative isolate">
           <div ref={containerRef} className="h-[330px] w-full overflow-hidden rounded-xl border border-border bg-muted sm:h-[430px]" />
           {!ready && !mapError ? <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-xl bg-background/75 text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Memuat peta…</div> : null}
-          {mapError ? <div role="alert" className="absolute inset-0 flex items-center justify-center rounded-xl border border-border bg-background/95 px-5 text-center text-sm text-negative">{mapError}</div> : null}
+          {mapError ? <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl border border-border bg-background/95 px-5 text-center text-sm text-negative"><p>{mapError}</p><Button type="button" variant="outline" size="sm" onClick={() => { setReady(false); setMapError(""); setMapAttempt((attempt) => attempt + 1); }}>Coba muat ulang peta</Button></div> : null}
           <Button type="button" variant="outline" size="icon" aria-label="Lokasi saya" className="absolute right-2 top-2 z-10 bg-background/95 shadow-md" onClick={locateMe} disabled={locating}>{locating ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}</Button>
           {locationError ? <p role="alert" className="absolute bottom-2 left-2 z-10 max-w-[85%] rounded-lg border border-border bg-background/95 px-3 py-2 text-xs shadow-md">{locationError}</p> : null}
         </div>
