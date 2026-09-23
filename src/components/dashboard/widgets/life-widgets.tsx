@@ -8,7 +8,7 @@ import { fitRows, FrameLink, useWidgetBox, WidgetFrame } from "@/components/dash
 import { CheckButton, useAction } from "@/components/views/life-shared";
 import { daysBetween, relativeDays } from "@/lib/dates";
 import { formatCurrency } from "@/lib/format";
-import { OWNER_LABEL, type ItemPriority, type MemberOwner } from "@/lib/types";
+import { OWNER_LABEL, type MemberOwner } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function without(set: Set<string>, id: string) {
@@ -147,53 +147,6 @@ export function ShoppingWidget({ items }: { items: ShoppingRow[] }) {
             <p className="tabular flex shrink-0 items-baseline justify-between border-t border-border/70 pt-2 text-xs text-muted-foreground">
               <span>Perkiraan total</span>
               <span className="text-sm font-medium text-foreground">{formatCurrency(estimate)}</span>
-            </p>
-          ) : null}
-        </div>
-      )}
-    </WidgetFrame>
-  );
-}
-
-/* ── Wishlist ──────────────────────────────────────────── */
-
-export type WishRow = { id: string; name: string; price: number | null; priority: ItemPriority };
-
-const PRIORITY_DOT: Record<ItemPriority, string> = {
-  high: "bg-negative",
-  medium: "bg-primary",
-  low: "bg-muted-foreground/40",
-};
-const PRIORITY_SHORT: Record<ItemPriority, string> = { high: "Tinggi", medium: "Sedang", low: "Rendah" };
-
-export function WishlistWidget({ items }: { items: WishRow[] }) {
-  const box = useWidgetBox();
-  const total = items.reduce((sum, i) => sum + Number(i.price ?? 0), 0);
-  const rows = fitRows(box.height, 48, total > 0 ? 28 : 0);
-  const shown = items.slice(0, rows);
-  const extra = items.length - shown.length;
-
-  return (
-    <WidgetFrame title="Wishlist" action={<FrameLink href="/dashboard/wishlist">Buka</FrameLink>}>
-      {items.length === 0 ? (
-        <Empty title="Wishlist masih kosong" description="Simpan barang incaran supaya tidak lupa." href="/dashboard/wishlist" cta="Buka Wishlist" />
-      ) : (
-        <div className="flex h-full min-h-0 flex-col">
-          <ul className="min-h-0 flex-1 overflow-hidden">
-            {shown.map((item) => (
-              <li key={item.id} className="flex h-12 items-center gap-3 rounded-xl px-2 transition-colors duration-150 hover:bg-muted/70">
-                <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", PRIORITY_DOT[item.priority])} title={`Prioritas ${PRIORITY_SHORT[item.priority].toLowerCase()}`} />
-                <span className="sr-only">Prioritas {PRIORITY_SHORT[item.priority].toLowerCase()}</span>
-                <p className="min-w-0 flex-1 truncate text-sm">{item.name}</p>
-                {item.price ? <span className="tabular shrink-0 text-xs text-muted-foreground">{formatCurrency(Number(item.price))}</span> : null}
-              </li>
-            ))}
-          </ul>
-          {extra > 0 ? <p className="shrink-0 pt-1 text-center text-xs text-muted-foreground">+{extra} barang lain</p> : null}
-          {total > 0 ? (
-            <p className="tabular flex shrink-0 items-baseline justify-between border-t border-border/70 pt-2 text-xs text-muted-foreground">
-              <span>Total incaran</span>
-              <span className="text-sm font-medium text-foreground">{formatCurrency(total)}</span>
             </p>
           ) : null}
         </div>

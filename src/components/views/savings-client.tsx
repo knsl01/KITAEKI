@@ -63,7 +63,7 @@ function GoalDialog({ goal, trigger, householdId }: { goal?: SavingsGoal; trigge
       <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{goal ? "Ubah target" : "Buat target baru"}</DialogTitle>
-          <DialogDescription>Misalnya dana rumah, liburan, atau wishlist barang impian.</DialogDescription>
+          <DialogDescription>Misalnya dana rumah, liburan, atau barang impian.</DialogDescription>
         </DialogHeader>
 
         <form action={onSubmit} className="space-y-4">
