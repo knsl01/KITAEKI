@@ -303,9 +303,8 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
         <div className="account-card-budget relative z-10 rounded-xl border border-border/70 bg-muted/40 p-3">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">Pos aktif</p><p className="mt-0.5 text-sm font-semibold">{allocations.length} pos</p></div>
-            <div className="text-right"><p className="text-xs text-muted-foreground">Total kebutuhan pos</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(targetTotal)}</p></div>
+            <div className="text-right"><p className="text-xs text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div>
           </div>
-          <div className="mt-2 flex items-center justify-between gap-3 text-xs"><span className="text-muted-foreground">Masih dibutuhkan</span><span className="tabular font-semibold text-primary">{formatCurrency(remainingNeed)}</span></div>
           <div className="mt-3 flex items-center justify-between gap-2 text-xs">
             <span className="text-muted-foreground">Pemenuhan target</span>
             <span className="tabular font-semibold">{usagePercent.toFixed(1)}% terisi</span>
