@@ -1090,6 +1090,14 @@
 .account-detail-list-enter { animation: account-detail-enter .35s .15s cubic-bezier(.22,1,.36,1) both; }
 .account-detail-row { animation: account-detail-row-enter .25s cubic-bezier(.22,1,.36,1) both; }
 
+.account-card-flip-inner {
+  transform-style: preserve-3d;
+  transition: transform .68s cubic-bezier(.22, 1, .36, 1);
+}
+.account-card-flip-inner.is-flipped { transform: rotateY(180deg); }
+.account-card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.account-card-back { transform: rotateY(180deg); }
+
 @keyframes slot-in {
   from {
     opacity: 0;

@@ -128,6 +128,18 @@ export async function runRecurringNow(id: string, customAmount?: number): Promis
   const finalAmount = customAmount !== undefined ? customAmount : row.amount;
   if (!finalAmount || finalAmount <= 0) return fail("Nominal tidak valid.");
 
+  let budgetPostId: string | null = null;
+  if (row.type === "expense" && row.account_id && row.category_id) {
+    const { data: post, error: postError } = await supabase.from("account_allocations")
+      .select("id")
+      .eq("household_id", householdId)
+      .eq("account_id", row.account_id)
+      .eq("category_id", row.category_id)
+      .maybeSingle();
+    if (postError) return fail(postError.message);
+    budgetPostId = post?.id ?? null;
+  }
+
   const { error: insertError } = await supabase.from("transactions").insert({
     user_id: user.id,
     household_id: householdId,
@@ -139,6 +151,7 @@ export async function runRecurringNow(id: string, customAmount?: number): Promis
     account_id: row.account_id,
     to_account_id: row.to_account_id,
     category_id: row.category_id,
+    budget_post_id: budgetPostId,
   });
   if (insertError) return fail(insertError.message);
 

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ArrowLeftRight, Bot, ClipboardList, Heart, ListChecks, MapPinned, Receipt, Repeat, Settings, ShoppingCart, Tags, Target, Wallet } from "lucide-react";
+import { ArrowLeftRight, Bot, Heart, ListChecks, MapPinned, Receipt, Repeat, Settings, ShoppingCart, Tags, Target, Wallet } from "lucide-react";
 import { BalanceHero, BalanceHeroSkeleton } from "@/components/dashboard/balance-hero";
 import { DashboardBanner, type BannerSettings } from "@/components/dashboard/banner";
 import { DashboardEditProvider, EditWidgetsButton } from "@/components/dashboard/edit-context";
@@ -287,7 +287,6 @@ export default async function DashboardPage() {
     "page-calendar": <PageShortcutWidget title="Calendar KITA" description="Buka agenda, tugas, dan kegiatan." href="/dashboard/calendar" icon={ListChecks} />,
     "page-routes": <PageShortcutWidget title="Rute & Rencana" description="Lihat peta dan tujuan perjalanan harian." href="/dashboard/routes" icon={MapPinned} />,
     "page-shopping": <PageShortcutWidget title="Belanja" description="Buka daftar belanja bersama." href="/dashboard/shopping" icon={ShoppingCart} />,
-    "page-budget": <PageShortcutWidget title="Anggaran" description="Atur pos anggaran dan cek pemakaiannya." href="/dashboard/budget" icon={ClipboardList} />,
     "page-categories": <PageShortcutWidget title="Kategori" description="Kelola kategori transaksi." href="/dashboard/categories" icon={Tags} />,
     "page-wishlist": <PageShortcutWidget title="Wishlist" description="Lihat barang yang ingin diwujudkan." href="/dashboard/wishlist" icon={Heart} />,
     "page-share": <PageShortcutWidget title="Share Story" description="Buat cerita visual untuk dibagikan." href="/dashboard/share" icon={Target} />,

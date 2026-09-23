@@ -18,6 +18,13 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
       case "add_expense": {
         const type: TransactionType = toolName === "add_income" ? "income" : "expense";
         const { amount, account_id, category_id, date, owner, title } = args;
+        let budgetPostId: string | null = null;
+        if (type === "expense" && account_id && category_id) {
+          const { data: post, error: postError } = await supabase.from("account_allocations")
+            .select("id").eq("household_id", householdId).eq("account_id", account_id).eq("category_id", category_id).maybeSingle();
+          if (postError) throw postError;
+          budgetPostId = post?.id ?? null;
+        }
         
         const { error } = await supabase.from("transactions").insert({
           household_id: householdId,
@@ -26,6 +33,7 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
           amount,
           account_id,
           category_id: category_id || null,
+          budget_post_id: budgetPostId,
           occurred_on: date,
           owner: owner || "shared",
           description: title,
@@ -56,12 +64,22 @@ export async function aiExecuteTool(toolName: string, args: any): Promise<Action
 
       case "update_transaction": {
         const { id, ...updates } = args;
+        let budgetPostId: string | null = null;
+        const { data: previousTransaction, error: previousError } = await supabase.from("transactions").select("type").eq("id", id).eq("household_id", householdId).maybeSingle();
+        if (previousError) throw previousError;
+        if (previousTransaction?.type === "expense" && updates.account_id && updates.category_id) {
+          const { data: post, error: postError } = await supabase.from("account_allocations")
+            .select("id").eq("household_id", householdId).eq("account_id", updates.account_id).eq("category_id", updates.category_id).maybeSingle();
+          if (postError) throw postError;
+          budgetPostId = post?.id ?? null;
+        }
         const { error } = await supabase
           .from("transactions")
           .update({
             amount: updates.amount,
             account_id: updates.account_id,
             category_id: updates.category_id || null,
+            budget_post_id: budgetPostId,
             occurred_on: updates.date,
             owner: updates.owner,
             description: updates.title,

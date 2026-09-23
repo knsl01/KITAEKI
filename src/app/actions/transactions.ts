@@ -13,6 +13,7 @@ type ParsedTransaction = {
   account_id: string;
   to_account_id: string | null;
   category_id: string | null;
+  budget_post_id: string | null;
   owner: string;
   description: string | null;
 };
@@ -28,6 +29,7 @@ function parseTransaction(formData: FormData) {
   const account_id = optionalStr(formData, "account_id");
   const to_account_id = optionalStr(formData, "to_account_id");
   const category_id = optionalStr(formData, "category_id");
+  const budget_post_id = optionalStr(formData, "budget_post_id");
   const owner = str(formData, "owner") || "shared";
   const description = optionalStr(formData, "description");
 
@@ -48,6 +50,7 @@ function parseTransaction(formData: FormData) {
       account_id,
       to_account_id: type === "transfer" ? to_account_id : null,
       category_id: type === "transfer" ? null : category_id,
+      budget_post_id: type === "expense" ? budget_post_id : null,
       owner,
       description,
     },
@@ -58,6 +61,7 @@ async function validateReferences(
   supabase: Awaited<ReturnType<typeof getUserClient>>["supabase"],
   householdId: string,
   values: ParsedTransaction,
+  transactionId?: string,
 ) {
   const accountIds = [values.account_id, values.to_account_id].filter((id): id is string => Boolean(id));
   const { data: accounts, error: accountError } = await supabase
@@ -80,6 +84,27 @@ async function validateReferences(
       .maybeSingle();
     if (categoryError) return categoryError.message;
     if (!category) return "Kategori transaksi tidak valid.";
+  }
+  if (values.budget_post_id) {
+    if (values.type !== "expense") return "Pos hanya bisa dipakai pada transaksi pengeluaran.";
+    const { data: post, error: postError } = await supabase.from("account_allocations")
+      .select("id, account_id, category_id, amount")
+      .eq("id", values.budget_post_id)
+      .eq("household_id", householdId)
+      .maybeSingle();
+    if (postError) return postError.message;
+    if (!post || post.account_id !== values.account_id || post.category_id !== values.category_id) {
+      return "Akun dan kategori harus sesuai dengan pos yang dipilih.";
+    }
+
+    let spentQuery = supabase.from("transactions").select("amount").eq("budget_post_id", values.budget_post_id);
+    if (transactionId) spentQuery = spentQuery.neq("id", transactionId);
+    const { data: linked, error: linkedError } = await spentQuery;
+    if (linkedError) return linkedError.message;
+    const alreadySpent = (linked ?? []).reduce((total, row) => total + Number(row.amount), 0);
+    if (values.amount > Number(post.amount) - alreadySpent) {
+      return `Nominal melebihi sisa pos (${Math.max(Number(post.amount) - alreadySpent, 0)}).`;
+    }
   }
   return null;
 }
@@ -152,7 +177,7 @@ export async function updateTransaction(id: string, formData: FormData): Promise
   await resolveCustomCategory(formData, type, householdId);
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
-  const referenceError = await validateReferences(supabase, householdId, parsed.values);
+  const referenceError = await validateReferences(supabase, householdId, parsed.values, id);
   if (referenceError) return fail(referenceError);
 
   const { error } = await supabase.from("transactions").update(parsed.values).eq("id", id).eq("household_id", householdId);
