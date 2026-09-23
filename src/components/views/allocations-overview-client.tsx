@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { AccountAllocationDialog } from "@/components/views/account-allocation-client";
 import { formatCurrency } from "@/lib/format";
-import type { Account, AccountAllocation } from "@/lib/types";
+import type { Account, AccountAllocation, MemberOwner } from "@/lib/types";
 
 function spentPercent(spent: number, original: number) {
   return original > 0 ? Math.max(0, (spent / original) * 100) : 0;
@@ -21,15 +21,30 @@ export function AllocationsOverviewClient({
   accounts,
   allocations,
   spentByPost,
+  ownerLabels,
 }: {
   accounts: Account[];
   allocations: AccountAllocation[];
   spentByPost: Record<string, number>;
+  ownerLabels: Record<MemberOwner, string>;
 }) {
   const activeAccounts = accounts.filter((account) => account.is_active);
   const totalOriginal = allocations.reduce((sum, allocation) => sum + Number(allocation.amount), 0);
   const totalSpent = allocations.reduce((sum, allocation) => sum + (spentByPost[allocation.id] ?? 0), 0);
   const totalRemaining = allocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0), 0);
+  const accountById = new Map(accounts.map((account) => [account.id, account]));
+  const groups: { key: MemberOwner | "unassigned"; title: string; allocations: AccountAllocation[] }[] = [
+    { key: "eki", title: ownerLabels.eki, allocations: [] },
+    { key: "dinda", title: ownerLabels.dinda, allocations: [] },
+    { key: "shared", title: ownerLabels.shared, allocations: [] },
+    { key: "unassigned", title: "Belum terhubung ke akun", allocations: [] },
+  ];
+  for (const allocation of allocations) {
+    const owner = allocation.account_id ? accountById.get(allocation.account_id)?.owner : undefined;
+    const group = groups.find((candidate) => candidate.key === (owner ?? "unassigned"));
+    group?.allocations.push(allocation);
+  }
+  const visibleGroups = groups.filter((group) => group.allocations.length > 0);
 
   return (
     <div>
@@ -53,8 +68,16 @@ export function AllocationsOverviewClient({
       {allocations.length === 0 ? (
         <Card><EmptyState title="Belum ada pos anggaran" description="Buat pos dari tombol di atas. Pilih akun sumber, nama pos, dan nominalnya." action={activeAccounts.length ? <AccountAllocationDialog accounts={activeAccounts} trigger={<Button><Plus className="h-4 w-4" />Tambah pos</Button>} /> : undefined} /></Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {allocations.map((allocation) => {
+        <div className="space-y-7">
+          {visibleGroups.map((group) => {
+            const groupRemaining = group.allocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0), 0);
+            return <section key={group.key} aria-labelledby={`budget-owner-${group.key}`} className="space-y-3">
+              <div className="flex flex-wrap items-end justify-between gap-2 border-b border-border pb-2">
+                <div><h2 id={`budget-owner-${group.key}`} className="font-serif text-xl tracking-tight">{group.title}</h2><p className="mt-0.5 text-xs text-muted-foreground">Pos anggaran berdasarkan pemilik akun sumber</p></div>
+                <span className="tabular text-xs text-muted-foreground">{group.allocations.length} pos · {formatCurrency(groupRemaining)} tersisa</span>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {group.allocations.map((allocation) => {
             const original = Number(allocation.amount);
             const spent = spentByPost[allocation.id] ?? 0;
             const remaining = Math.max(original - spent, 0);
@@ -89,6 +112,9 @@ export function AllocationsOverviewClient({
                 </CardContent>
               </Card>
             );
+          })}
+              </div>
+            </section>;
           })}
         </div>
       )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Archive, ArrowLeft, Loader2, Pencil, PiggyBank, Plus, RotateCcw, Trash2 } from "lucide-react";
@@ -29,7 +30,7 @@ import { Select } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 import { AccountAllocationDialog } from "@/components/views/account-allocation-client";
-import { brandFor } from "@/lib/icons";
+import { accountLogoFor } from "@/lib/icons";
 import {
   ACCOUNT_TYPE_LABEL,
   OWNER_LABEL,
@@ -202,7 +203,7 @@ export function AccountsClient({ accounts, allocations, spentByPost }: { account
           />
         </Card>
       ) : (
-        <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="account-card-grid stagger">
             {visibleAccounts.map((account) => {
               const accountAllocations = allocations.filter((allocation) => allocation.account_id === account.id);
               return <AccountCard key={account.id} account={account} allocations={accountAllocations} spentByPost={spentByPost} pending={pending} onToggleActive={changeActive} onDelete={deleteAccount} onRefresh={() => router.refresh()} />;
@@ -227,8 +228,7 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   const spentTotal = allocations.reduce((sum, allocation) => sum + (spentByPost[allocation.id] ?? 0), 0);
   const usagePercent = spentPercent(spentTotal, originalTotal);
   const available = Number(account.balance) - remainingTotal;
-  const brand = brandFor(account.icon_key, account.name);
-  const BrandIcon = brand.icon;
+  const accountLogo = accountLogoFor(account.icon_key, account.name);
   const addPos = <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button className="w-full" disabled={!account.is_active}><Plus className="h-4 w-4" />Tambah pos</Button>} />;
   const stop = (event: React.SyntheticEvent) => event.stopPropagation();
   const destination = `/dashboard/accounts/${account.id}`;
@@ -252,7 +252,7 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   }
 
   return <Card
-    className="relative min-h-[500px] cursor-pointer select-none overflow-hidden border-border bg-card p-0 [perspective:1200px]"
+    className="account-card-shell relative cursor-pointer select-none overflow-hidden border-border bg-card p-0 [perspective:1200px]"
     onClick={handleCardClick}
     onDoubleClick={handleCardDoubleClick}
     role="link" tabIndex={0} aria-label={`${account.name}. Ketuk sekali untuk membuka daftar pos, dua kali untuk ringkasan singkat.`}
@@ -261,16 +261,17 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
       if (event.key === " ") { event.preventDefault(); setFlipped((value) => !value); }
     }}
   >
-    <div className={`account-card-flip-inner relative min-h-[500px] ${flipped ? "is-flipped" : ""}`}>
-      <div className="account-card-face absolute inset-0 overflow-hidden rounded-lg p-4 sm:p-5">
-        <div aria-hidden className="pointer-events-none absolute -right-3 top-14 z-0 select-none opacity-[0.075] blur-[1px]">
-          <BrandIcon className="h-40 w-40" strokeWidth={1.1} style={{ color: brand.color }} />
-          <span className="absolute inset-0 flex items-center justify-center text-4xl font-black tracking-tight" style={{ color: brand.color }}>{brand.short}</span>
-        </div>
+    <div className={`account-card-flip-inner relative ${flipped ? "is-flipped" : ""}`}>
+      <div className="account-card-face account-card-front overflow-hidden rounded-lg bg-card">
+        {accountLogo ? <div aria-hidden className="pointer-events-none absolute -right-12 top-12 z-0 h-60 w-60 select-none opacity-[0.07] blur-[1.5px] mix-blend-soft-light md:-right-14 md:top-14 md:h-72 md:w-72">
+          <Image src={accountLogo} alt="" fill sizes="(max-width: 767px) 240px, 288px" className="object-contain" />
+        </div> : null}
 
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm" />
+            {accountLogo ? <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 p-1.5 md:h-14 md:w-14">
+              <Image src={accountLogo} alt={`${account.name} logo`} fill sizes="(max-width: 767px) 48px, 56px" className="object-contain p-1" />
+            </span> : <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm md:h-14 md:w-14" />}
             <div className="min-w-0">
               <p className="truncate text-base font-semibold tracking-tight">{account.name}</p>
               <p className="mt-1 text-xs text-muted-foreground">{ACCOUNT_TYPE_LABEL[account.type]} · {OWNER_LABEL[account.owner]}</p>
@@ -282,13 +283,13 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
           </div>
         </div>
 
-        <div className="relative z-10 mt-5">
+        <div className="account-card-balance relative z-10">
           <p className="text-xs text-muted-foreground">Saldo saat ini</p>
           <p className="tabular mt-1 break-words text-3xl font-bold tracking-tight sm:text-[2rem]">{formatCurrency(Number(account.balance))}</p>
           <p className="tabular mt-1 text-xs text-muted-foreground">Saldo awal {formatCurrency(Number(account.initial_balance))}</p>
         </div>
 
-        <div className="relative z-10 mt-5 rounded-xl border border-border/70 bg-muted/40 p-3">
+        <div className="account-card-budget relative z-10 rounded-xl border border-border/70 bg-muted/40 p-3">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">Pos aktif</p><p className="mt-0.5 text-sm font-semibold">{allocations.length} pos</p></div>
             <div className="text-right"><p className="text-xs text-muted-foreground">Alokasi tersisa</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div>
@@ -300,23 +301,23 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
           <Progress value={usagePercent} className="mt-2 h-2" />
         </div>
 
-        <div className="relative z-10 mt-3 grid grid-cols-2 gap-3">
+        <div className="account-card-metrics relative z-10 grid grid-cols-2 gap-3">
           <div><p className="text-xs text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(available)}</p></div>
           <div className="border-l border-border pl-3 text-right"><p className="text-xs text-muted-foreground">Dialokasikan</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(remainingTotal)}</p></div>
         </div>
 
-        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="relative z-10 mt-4 grid grid-cols-2 gap-2">
+        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="account-card-actions relative z-10 grid grid-cols-2 gap-2">
           {addPos}
           <Button asChild variant="outline" className="w-full"><Link href={destination}>Kelola <ArrowLeft className="h-4 w-4 rotate-180" /></Link></Button>
         </div>
 
-        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="relative z-10 mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="account-card-utilities relative z-10 flex items-center justify-between gap-2 border-t border-border pt-3">
           {account.is_active ? <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, false)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4" />}Nonaktifkan</Button> : <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, true)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Pulihkan</Button>}
           {account.is_active ? <ConfirmDelete title="Hapus akun?" description="Akun yang memiliki riwayat atau pos akan diarsipkan agar datanya tetap aman." onConfirm={() => onDelete(account.id)} trigger={<Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="h-4 w-4" />Hapus</Button>} /> : null}
         </div>
       </div>
 
-      <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg p-5 sm:p-6" aria-hidden={!flipped}>
+      <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg bg-card" aria-hidden={!flipped}>
         <div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Ringkasan pos</p><p className="text-xs text-muted-foreground">{account.name} · persentase pemakaian</p></div><Button variant="ghost" size="icon" aria-label="Kembali ke akun" onClick={(event) => { stop(event); setFlipped(false); }}><ArrowLeft className="h-4 w-4" /></Button></div>
         <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Anggaran tersisa</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
         <div className="space-y-2">{allocations.length ? allocations.slice(0, 3).map((allocation) => {
