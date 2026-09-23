@@ -113,3 +113,12 @@ export async function deleteAccountAllocation(id: string): Promise<ActionResult>
   return { ok: true };
 }
 
+/** Compatibility exports for older Pos/Budget components still in use. */
+export async function upsertBudget(formData: FormData): Promise<ActionResult> {
+  return upsertAccountAllocation(formData);
+}
+
+export async function deleteBudget(id: string): Promise<ActionResult> {
+  return deleteAccountAllocation(id);
+}
+
