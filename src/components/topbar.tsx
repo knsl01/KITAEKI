@@ -4,7 +4,9 @@ import { MobileMenu } from "@/components/mobile-menu";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { TransactionDialog } from "@/components/transaction-dialog";
 import { Button } from "@/components/ui/button";
-import type { Account, Budget, Category, MemberOwner } from "@/lib/types";
+import type { Account, Category, MemberOwner } from "@/lib/types";
+
+type BudgetPost = { id: string; category_id: string; account_id: string | null; category?: Pick<Category, "id" | "name"> | null };
 
 export function Topbar({
   accounts,
@@ -18,7 +20,7 @@ export function Topbar({
 }: {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
-  budgets?: (Pick<Budget, "id" | "category_id" | "account_id"> & { category?: Pick<Category, "id" | "name"> | null })[];
+  budgets?: BudgetPost[];
   defaultOwner: MemberOwner;
   name: string;
   householdName: string;

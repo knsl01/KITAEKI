@@ -20,15 +20,17 @@ type Props = {
   start: string;
   end: string;
   accounts: Account[];
+  totalAllocated: number;
   transactions: Pick<Transaction, "type" | "amount" | "owner" | "occurred_on" | "category_id">[];
   upcoming: Pick<RecurringTransaction, "id" | "description" | "amount" | "type" | "next_run_on" | "owner">[];
   categories: Pick<Category, "id" | "name" | "color" | "kind">[];
 };
 
-export function FinanceClient({ start, end, accounts, transactions, upcoming, categories }: Props) {
+export function FinanceClient({ start, end, accounts, transactions, upcoming, categories, totalAllocated }: Props) {
   const router = useRouter();
 
   const totalBalance = accounts.reduce((sum, a) => sum + Number(a.balance), 0);
+  const availableBalance = totalBalance - totalAllocated;
   const totals = sumTotals(transactions);
   const owners: MemberOwner[] = ["eki", "dinda", "shared"];
 
@@ -177,6 +179,8 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         <p className="print-report-period">Periode {start} sampai {end}</p>
         <div className="print-report-kpis">
           <div><span>Total saldo</span><strong>{formatCurrency(totalBalance)}</strong></div>
+          <div><span>Total anggaran</span><strong>{formatCurrency(totalAllocated)}</strong></div>
+          <div><span>Saldo tersedia</span><strong>{formatCurrency(availableBalance)}</strong></div>
           <div><span>Total pemasukan</span><strong className="income-print">{formatCurrency(totals.income)}</strong></div>
           <div><span>Total pengeluaran</span><strong className="expense-print">{formatCurrency(totals.expense)}</strong></div>
           <div><span>Selisih bersih</span><strong>{formatCurrency(totals.net)}</strong></div>
@@ -217,10 +221,18 @@ export function FinanceClient({ start, end, accounts, transactions, upcoming, ca
         </select>
       </form>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6 mb-4">
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Total saldo</p>
           <p className="tabular mt-2 text-2xl font-bold">{formatCurrency(totalBalance)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm text-muted-foreground">Total anggaran</p>
+          <p className="tabular mt-2 text-2xl font-bold text-primary">{formatCurrency(totalAllocated)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm text-muted-foreground">Saldo tersedia</p>
+          <p className={`tabular mt-2 text-2xl font-bold ${availableBalance < 0 ? "text-negative" : "text-[hsl(var(--positive))]"}`}>{formatCurrency(availableBalance)}</p>
         </Card>
         <Card className="p-5">
           <p className="text-sm text-muted-foreground">Pemasukan</p>

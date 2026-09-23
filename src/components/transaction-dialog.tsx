@@ -23,14 +23,13 @@ import {
   OWNER_LABEL,
   TYPE_LABEL,
   type Account,
-  type Budget,
   type Category,
   type MemberOwner,
   type Transaction,
   type TransactionType,
 } from "@/lib/types";
 
-type BudgetPost = Pick<Budget, "id" | "category_id" | "account_id"> & {
+type BudgetPost = { id: string; category_id: string; account_id?: string | null } & {
   category?: Pick<Category, "id" | "name"> | null;
 };
 
@@ -58,7 +57,7 @@ export function TransactionDialog({
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<TransactionType>(transaction?.type ?? "expense");
   const [selectedAccountId, setSelectedAccountId] = useState(transaction?.account_id ?? "");
-  const [selectedBudgetId, setSelectedBudgetId] = useState("");
+  const [selectedBudgetId, setSelectedBudgetId] = useState(transaction?.budget_post_id ?? "");
   const [selectedCategoryId, setSelectedCategoryId] = useState(transaction?.category_id ?? "");
   const [isLainnya, setIsLainnya] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
@@ -70,7 +69,7 @@ export function TransactionDialog({
     [categories, type]
   );
   const visibleBudgets = useMemo(
-    () => budgets.filter((budget) => budget.account_id === selectedAccountId || budget.account_id == null),
+    () => budgets.filter((budget) => budget.account_id === selectedAccountId),
     [budgets, selectedAccountId]
   );
 
@@ -90,6 +89,7 @@ export function TransactionDialog({
   }
 
   function handleCategoryChange(value: string) {
+    setSelectedBudgetId("");
     if (value === LAINNYA_VALUE) {
       setIsLainnya(true);
       setSelectedCategoryId("");
@@ -125,7 +125,7 @@ export function TransactionDialog({
   function resetState() {
     setType(transaction?.type ?? "expense");
     setSelectedAccountId(transaction?.account_id ?? "");
-    setSelectedBudgetId("");
+    setSelectedBudgetId(transaction?.budget_post_id ?? "");
     setSelectedCategoryId(transaction?.category_id ?? "");
     setIsLainnya(false);
     setCustomCategory("");
@@ -176,6 +176,7 @@ export function TransactionDialog({
                   onClick={() => {
                     setType(t);
                     setSelectedBudgetId("");
+                    setSelectedCategoryId("");
                     setIsLainnya(false);
                     setCustomCategory("");
                   }}
@@ -273,10 +274,10 @@ export function TransactionDialog({
             {/* Pos Anggaran - muncul saat pengeluaran */}
             {type === "expense" && selectedAccountId && visibleBudgets.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="budget_id">Pos tetap <span className="text-muted-foreground font-normal">(opsional)</span></Label>
+                <Label htmlFor="budget_post_id">Pos budget <span className="text-muted-foreground font-normal">(opsional)</span></Label>
                 <Select
-                  id="budget_id"
-                  name="budget_id"
+                  id="budget_post_id"
+                  name="budget_post_id"
                   value={selectedBudgetId}
                   onChange={(e) => handleBudgetChange(e.target.value)}
                 >
