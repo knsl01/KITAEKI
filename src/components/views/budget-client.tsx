@@ -22,16 +22,16 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select } from "@/components/ui/select";
 import { formatCurrency, lastMonths, monthLabel, percent } from "@/lib/format";
-import type { Budget, Category, Transaction } from "@/lib/types";
+import type { AccountAllocation, Category, Transaction } from "@/lib/types";
 
 type Props = {
   month: string;
-  budgets: Budget[];
+  budgets: AccountAllocation[];
   categories: Category[];
   transactions: Pick<Transaction, "amount" | "type" | "category_id">[];
 };
 
-function BudgetDialog({ month, categories, budget, trigger }: { month: string; categories: Category[]; budget?: Budget; trigger?: React.ReactNode }) {
+function BudgetDialog({ month, categories, budget, trigger }: { month: string; categories: Category[]; budget?: AccountAllocation; trigger?: React.ReactNode }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -249,3 +249,4 @@ export function BudgetClient({ month, budgets, categories, transactions }: Props
     </div>
   );
 }
+
