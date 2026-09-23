@@ -154,6 +154,24 @@ export type ShoppingItem = {
   created_at: string;
 };
 
+/** Bentuk baris wishlist lama yang masih dipakai checkout/deployment terdahulu. */
+export type WishlistItem = {
+  id: string;
+  household_id: string;
+  created_by: string | null;
+  owner: MemberOwner;
+  name: string;
+  price: number | null;
+  url: string | null;
+  image_url: string | null;
+  priority: ItemPriority;
+  is_purchased: boolean;
+  purchased_on: string | null;
+  savings_goal_id: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
 export const PRIORITY_LABEL: Record<ItemPriority, string> = {
   high: "Prioritas tinggi",
   medium: "Prioritas sedang",
