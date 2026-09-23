@@ -135,11 +135,12 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
     let cancelled = false;
     let map: MapLibreMap | null = null;
     let styleReady = false;
+    let sawMapError = false;
     let loadTimer: number | undefined;
     const armLoadTimer = () => {
       if (loadTimer !== undefined) window.clearTimeout(loadTimer);
       loadTimer = window.setTimeout(() => {
-        if (cancelled || !map) return;
+        if (cancelled || !map || sawMapError) return;
         setReady(false);
         setMapError("Peta belum selesai dimuat. Periksa koneksi, izin domain API key, dan permintaan style, glyph, sprite, serta tile Geoapify.");
       }, 15000);
@@ -165,20 +166,18 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
       map.on("style.load", () => {
         if (cancelled || !map) return;
         styleReady = true;
-        if (loadTimer !== undefined) window.clearTimeout(loadTimer);
         addOverlayLayers(map);
         map.resize();
         setReady(true);
-        setMapError("");
       });
       map.on("load", () => {
         if (cancelled) return;
         if (loadTimer !== undefined) window.clearTimeout(loadTimer);
-        setReady(true);
-        setMapError("");
+        if (styleReady) setReady(true);
       });
       map.on("error", (event) => {
         if (cancelled) return;
+        sawMapError = true;
         const message = describeMapError(event);
         console.error("MapLibre error:", message);
         setMapError(message);
@@ -200,6 +199,7 @@ export function FreeRouteMap({ points, locations, onPlaceSelected }: Props) {
       if (dark !== currentDarkStyle) {
         currentDarkStyle = dark;
         styleReady = false;
+        sawMapError = false;
         setReady(false);
         setMapError("");
         armLoadTimer();
