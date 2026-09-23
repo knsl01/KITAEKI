@@ -40,8 +40,8 @@ import {
   type MemberOwner,
 } from "@/lib/types";
 
-function spentPercent(spent: number, original: number) {
-  return original > 0 ? Math.max(0, (spent / original) * 100) : 0;
+function filledPercent(allocated: number, target: number) {
+  return target > 0 ? Math.min(100, Math.max(0, (allocated / target) * 100)) : 0;
 }
 
 function AccountDialog({ account, trigger }: { account?: Account; trigger: React.ReactNode }) {
@@ -143,7 +143,7 @@ function AccountDialog({ account, trigger }: { account?: Account; trigger: React
   );
 }
 
-export function AccountsClient({ accounts, allocations, spentByPost }: { accounts: Account[]; allocations: AccountAllocation[]; spentByPost: Record<string, number> }) {
+export function AccountsClient({ accounts, allocations }: { accounts: Account[]; allocations: AccountAllocation[] }) {
   const router = useRouter();
   const [showInactive, setShowInactive] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -154,7 +154,7 @@ export function AccountsClient({ accounts, allocations, spentByPost }: { account
   const activeAccounts = accounts.filter((account) => account.is_active);
   const activeAccountIds = new Set(activeAccounts.map((account) => account.id));
   const activeAllocations = allocations.filter((allocation) => !allocation.account_id || activeAccountIds.has(allocation.account_id));
-  const totalAllocated = activeAllocations.reduce((sum, allocation) => sum + Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0), 0);
+  const totalAllocated = activeAllocations.reduce((sum, allocation) => sum + Number(allocation.allocated_amount), 0);
   const available = total - totalAllocated;
 
   function changeActive(accountId: string, isActive: boolean) {
@@ -206,7 +206,7 @@ export function AccountsClient({ accounts, allocations, spentByPost }: { account
         <div className="account-card-grid stagger">
             {visibleAccounts.map((account) => {
               const accountAllocations = allocations.filter((allocation) => allocation.account_id === account.id);
-              return <AccountCard key={account.id} account={account} allocations={accountAllocations} spentByPost={spentByPost} pending={pending} onToggleActive={changeActive} onDelete={deleteAccount} onRefresh={() => router.refresh()} />;
+              return <AccountCard key={account.id} account={account} allocations={accountAllocations} pending={pending} onToggleActive={changeActive} onDelete={deleteAccount} onRefresh={() => router.refresh()} />;
             })}
         </div>
       )}
@@ -214,8 +214,8 @@ export function AccountsClient({ accounts, allocations, spentByPost }: { account
   );
 }
 
-function AccountCard({ account, allocations, spentByPost, pending, onToggleActive, onDelete, onRefresh }: {
-  account: Account; allocations: AccountAllocation[]; spentByPost: Record<string, number>; pending: boolean;
+function AccountCard({ account, allocations, pending, onToggleActive, onDelete, onRefresh }: {
+  account: Account; allocations: AccountAllocation[]; pending: boolean;
   onToggleActive: (id: string, active: boolean) => void; onDelete: (id: string) => Promise<{ ok: true } | { ok: false; error: string }>; onRefresh: () => void;
 }) {
   const router = useRouter();
@@ -223,12 +223,11 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   const [logoFailed, setLogoFailed] = useState(false);
   const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
-  const remaining = (allocation: AccountAllocation) => Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0);
-  const remainingTotal = allocations.reduce((sum, allocation) => sum + remaining(allocation), 0);
-  const originalTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.amount), 0);
-  const spentTotal = allocations.reduce((sum, allocation) => sum + (spentByPost[allocation.id] ?? 0), 0);
-  const usagePercent = spentPercent(spentTotal, originalTotal);
-  const available = Number(account.balance) - remainingTotal;
+  const allocatedTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.allocated_amount), 0);
+  const targetTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.target_amount), 0);
+  const spentTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.spent_amount), 0);
+  const usagePercent = filledPercent(allocatedTotal, targetTotal);
+  const available = Number(account.balance) - allocatedTotal;
   const accountLogo = accountLogoFor(account.icon_key, account.name);
   const brand = brandFor(account.icon_key, account.name);
   const BrandIcon = brand.icon;
@@ -295,18 +294,19 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
         <div className="account-card-budget relative z-10 rounded-xl border border-border/70 bg-muted/40 p-3">
           <div className="flex items-center justify-between gap-3">
             <div><p className="text-xs text-muted-foreground">Pos aktif</p><p className="mt-0.5 text-sm font-semibold">{allocations.length} pos</p></div>
-            <div className="text-right"><p className="text-xs text-muted-foreground">Alokasi tersisa</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div>
+            <div className="text-right"><p className="text-xs text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div>
           </div>
           <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-            <span className="text-muted-foreground">Pemakaian anggaran</span>
-            <span className="tabular font-semibold">{usagePercent.toFixed(1)}% terpakai</span>
+            <span className="text-muted-foreground">Pemenuhan target</span>
+            <span className="tabular font-semibold">{usagePercent.toFixed(1)}% terisi</span>
           </div>
           <Progress value={usagePercent} className="mt-2 h-2" />
+          <p className="mt-1 text-[11px] text-muted-foreground">Pengeluaran dari pos {formatCurrency(spentTotal)}</p>
         </div>
 
         <div className="account-card-metrics relative z-10 grid grid-cols-2 gap-3">
           <div><p className="text-xs text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(available)}</p></div>
-          <div className="border-l border-border pl-3 text-right"><p className="text-xs text-muted-foreground">Dialokasikan</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(remainingTotal)}</p></div>
+          <div className="border-l border-border pl-3 text-right"><p className="text-xs text-muted-foreground">Dialokasikan</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(allocatedTotal)}</p></div>
         </div>
 
         <div data-account-card-action onClick={stop} onDoubleClick={stop} className="account-card-actions relative z-10 grid grid-cols-2 gap-2">
@@ -322,10 +322,10 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
 
       <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg bg-card" aria-hidden={!flipped}>
         <div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Ringkasan pos</p><p className="text-xs text-muted-foreground">{account.name} · persentase pemakaian</p></div><Button variant="ghost" size="icon" aria-label="Kembali ke akun" onClick={(event) => { stop(event); setFlipped(false); }}><ArrowLeft className="h-4 w-4" /></Button></div>
-        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Anggaran tersisa</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
+        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(allocatedTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
         <div className="space-y-2">{allocations.length ? allocations.slice(0, 3).map((allocation) => {
-          const used = spentByPost[allocation.id] ?? 0; const balance = remaining(allocation); const original = Number(allocation.amount); const percent = spentPercent(used, original);
-          return <div key={allocation.id} className="rounded-lg border border-border/70 px-2.5 py-2"><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium">{allocation.category?.name ?? "Pos"}</span><span className="tabular shrink-0 text-xs font-semibold">{formatCurrency(balance)} tersisa</span></div><Progress value={percent} className="mt-1.5 h-1.5" /><div className="mt-1 text-[10px] text-muted-foreground">{percent.toFixed(1)}% terpakai · dari {formatCurrency(original)}</div></div>;
+          const spent = Number(allocation.spent_amount); const allocated = Number(allocation.allocated_amount); const target = Number(allocation.target_amount); const percent = filledPercent(allocated, target);
+          return <div key={allocation.id} className="rounded-lg border border-border/70 px-2.5 py-2"><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium">{allocation.category?.name ?? "Pos"}</span><span className="tabular shrink-0 text-xs font-semibold">{formatCurrency(allocated)} terisi</span></div><Progress value={percent} className="mt-1.5 h-1.5" /><div className="mt-1 text-[10px] text-muted-foreground">{percent.toFixed(1)}% · target {formatCurrency(target)} · terpakai {formatCurrency(spent)}</div></div>;
         }) : <p className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">Belum ada pos. Tambahkan pos melalui kartu akun.</p>}</div>
         {allocations.length > 3 ? <p className="mt-2 text-xs text-muted-foreground">+{allocations.length - 3} pos lainnya</p> : null}
         <div data-account-card-action onClick={stop} onDoubleClick={stop} className="mt-3 flex justify-end"><Button asChild size="sm" variant="outline"><Link href={destination}>Kelola semua pos <ArrowLeft className="h-3.5 w-3.5 rotate-180" /></Link></Button></div>

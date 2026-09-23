@@ -9,11 +9,10 @@ export const metadata = { title: "Anggaran — KITA" };
 export default async function BudgetPage() {
   const [currentView, workspace] = await Promise.all([getView(), getWorkspace()]);
   const supabase = await createClient();
-  const [{ data: rawAccounts }, { data: rawAllocations }, { data: categories }, { data: spending }] = await Promise.all([
+  const [{ data: rawAccounts }, { data: rawAllocations }, { data: categories }] = await Promise.all([
     supabase.from("accounts").select("*").order("created_at"),
     supabase.from("account_allocations").select("*").order("created_at"),
     supabase.from("categories").select("id, name, color").eq("kind", "expense"),
-    supabase.from("transactions").select("amount, budget_post_id, owner").not("budget_post_id", "is", null),
   ]);
 
   const accounts = ((rawAccounts ?? []) as Account[]).filter((account) => currentView === "bersama" || account.owner === currentView || account.owner === "shared");
@@ -22,19 +21,11 @@ export default async function BudgetPage() {
   const allocations = ((rawAllocations ?? []) as AccountAllocation[])
     .filter((allocation) => !allocation.account_id || accountIds.has(allocation.account_id))
     .map((allocation) => ({ ...allocation, category: categoryMap.get(allocation.category_id) ?? null }));
-  const allocationIds = new Set(allocations.map((allocation) => allocation.id));
-  const spentByPost: Record<string, number> = {};
-  for (const transaction of spending ?? []) {
-    if (!transaction.budget_post_id || !allocationIds.has(transaction.budget_post_id)) continue;
-    if (currentView !== "bersama" && transaction.owner !== currentView && transaction.owner !== "shared") continue;
-    spentByPost[transaction.budget_post_id] = (spentByPost[transaction.budget_post_id] ?? 0) + Number(transaction.amount);
-  }
-
   const ownerLabels = {
     eki: workspace?.member1Name || "Eki",
     dinda: workspace?.member2Name || "Dinda",
     shared: "Bersama",
   };
 
-  return <AllocationsOverviewClient accounts={accounts} allocations={allocations} spentByPost={spentByPost} ownerLabels={ownerLabels} />;
+  return <AllocationsOverviewClient accounts={accounts} allocations={allocations} ownerLabels={ownerLabels} />;
 }

@@ -35,7 +35,7 @@ type BudgetPost = { id: string; category_id: string; account_id?: string | null 
 type TransactionWithBudgetPost = Transaction & { budget_post_id?: string | null };
 
 type Props = {
-  accounts: Pick<Account, "id" | "name">[];
+  accounts: Pick<Account, "id" | "name" | "owner">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
   budgets?: BudgetPost[];
   transaction?: TransactionWithBudgetPost;
@@ -58,6 +58,7 @@ export function TransactionDialog({
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<TransactionType>(transaction?.type ?? "expense");
   const [selectedAccountId, setSelectedAccountId] = useState(transaction?.account_id ?? "");
+  const [selectedToAccountId, setSelectedToAccountId] = useState(transaction?.to_account_id ?? "");
   const [selectedBudgetId, setSelectedBudgetId] = useState(transaction?.budget_post_id ?? "");
   const [selectedCategoryId, setSelectedCategoryId] = useState(transaction?.category_id ?? "");
   const [isLainnya, setIsLainnya] = useState(false);
@@ -126,6 +127,7 @@ export function TransactionDialog({
   function resetState() {
     setType(transaction?.type ?? "expense");
     setSelectedAccountId(transaction?.account_id ?? "");
+    setSelectedToAccountId(transaction?.to_account_id ?? "");
     setSelectedBudgetId(transaction?.budget_post_id ?? "");
     setSelectedCategoryId(transaction?.category_id ?? "");
     setIsLainnya(false);
@@ -240,6 +242,7 @@ export function TransactionDialog({
                   onChange={(e) => {
                     setSelectedAccountId(e.target.value);
                     setSelectedBudgetId("");
+                    if (e.target.value === selectedToAccountId) setSelectedToAccountId("");
                   }}
                   required
                 >
@@ -258,15 +261,20 @@ export function TransactionDialog({
                   <Select
                     id="to_account_id"
                     name="to_account_id"
-                    defaultValue={transaction?.to_account_id ?? ""}
+                    value={selectedToAccountId}
+                    onChange={(e) => setSelectedToAccountId(e.target.value)}
                     required
                   >
                     <option value="">Pilih akun tujuan</option>
-                    {accounts.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
+                    {(["eki", "dinda", "shared"] as MemberOwner[]).map((owner) => {
+                      const ownerAccounts = accounts.filter((account) => account.owner === owner && account.id !== selectedAccountId);
+                      if (!ownerAccounts.length) return null;
+                      return (
+                        <optgroup key={owner} label={`Akun ${OWNER_LABEL[owner]}`}>
+                          {ownerAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
+                        </optgroup>
+                      );
+                    })}
                   </Select>
                 </div>
               ) : null}

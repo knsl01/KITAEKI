@@ -88,7 +88,7 @@ async function validateReferences(
   if (values.budget_post_id) {
     if (values.type !== "expense") return "Pos hanya bisa dipakai pada transaksi pengeluaran.";
     const { data: post, error: postError } = await supabase.from("account_allocations")
-      .select("id, account_id, category_id, amount")
+      .select("id, account_id, category_id, allocated_amount")
       .eq("id", values.budget_post_id)
       .eq("household_id", householdId)
       .maybeSingle();
@@ -97,13 +97,15 @@ async function validateReferences(
       return "Akun dan kategori harus sesuai dengan pos yang dipilih.";
     }
 
-    let spentQuery = supabase.from("transactions").select("amount").eq("budget_post_id", values.budget_post_id);
-    if (transactionId) spentQuery = spentQuery.neq("id", transactionId);
-    const { data: linked, error: linkedError } = await spentQuery;
-    if (linkedError) return linkedError.message;
-    const alreadySpent = (linked ?? []).reduce((total, row) => total + Number(row.amount), 0);
-    if (values.amount > Number(post.amount) - alreadySpent) {
-      return `Nominal melebihi sisa pos (${Math.max(Number(post.amount) - alreadySpent, 0)}).`;
+    let availableInPost = Number(post.allocated_amount);
+    if (transactionId) {
+      const { data: previous, error: previousError } = await supabase.from("transactions")
+        .select("amount, budget_post_id").eq("id", transactionId).eq("household_id", householdId).maybeSingle();
+      if (previousError) return previousError.message;
+      if (previous?.budget_post_id === values.budget_post_id) availableInPost += Number(previous.amount);
+    }
+    if (values.amount > availableInPost) {
+      return `Nominal melebihi dana yang tersedia di pos (${Math.max(availableInPost, 0)}).`;
     }
   }
   return null;

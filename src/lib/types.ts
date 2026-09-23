@@ -64,7 +64,9 @@ export type AccountAllocation = {
   household_id: string;
   account_id: string | null;
   category_id: string;
-  amount: number;
+  target_amount: number;
+  allocated_amount: number;
+  spent_amount: number;
   created_at: string;
   updated_at: string;
   category?: Pick<Category, "id" | "name" | "color"> | null;

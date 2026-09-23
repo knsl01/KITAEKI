@@ -18,7 +18,7 @@ export function Topbar({
   currentView,
   memberLabels,
 }: {
-  accounts: Pick<Account, "id" | "name">[];
+  accounts: Pick<Account, "id" | "name" | "owner">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
   budgets?: BudgetPost[];
   defaultOwner: MemberOwner;

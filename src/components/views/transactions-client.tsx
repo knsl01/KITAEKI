@@ -30,7 +30,7 @@ type BudgetPost = { id: string; account_id?: string | null; category_id: string;
 
 type Props = {
   transactions: TransactionWithRelations[];
-  accounts: Pick<Account, "id" | "name">[];
+  accounts: Pick<Account, "id" | "name" | "owner">[];
   categories: Pick<Category, "id" | "name" | "kind" | "color">[];
   budgets?: BudgetPost[];
 };

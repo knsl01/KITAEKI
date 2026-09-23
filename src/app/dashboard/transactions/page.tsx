@@ -21,7 +21,7 @@ export default async function TransactionsPage() {
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(500),
-    supabase.from("accounts").select("id, name").eq("is_active", true).order("name"),
+    supabase.from("accounts").select("id, name, owner").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, color").order("name"),
     supabase.from("account_allocations").select("id, account_id, category_id"),
   ]);
@@ -43,7 +43,7 @@ export default async function TransactionsPage() {
   return (
     <TransactionsClient
       transactions={filteredTxs}
-      accounts={(accounts ?? []) as Pick<Account, "id" | "name">[]}
+      accounts={(accounts ?? []) as Pick<Account, "id" | "name" | "owner">[]}
       categories={(categories ?? []) as Pick<Category, "id" | "name" | "kind" | "color">[]}
       budgets={budgetPosts}
     />

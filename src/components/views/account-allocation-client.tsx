@@ -46,7 +46,7 @@ export function AccountAllocationDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{allocation ? "Ubah pos" : "Tambah pos"}</DialogTitle>
-          <DialogDescription>Pos menandai sebagian saldo akun. Membuat pos tidak mengubah saldo; saldo berubah saat transaksi dicatat.</DialogDescription>
+          <DialogDescription>Masukkan total kebutuhan. Dana akan dicadangkan dari saldo tersedia akun tanpa mengurangi saldo aktual.</DialogDescription>
         </DialogHeader>
         <form action={submit} className="space-y-4">
           {allocation ? <input type="hidden" name="allocation_id" value={allocation.id} /> : null}
@@ -64,8 +64,8 @@ export function AccountAllocationDialog({
             <Input id="pos_name" name="pos_name" defaultValue={allocation?.category?.name ?? ""} placeholder="Contoh: KOST, Listrik, Wifi" maxLength={100} required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="allocation_amount">Nominal budget</Label>
-            <MoneyInput id="allocation_amount" name="amount" min={1} defaultValue={allocation?.amount ?? ""} placeholder="500.000" required />
+            <Label htmlFor="allocation_target_amount">Kebutuhan / target pos</Label>
+            <MoneyInput id="allocation_target_amount" name="target_amount" min={1} defaultValue={allocation?.target_amount ?? ""} placeholder="1.500.000" required />
           </div>
           {error ? <p role="alert" className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">{error}</p> : null}
           <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Batal</Button><Button type="submit" disabled={pending}>{pending && <Loader2 className="h-4 w-4 animate-spin" />}{allocation ? "Simpan" : "Tambah pos"}</Button></div>

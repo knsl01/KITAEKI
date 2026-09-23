@@ -27,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const workspace = await getWorkspace();
 
   const [{ data: accounts }, { data: categories }, { data: budgets }, { data: preferences }] = await Promise.all([
-    supabase.from("accounts").select("id, name, icon_key").eq("is_active", true).order("name"),
+    supabase.from("accounts").select("id, name, icon_key, owner").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, icon_key, color").order("name"),
     supabase.from("account_allocations").select("id, account_id, category_id"),
     supabase.from("user_preferences").select("mobile_nav").eq("user_id", user.id).maybeSingle(),
