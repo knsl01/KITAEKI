@@ -14,8 +14,8 @@ import { AccountAllocationDialog } from "@/components/views/account-allocation-c
 import { formatCurrency } from "@/lib/format";
 import { ACCOUNT_TYPE_LABEL, OWNER_LABEL, type Account, type AccountAllocation } from "@/lib/types";
 
-function remainingPercent(remaining: number, original: number) {
-  return original > 0 ? Math.max(0, Math.min(100, (remaining / original) * 100)) : 0;
+function spentPercent(spent: number, original: number) {
+  return original > 0 ? Math.max(0, (spent / original) * 100) : 0;
 }
 
 export function AccountPositionsClient({
@@ -68,7 +68,7 @@ export function AccountPositionsClient({
             const original = Number(allocation.amount);
             const spent = spentByPost[allocation.id] ?? 0;
             const remaining = Math.max(original - spent, 0);
-            const percent = remainingPercent(remaining, original);
+            const percent = spentPercent(spent, original);
             return (
               <Card key={allocation.id} className="account-detail-row overflow-hidden">
                 <CardContent className="p-4">
@@ -77,8 +77,7 @@ export function AccountPositionsClient({
                     <p className="tabular shrink-0 text-right text-sm font-semibold">{formatCurrency(remaining)}<span className="block text-[10px] font-normal text-muted-foreground">tersisa</span></p>
                   </div>
                   <Progress value={percent} className="mt-4 h-2" />
-                  <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground"><span>{percent.toFixed(1)}% tersisa</span><span>Budget {formatCurrency(original)}</span></div>
-                  <p className="mt-1 text-[11px] text-muted-foreground">Terpakai {formatCurrency(spent)}</p>
+                  <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground"><span>{percent.toFixed(1)}% terpakai</span><span>Budget {formatCurrency(original)} · sisa {formatCurrency(remaining)}</span></div>
                   <div className="mt-3 flex justify-end gap-1 border-t border-border pt-2">
                     <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} allocation={allocation} trigger={<Button variant="ghost" size="sm" disabled={!account.is_active}><Pencil className="h-3.5 w-3.5" />Ubah</Button>} />
                     <ConfirmDelete title="Hapus pos?" description="Transaksi yang sudah tercatat tetap ada. Sisa budget yang belum terpakai kembali menjadi saldo tersedia." onConfirm={() => deleteAccountAllocation(allocation.id)} trigger={<Button variant="ghost" size="sm"><Trash2 className="h-3.5 w-3.5" />Hapus</Button>} />

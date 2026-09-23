@@ -13,8 +13,8 @@ import { AccountAllocationDialog } from "@/components/views/account-allocation-c
 import { formatCurrency } from "@/lib/format";
 import type { Account, AccountAllocation } from "@/lib/types";
 
-function remainingPercent(remaining: number, original: number) {
-  return original > 0 ? Math.max(0, Math.min(100, (remaining / original) * 100)) : 0;
+function spentPercent(spent: number, original: number) {
+  return original > 0 ? Math.max(0, (spent / original) * 100) : 0;
 }
 
 export function AllocationsOverviewClient({
@@ -58,7 +58,7 @@ export function AllocationsOverviewClient({
             const original = Number(allocation.amount);
             const spent = spentByPost[allocation.id] ?? 0;
             const remaining = Math.max(original - spent, 0);
-            const percent = remainingPercent(remaining, original);
+            const percent = spentPercent(spent, original);
             const account = accounts.find((candidate) => candidate.id === allocation.account_id);
             const accountOptions = account ? [account, ...activeAccounts.filter((candidate) => candidate.id !== account.id)] : activeAccounts;
 
@@ -74,8 +74,8 @@ export function AllocationsOverviewClient({
                   </div>
                   <Progress value={percent} className="mt-4 h-2" />
                   <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                    <span>{percent.toFixed(1)}% dari anggaran</span>
-                    <span>Budget {formatCurrency(original)} · terpakai {formatCurrency(spent)}</span>
+                    <span>{percent.toFixed(1)}% terpakai</span>
+                    <span>Budget {formatCurrency(original)} · sisa {formatCurrency(remaining)}</span>
                   </div>
                   <div className="mt-3 flex justify-end gap-1 border-t border-border pt-2">
                     <AccountAllocationDialog accounts={accountOptions} allocation={allocation} trigger={<Button variant="ghost" size="sm" disabled={activeAccounts.length === 0} aria-label={`Ubah ${allocation.category?.name ?? "pos"}`}><Pencil className="h-3.5 w-3.5" />Ubah</Button>} />

@@ -29,6 +29,7 @@ import { Select } from "@/components/ui/select";
 import { formatCurrency } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 import { AccountAllocationDialog } from "@/components/views/account-allocation-client";
+import { brandFor } from "@/lib/icons";
 import {
   ACCOUNT_TYPE_LABEL,
   OWNER_LABEL,
@@ -38,8 +39,8 @@ import {
   type MemberOwner,
 } from "@/lib/types";
 
-function remainingPercent(remaining: number, original: number) {
-  return original > 0 ? Math.max(0, Math.min(100, (remaining / original) * 100)) : 0;
+function spentPercent(spent: number, original: number) {
+  return original > 0 ? Math.max(0, (spent / original) * 100) : 0;
 }
 
 function AccountDialog({ account, trigger }: { account?: Account; trigger: React.ReactNode }) {
@@ -222,8 +223,13 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   useEffect(() => () => { if (clickTimer.current) clearTimeout(clickTimer.current); }, []);
   const remaining = (allocation: AccountAllocation) => Math.max(Number(allocation.amount) - (spentByPost[allocation.id] ?? 0), 0);
   const remainingTotal = allocations.reduce((sum, allocation) => sum + remaining(allocation), 0);
+  const originalTotal = allocations.reduce((sum, allocation) => sum + Number(allocation.amount), 0);
+  const spentTotal = allocations.reduce((sum, allocation) => sum + (spentByPost[allocation.id] ?? 0), 0);
+  const usagePercent = spentPercent(spentTotal, originalTotal);
   const available = Number(account.balance) - remainingTotal;
-  const addPos = <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button size="sm" disabled={!account.is_active}><Plus className="h-4 w-4" />Tambah pos</Button>} />;
+  const brand = brandFor(account.icon_key, account.name);
+  const BrandIcon = brand.icon;
+  const addPos = <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button className="w-full" disabled={!account.is_active}><Plus className="h-4 w-4" />Tambah pos</Button>} />;
   const stop = (event: React.SyntheticEvent) => event.stopPropagation();
   const destination = `/dashboard/accounts/${account.id}`;
 
@@ -246,7 +252,7 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
   }
 
   return <Card
-    className="min-h-[320px] cursor-pointer select-none p-0 [perspective:1200px]"
+    className="relative min-h-[500px] cursor-pointer select-none overflow-hidden border-border bg-card p-0 [perspective:1200px]"
     onClick={handleCardClick}
     onDoubleClick={handleCardDoubleClick}
     role="link" tabIndex={0} aria-label={`${account.name}. Ketuk sekali untuk membuka daftar pos, dua kali untuk ringkasan singkat.`}
@@ -255,32 +261,70 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
       if (event.key === " ") { event.preventDefault(); setFlipped((value) => !value); }
     }}
   >
-    <div className={`account-card-flip-inner relative min-h-[320px] ${flipped ? "is-flipped" : ""}`}>
-      <div className="account-card-face absolute inset-0 overflow-hidden rounded-lg p-5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-start gap-3"><BrandMarkTile iconKey={account.icon_key} name={account.name} /><div className="min-w-0"><p className="truncate font-medium">{account.name}</p><p className="mt-1 text-xs text-muted-foreground">{ACCOUNT_TYPE_LABEL[account.type]} · {OWNER_LABEL[account.owner]}</p></div></div>
-          {account.is_active ? null : <Badge>Nonaktif</Badge>}
+    <div className={`account-card-flip-inner relative min-h-[500px] ${flipped ? "is-flipped" : ""}`}>
+      <div className="account-card-face absolute inset-0 overflow-hidden rounded-lg p-4 sm:p-5">
+        <div aria-hidden className="pointer-events-none absolute -right-3 top-14 z-0 select-none opacity-[0.075] blur-[1px]">
+          <BrandIcon className="h-40 w-40" strokeWidth={1.1} style={{ color: brand.color }} />
+          <span className="absolute inset-0 flex items-center justify-center text-4xl font-black tracking-tight" style={{ color: brand.color }}>{brand.short}</span>
         </div>
-        <p className="tabular mt-5 text-2xl font-bold tracking-tight">{formatCurrency(Number(account.balance))}</p>
-        <p className="tabular mt-1 text-xs text-muted-foreground">Saldo awal {formatCurrency(Number(account.initial_balance))}</p>
-        <div className="mt-4 flex items-center justify-between rounded-xl bg-muted/60 px-3 py-2"><span className="text-xs text-muted-foreground">Pos aktif</span><span className="tabular text-sm font-semibold">{allocations.length} · {formatCurrency(remainingTotal)}</span></div>
-        <p className="mt-2 text-xs text-muted-foreground">Tersedia {formatCurrency(available)} · ketuk untuk membuka semua pos, dua kali untuk ringkasan.</p>
-        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="mt-4 flex flex-wrap items-center gap-1 border-t border-border pt-3">
+
+        <div className="relative z-10 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm" />
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold tracking-tight">{account.name}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{ACCOUNT_TYPE_LABEL[account.type]} · {OWNER_LABEL[account.owner]}</p>
+            </div>
+          </div>
+          <div data-account-card-action onClick={stop} onDoubleClick={stop} className="relative z-10 flex items-center gap-1">
+            {!account.is_active ? <Badge>Nonaktif</Badge> : null}
+            <AccountDialog account={account} trigger={<Button variant="ghost" size="icon" aria-label={`Ubah akun ${account.name}`}><Pencil className="h-4 w-4" /></Button>} />
+          </div>
+        </div>
+
+        <div className="relative z-10 mt-5">
+          <p className="text-xs text-muted-foreground">Saldo saat ini</p>
+          <p className="tabular mt-1 break-words text-3xl font-bold tracking-tight sm:text-[2rem]">{formatCurrency(Number(account.balance))}</p>
+          <p className="tabular mt-1 text-xs text-muted-foreground">Saldo awal {formatCurrency(Number(account.initial_balance))}</p>
+        </div>
+
+        <div className="relative z-10 mt-5 rounded-xl border border-border/70 bg-muted/40 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div><p className="text-xs text-muted-foreground">Pos aktif</p><p className="mt-0.5 text-sm font-semibold">{allocations.length} pos</p></div>
+            <div className="text-right"><p className="text-xs text-muted-foreground">Alokasi tersisa</p><p className="tabular mt-0.5 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div>
+          </div>
+          <div className="mt-3 flex items-center justify-between gap-2 text-xs">
+            <span className="text-muted-foreground">Pemakaian anggaran</span>
+            <span className="tabular font-semibold">{usagePercent.toFixed(1)}% terpakai</span>
+          </div>
+          <Progress value={usagePercent} className="mt-2 h-2" />
+        </div>
+
+        <div className="relative z-10 mt-3 grid grid-cols-2 gap-3">
+          <div><p className="text-xs text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(available)}</p></div>
+          <div className="border-l border-border pl-3 text-right"><p className="text-xs text-muted-foreground">Dialokasikan</p><p className="tabular mt-1 break-words text-base font-semibold">{formatCurrency(remainingTotal)}</p></div>
+        </div>
+
+        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="relative z-10 mt-4 grid grid-cols-2 gap-2">
           {addPos}
-          <AccountDialog account={account} trigger={<Button variant="ghost" size="sm"><Pencil className="h-3.5 w-3.5" />Ubah</Button>} />
-          {account.is_active ? <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, false)}>{pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Archive className="h-3.5 w-3.5" />}Nonaktifkan</Button> : <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, true)}>{pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}Pulihkan</Button>}
-          {account.is_active ? <ConfirmDelete title="Hapus akun?" description="Akun yang memiliki riwayat atau pos akan diarsipkan agar datanya tetap aman." onConfirm={() => onDelete(account.id)} trigger={<Button variant="ghost" size="sm" className="text-muted-foreground"><Trash2 className="h-3.5 w-3.5" />Hapus</Button>} /> : null}
+          <Button asChild variant="outline" className="w-full"><Link href={destination}>Kelola <ArrowLeft className="h-4 w-4 rotate-180" /></Link></Button>
+        </div>
+
+        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="relative z-10 mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+          {account.is_active ? <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, false)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4" />}Nonaktifkan</Button> : <Button type="button" variant="ghost" size="sm" disabled={pending} onClick={() => onToggleActive(account.id, true)}>{pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}Pulihkan</Button>}
+          {account.is_active ? <ConfirmDelete title="Hapus akun?" description="Akun yang memiliki riwayat atau pos akan diarsipkan agar datanya tetap aman." onConfirm={() => onDelete(account.id)} trigger={<Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="h-4 w-4" />Hapus</Button>} /> : null}
         </div>
       </div>
-      <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg p-5" aria-hidden={!flipped}>
-        <div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Ringkasan pos</p><p className="text-xs text-muted-foreground">{account.name} · sisa anggaran tiap pos</p></div><Button variant="ghost" size="icon" aria-label="Kembali ke akun" onClick={(event) => { stop(event); setFlipped(false); }}><ArrowLeft className="h-4 w-4" /></Button></div>
-        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Total pos tersisa</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
+
+      <div className="account-card-face account-card-back absolute inset-0 overflow-hidden rounded-lg p-5 sm:p-6" aria-hidden={!flipped}>
+        <div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Ringkasan pos</p><p className="text-xs text-muted-foreground">{account.name} · persentase pemakaian</p></div><Button variant="ghost" size="icon" aria-label="Kembali ke akun" onClick={(event) => { stop(event); setFlipped(false); }}><ArrowLeft className="h-4 w-4" /></Button></div>
+        <div className="my-3 grid grid-cols-2 gap-2"><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Anggaran tersisa</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(remainingTotal)}</p></div><div className="rounded-lg bg-muted/60 p-2.5"><p className="text-[11px] text-muted-foreground">Saldo tersedia</p><p className="tabular mt-1 text-sm font-semibold">{formatCurrency(available)}</p></div></div>
         <div className="space-y-2">{allocations.length ? allocations.slice(0, 3).map((allocation) => {
-          const used = spentByPost[allocation.id] ?? 0; const balance = remaining(allocation); const original = Number(allocation.amount);
-          return <div key={allocation.id} className="rounded-lg border border-border/70 px-2.5 py-2"><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium">{allocation.category?.name ?? "Pos"}</span><span className="tabular shrink-0 text-xs font-semibold">{formatCurrency(balance)}</span></div><Progress value={remainingPercent(balance, original)} className="mt-1.5 h-1.5" /><div className="mt-1 text-[10px] text-muted-foreground">{remainingPercent(balance, original).toFixed(1)}% tersisa · dari {formatCurrency(original)}{used > 0 ? ` · terpakai ${formatCurrency(used)}` : ""}</div></div>;
-        }) : <EmptyState title="Belum ada pos" description="Tambah pos untuk mengalokasikan sebagian saldo akun ini." />}</div>
+          const used = spentByPost[allocation.id] ?? 0; const balance = remaining(allocation); const original = Number(allocation.amount); const percent = spentPercent(used, original);
+          return <div key={allocation.id} className="rounded-lg border border-border/70 px-2.5 py-2"><div className="flex items-center justify-between gap-2"><span className="truncate text-sm font-medium">{allocation.category?.name ?? "Pos"}</span><span className="tabular shrink-0 text-xs font-semibold">{formatCurrency(balance)} tersisa</span></div><Progress value={percent} className="mt-1.5 h-1.5" /><div className="mt-1 text-[10px] text-muted-foreground">{percent.toFixed(1)}% terpakai · dari {formatCurrency(original)}</div></div>;
+        }) : <p className="rounded-lg bg-muted/40 p-3 text-sm text-muted-foreground">Belum ada pos. Tambahkan pos melalui kartu akun.</p>}</div>
         {allocations.length > 3 ? <p className="mt-2 text-xs text-muted-foreground">+{allocations.length - 3} pos lainnya</p> : null}
-        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="mt-3 flex justify-end"><Button asChild size="sm" variant="outline"><Link href={destination}>Buka semua pos <ArrowLeft className="h-3.5 w-3.5 rotate-180" /></Link></Button></div>
+        <div data-account-card-action onClick={stop} onDoubleClick={stop} className="mt-3 flex justify-end"><Button asChild size="sm" variant="outline"><Link href={destination}>Kelola semua pos <ArrowLeft className="h-3.5 w-3.5 rotate-180" /></Link></Button></div>
       </div>
     </div>
   </Card>;
