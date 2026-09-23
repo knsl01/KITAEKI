@@ -23,6 +23,8 @@ export async function createShoppingItem(formData: FormData): Promise<ActionResu
 
   const name = str(formData, "name");
   if (!name) return fail("Nama barang wajib diisi.");
+  if (name.length > 120) return fail("Nama barang maksimal 120 karakter.");
+  if (str(formData, "quantity").length > 80) return fail("Jumlah dan satuan maksimal 80 karakter.");
 
   const estimated_price = optionalNum(formData, "estimated_price");
   if (estimated_price !== null && estimated_price < 0) return fail("Perkiraan harga tidak boleh negatif.");
@@ -42,6 +44,33 @@ export async function createShoppingItem(formData: FormData): Promise<ActionResu
     body: `${who} menambahkan “${name}” ke daftar belanja`,
     url: "/dashboard/shopping",
   }));
+
+  revalidatePath("/dashboard/shopping");
+  return { ok: true };
+}
+
+export async function updateShoppingItem(id: string, formData: FormData): Promise<ActionResult> {
+  const { supabase, user, householdId } = await getUserClient();
+  if (!user) return fail(UNAUTH);
+  if (!householdId) return fail(NO_HOUSEHOLD);
+
+  const name = str(formData, "name");
+  if (!name) return fail("Nama barang wajib diisi.");
+  if (name.length > 120) return fail("Nama barang maksimal 120 karakter.");
+  const quantity = optionalStr(formData, "quantity");
+  if ((quantity?.length ?? 0) > 80) return fail("Jumlah dan satuan maksimal 80 karakter.");
+
+  const estimated_price = optionalNum(formData, "estimated_price");
+  if (estimated_price !== null && estimated_price < 0) return fail("Perkiraan harga tidak boleh negatif.");
+
+  const { data, error } = await supabase.from("shopping_items").update({
+    name,
+    quantity,
+    estimated_price,
+    assigned_to: pick(formData, "assigned_to", OWNER_KEYS, "shared"),
+  }).eq("id", id).eq("household_id", householdId).select("id").maybeSingle();
+  if (error) return fail(error.message);
+  if (!data) return fail("Barang tidak ditemukan atau sudah dihapus.");
 
   revalidatePath("/dashboard/shopping");
   return { ok: true };
