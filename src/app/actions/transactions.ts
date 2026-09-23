@@ -6,6 +6,16 @@ import { pushActivity, rupiah } from "@/lib/push";
 import type { TransactionType } from "@/lib/types";
 
 const TYPES: TransactionType[] = ["income", "expense", "transfer"];
+type ParsedTransaction = {
+  type: TransactionType;
+  amount: number;
+  occurred_on: string;
+  account_id: string;
+  to_account_id: string | null;
+  category_id: string | null;
+  owner: string;
+  description: string | null;
+};
 
 function revalidateAll() {
   revalidatePath("/dashboard", "layout");
@@ -42,6 +52,36 @@ function parseTransaction(formData: FormData) {
       description,
     },
   } as const;
+}
+
+async function validateReferences(
+  supabase: Awaited<ReturnType<typeof getUserClient>>["supabase"],
+  householdId: string,
+  values: ParsedTransaction,
+) {
+  const accountIds = [values.account_id, values.to_account_id].filter((id): id is string => Boolean(id));
+  const { data: accounts, error: accountError } = await supabase
+    .from("accounts")
+    .select("id")
+    .eq("household_id", householdId)
+    .eq("is_active", true)
+    .in("id", accountIds);
+  if (accountError) return accountError.message;
+  if ((accounts?.length ?? 0) !== new Set(accountIds).size) return "Pilih akun yang masih aktif.";
+
+  if (values.category_id) {
+    const expectedKind = values.type === "income" ? "income" : "expense";
+    const { data: category, error: categoryError } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("id", values.category_id)
+      .eq("household_id", householdId)
+      .eq("kind", expectedKind)
+      .maybeSingle();
+    if (categoryError) return categoryError.message;
+    if (!category) return "Kategori transaksi tidak valid.";
+  }
+  return null;
 }
 
 /** Kategori "Lainnya" disimpan sebagai kategori sungguhan agar tetap bisa dipakai
@@ -85,6 +125,8 @@ export async function createTransaction(formData: FormData): Promise<ActionResul
   await resolveCustomCategory(formData, type, householdId);
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
+  const referenceError = await validateReferences(supabase, householdId, parsed.values);
+  if (referenceError) return fail(referenceError);
 
   const { error } = await supabase.from("transactions").insert({ ...parsed.values, user_id: user.id, household_id: householdId });
   if (error) return fail(error.message);
@@ -110,6 +152,8 @@ export async function updateTransaction(id: string, formData: FormData): Promise
   await resolveCustomCategory(formData, type, householdId);
   const parsed = parseTransaction(formData);
   if ("error" in parsed && parsed.error) return fail(parsed.error);
+  const referenceError = await validateReferences(supabase, householdId, parsed.values);
+  if (referenceError) return fail(referenceError);
 
   const { error } = await supabase.from("transactions").update(parsed.values).eq("id", id).eq("household_id", householdId);
   if (error) return fail(error.message);

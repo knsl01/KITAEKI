@@ -1,44 +1,43 @@
-import { BudgetClient } from "@/components/views/budget-client";
+import { AllocationsOverviewClient } from "@/components/views/allocations-overview-client";
 import { createClient } from "@/lib/supabase/server";
-import { monthKey, monthRange } from "@/lib/format";
+import { monthKey, monthRange, monthLabel } from "@/lib/format";
 import { getView } from "@/lib/workspace";
-import type { Budget, Category, Transaction } from "@/lib/types";
+import type { Account, AccountAllocation, Category, MemberOwner, Transaction } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Pos Anggaran — KITA" };
 
-export default async function BudgetPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ month?: string }>;
-}) {
-  const params = await searchParams;
-  const month = /^\d{4}-\d{2}$/.test(params.month ?? "") ? params.month! : monthKey();
+export default async function BudgetPage() {
+  const month = monthKey();
   const { start, end } = monthRange(month);
-
-  const currentView = await getView();
+  const view = await getView();
   const supabase = await createClient();
 
-  const [{ data: budgets }, { data: categories }, { data: transactions }] = await Promise.all([
-    supabase.from("budgets").select("*, category:categories(id, name, color)").eq("period_month", start),
-    supabase.from("categories").select("*").eq("kind", "expense").order("name"),
-    supabase
-      .from("transactions")
-      .select("amount, type, category_id, owner")
-      .eq("type", "expense")
-      .gte("occurred_on", start)
-      .lte("occurred_on", end),
+  const [{ data: accounts }, { data: allocations }, { data: categories }, { data: transactions }] = await Promise.all([
+    supabase.from("accounts").select("*").order("name"),
+    supabase.from("account_allocations").select("*").order("created_at"),
+    supabase.from("categories").select("id, name, color").eq("kind", "expense").order("name"),
+    supabase.from("transactions").select("amount, category_id, account_id, owner").eq("type", "expense").gte("occurred_on", start).lte("occurred_on", end),
   ]);
 
-  const rawTxs = (transactions ?? []) as Pick<Transaction, "amount" | "type" | "category_id" | "owner">[];
-  const txs = rawTxs.filter((t) => currentView === "bersama" || t.owner === currentView || t.owner === "shared");
+  const allAccounts = (accounts ?? []) as Account[];
+  const accountMap = new Map(allAccounts.map((account) => [account.id, account]));
+  const categoryList = (categories ?? []) as Pick<Category, "id" | "name" | "color">[];
+  const categoryMap = new Map(categoryList.map((category) => [category.id, category]));
+  const allocationList = ((allocations ?? []) as AccountAllocation[]).map((allocation) => ({
+    ...allocation,
+    category: categoryMap.get(allocation.category_id) ?? null,
+    account: allocation.account_id ? accountMap.get(allocation.account_id) ?? null : null,
+  }));
+  const visibleTransactions = ((transactions ?? []) as Pick<Transaction, "amount" | "category_id" | "account_id" | "owner">[])
+    .filter((transaction) => view === "bersama" || transaction.owner === view || transaction.owner === "shared");
 
-  return (
-    <BudgetClient
-      month={month}
-      budgets={(budgets ?? []) as unknown as Budget[]}
-      categories={(categories ?? []) as Category[]}
-      transactions={txs}
-    />
-  );
+  return <AllocationsOverviewClient
+    accounts={allAccounts}
+    allocations={allocationList}
+    categories={categoryList}
+    transactions={visibleTransactions}
+    view={view as MemberOwner | "bersama"}
+    monthLabelText={monthLabel(month)}
+  />;
 }

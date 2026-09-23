@@ -21,9 +21,9 @@ export default async function TransactionsPage() {
       .order("occurred_on", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(500),
-    supabase.from("accounts").select("id, name").order("name"),
+    supabase.from("accounts").select("id, name").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind, color").order("name"),
-    supabase.from("budgets").select("id, account_id, category_id").eq("period_month", `${new Date().toISOString().slice(0, 7)}-01`),
+    supabase.from("account_allocations").select("id, account_id, category_id"),
   ]);
 
   const filteredTxs = (transactions ?? []).filter((t) => {

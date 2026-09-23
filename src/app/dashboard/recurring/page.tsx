@@ -15,7 +15,7 @@ export default async function RecurringPage() {
       .from("recurring_transactions")
       .select("*, account:accounts!recurring_transactions_account_id_fkey(id, name), category:categories(id, name, color)")
       .order("next_run_on"),
-    supabase.from("accounts").select("id, name").order("name"),
+    supabase.from("accounts").select("id, name").eq("is_active", true).order("name"),
     supabase.from("categories").select("id, name, kind").order("name"),
   ]);
 

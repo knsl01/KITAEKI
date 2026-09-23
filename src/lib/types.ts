@@ -67,6 +67,19 @@ export type Budget = {
   category?: Pick<Category, "id" | "name" | "color"> | null;
 };
 
+export type AccountAllocation = {
+  id: string;
+  user_id: string;
+  household_id: string;
+  account_id: string | null;
+  category_id: string;
+  amount: number;
+  created_at: string;
+  updated_at: string;
+  category?: Pick<Category, "id" | "name" | "color"> | null;
+  account?: Pick<Account, "id" | "name"> | null;
+};
+
 export type SavingsGoal = {
   id: string;
   user_id: string;
