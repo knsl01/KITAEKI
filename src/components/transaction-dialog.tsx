@@ -32,12 +32,13 @@ import {
 type BudgetPost = { id: string; category_id: string; account_id?: string | null } & {
   category?: Pick<Category, "id" | "name"> | null;
 };
+type TransactionWithBudgetPost = Transaction & { budget_post_id?: string | null };
 
 type Props = {
   accounts: Pick<Account, "id" | "name">[];
   categories: Pick<Category, "id" | "name" | "kind">[];
   budgets?: BudgetPost[];
-  transaction?: Transaction;
+  transaction?: TransactionWithBudgetPost;
   defaultOwner?: MemberOwner;
   trigger?: React.ReactNode;
 };
