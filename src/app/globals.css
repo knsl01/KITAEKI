@@ -1090,13 +1090,76 @@
 .account-detail-list-enter { animation: account-detail-enter .35s .15s cubic-bezier(.22,1,.36,1) both; }
 .account-detail-row { animation: account-detail-row-enter .25s cubic-bezier(.22,1,.36,1) both; }
 
+.account-card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 1rem;
+}
+.account-card-shell {
+  width: 100%;
+  max-width: 30rem;
+  min-width: 0;
+  justify-self: center;
+  container-type: inline-size;
+}
+.account-card-flip-inner {
+  position: relative;
+  width: 100%;
+}
+.account-card-face { padding: 18px; }
+.account-card-front { position: relative; inset: auto; }
+.account-card-back { position: absolute; inset: 0; }
+.account-card-balance { margin-top: 16px; }
+.account-card-budget { margin-top: 16px; }
+.account-card-metrics { margin-top: 12px; }
+.account-card-actions { margin-top: 16px; }
+.account-card-utilities { margin-top: 12px; }
+
+@media (min-width: 768px) and (max-width: 1399px) {
+  .account-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 1400px) {
+  .account-card-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 450px), 1fr)); }
+}
+@container (min-width: 400px) {
+  .account-card-face { padding: 24px; }
+}
+@container (min-width: 450px) {
+  .account-card-balance { margin-top: 20px; }
+  .account-card-budget { margin-top: 20px; }
+}
+@container (min-width: 470px) {
+  .account-card-flip-inner { aspect-ratio: 480 / 500; }
+  .account-card-front { position: absolute; inset: 0; }
+  .account-card-face { padding: 28px; }
+}
+
 .account-card-flip-inner {
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   transition: transform .68s cubic-bezier(.22, 1, .36, 1);
 }
 .account-card-flip-inner.is-flipped { transform: rotateY(180deg); }
-.account-card-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.account-card-back { transform: rotateY(180deg); }
+.account-card-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background-color: hsl(var(--card));
+}
+.account-card-front {
+  transform: rotateY(0deg);
+  visibility: visible;
+  transition: visibility 0s linear .34s;
+}
+.account-card-back {
+  transform: rotateY(180deg);
+  visibility: hidden;
+  transition: visibility 0s linear .34s;
+}
+.account-card-flip-inner.is-flipped .account-card-front { visibility: hidden; }
+.account-card-flip-inner.is-flipped .account-card-back { visibility: visible; }
+.account-card-flip-inner.is-flipped .account-card-front,
+.account-card-flip-inner:not(.is-flipped) .account-card-back { pointer-events: none; }
 
 @keyframes slot-in {
   from {

@@ -173,3 +173,43 @@ export function brandFor(iconKey?: string | null, name?: string | null): BrandMa
   }
   return BRAND_MAP.get("other")!;
 }
+
+const ACCOUNT_LOGO_PATHS: Record<string, string> = {
+  bca: "/account-logos/bca.png",
+  blu: "/account-logos/blu.png",
+  bri: "/account-logos/bri.png",
+  cash: "/account-logos/cash.png",
+  dana: "/account-logos/dana.png",
+  gopay: "/account-logos/gopay.png",
+  jago: "/account-logos/jago.png",
+  mandiri: "/account-logos/mandiri.png",
+  ovo: "/account-logos/ovo.png",
+  shopeepay: "/account-logos/shopeepay.png",
+  superbank: "/account-logos/superbank.png",
+};
+
+/** Logo lokal akun yang dikirim untuk kartu akun, jika ada yang cocok. */
+export function accountLogoFor(iconKey?: string | null, name?: string | null): string | null {
+  const normalizedKey = iconKey?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  if (ACCOUNT_LOGO_PATHS[normalizedKey]) return ACCOUNT_LOGO_PATHS[normalizedKey];
+
+  const normalizedName = name?.toLowerCase().replace(/[^a-z0-9]/g, "") ?? "";
+  const nameHints: [RegExp, keyof typeof ACCOUNT_LOGO_PATHS][] = [
+    [/superbank/, "superbank"],
+    [/shopeepay/, "shopeepay"],
+    [/mandiri/, "mandiri"],
+    [/gopay/, "gopay"],
+    [/dana/, "dana"],
+    [/jago/, "jago"],
+    [/blu/, "blu"],
+    [/ovo/, "ovo"],
+    [/bri/, "bri"],
+    [/bca/, "bca"],
+    [/cash|tunai/, "cash"],
+  ];
+
+  for (const [pattern, key] of nameHints) {
+    if (pattern.test(normalizedName)) return ACCOUNT_LOGO_PATHS[key];
+  }
+  return null;
+}

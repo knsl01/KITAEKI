@@ -48,6 +48,7 @@ export type Transaction = {
   account_id: string | null;
   to_account_id: string | null;
   category_id: string | null;
+  budget_post_id?: string | null;
   created_at: string;
 };
 
@@ -55,16 +56,6 @@ export type TransactionWithRelations = Transaction & {
   account: Pick<Account, "id" | "name"> | null;
   to_account: Pick<Account, "id" | "name"> | null;
   category: Pick<Category, "id" | "name" | "color" | "kind" | "icon_key"> | null;
-};
-
-export type Budget = {
-  id: string;
-  user_id: string;
-  category_id: string;
-  account_id?: string | null;
-  amount: number;
-  period_month: string;
-  category?: Pick<Category, "id" | "name" | "color"> | null;
 };
 
 export type AccountAllocation = {

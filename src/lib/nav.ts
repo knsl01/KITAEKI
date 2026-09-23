@@ -13,7 +13,6 @@ import {
   Bot,
   MapPinned,
   Heart,
-  ClipboardList,
 } from "lucide-react";
 
 export const NAV_ITEMS = [
@@ -27,7 +26,6 @@ export const NAV_ITEMS = [
   { href: "/dashboard/calendar", label: "Calendar KITA", icon: ListChecks },
   { href: "/dashboard/routes", label: "Rute & Rencana", icon: MapPinned },
   { href: "/dashboard/shopping", label: "Belanja", icon: ShoppingCart },
-  { href: "/dashboard/budget", label: "Anggaran", icon: ClipboardList },
   { href: "/dashboard/wishlist", label: "Wishlist", icon: Heart },
   { href: "/dashboard/categories", label: "Kategori", icon: Tags },
   { href: "/dashboard/share", label: "Share Story", icon: Target },

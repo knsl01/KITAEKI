@@ -1,13 +1,13 @@
 import { AllocationsOverviewClient } from "@/components/views/allocations-overview-client";
 import { createClient } from "@/lib/supabase/server";
-import { getView } from "@/lib/workspace";
+import { getView, getWorkspace } from "@/lib/workspace";
 import type { Account, AccountAllocation, Category } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Anggaran — KITA" };
 
 export default async function BudgetPage() {
-  const currentView = await getView();
+  const [currentView, workspace] = await Promise.all([getView(), getWorkspace()]);
   const supabase = await createClient();
   const [{ data: rawAccounts }, { data: rawAllocations }, { data: categories }, { data: spending }] = await Promise.all([
     supabase.from("accounts").select("*").order("created_at"),
@@ -30,5 +30,11 @@ export default async function BudgetPage() {
     spentByPost[transaction.budget_post_id] = (spentByPost[transaction.budget_post_id] ?? 0) + Number(transaction.amount);
   }
 
-  return <AllocationsOverviewClient accounts={accounts} allocations={allocations} spentByPost={spentByPost} />;
+  const ownerLabels = {
+    eki: workspace?.member1Name || "Eki",
+    dinda: workspace?.member2Name || "Dinda",
+    shared: "Bersama",
+  };
+
+  return <AllocationsOverviewClient accounts={accounts} allocations={allocations} spentByPost={spentByPost} ownerLabels={ownerLabels} />;
 }
