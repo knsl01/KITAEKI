@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sparkles, X, Send, Bot, CheckCircle2, XCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -14,8 +15,9 @@ type Message = {
   role: "user" | "model" | "assistant"; 
   content: string; 
   isError?: boolean;
-  toolCall?: { name: string; args: any };
-  toolResult?: { name: string; result: any };
+  resolved?: boolean;
+  toolStatus?: "done" | "failed" | "cancelled";
+  toolCall?: { name: string; args: Record<string, unknown> };
 };
 
 export function KitaAiWidget() {
@@ -26,6 +28,20 @@ export function KitaAiWidget() {
   ]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  function toHistory(items: Message[]) {
+    const turns: { role: "user" | "model"; parts: { text: string }[] }[] = [];
+    for (const item of items.slice(1)) {
+      if (item.role === "user") turns.push({ role: "user", parts: [{ text: item.content }] });
+      else {
+        const status = item.toolStatus === "cancelled" ? "Perintah dibatalkan" : item.toolStatus === "done" ? "Perintah berhasil" : item.toolStatus === "failed" ? "Perintah gagal" : "Menunggu konfirmasi untuk perintah";
+        const text = item.toolCall ? `${status} ${item.toolCall.name}: ${JSON.stringify(item.toolCall.args)}` : item.content;
+        if (text) turns.push({ role: "model", parts: [{ text }] });
+      }
+    }
+    return turns;
+  }
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -33,7 +49,7 @@ export function KitaAiWidget() {
     }
   }, [messages, isTyping, isOpen]);
 
-  async function processResponse(res: any, currentMessages: Message[]) {
+  async function processResponse(res: { error?: string; reply?: string; toolCall?: { name: string; args: Record<string, unknown> } }, currentMessages: Message[]) {
     if (res.error) {
       setMessages([...currentMessages, { role: "assistant", content: res.error, isError: true }]);
     } else if (res.toolCall) {
@@ -53,63 +69,41 @@ export function KitaAiWidget() {
     setMessage("");
     setIsTyping(true);
 
-    const history = newMessages.slice(1).map((m) => ({
-      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
-      parts: [{ text: m.content }],
-      toolCall: m.toolCall,
-      toolResult: m.toolResult,
-    }));
-
-    const res = await askKitaAi(history, userMsg);
-    setIsTyping(false);
-    await processResponse(res, newMessages);
+    try {
+      const res = await askKitaAi(toHistory(newMessages.slice(0, -1)), userMsg);
+      await processResponse(res, newMessages);
+    } catch {
+      setMessages([...newMessages, { role: "assistant", content: "KITA AI belum bisa menjawab. Coba lagi sebentar.", isError: true }]);
+    } finally {
+      setIsTyping(false);
+    }
   }
 
-  async function handleExecuteTool(toolName: string, args: any) {
+  async function handleExecuteTool(toolName: string, args: Record<string, unknown>, messageIndex: number) {
     setIsTyping(true);
-    const result = await aiExecuteTool(toolName, args);
-    const newMessages: Message[] = [
-      ...messages,
-      { role: "user", content: "Sistem: Aksi dikonfirmasi.", toolResult: { name: toolName, result } }
-    ];
-    setMessages(newMessages);
-    
-    const history = newMessages.slice(1).map((m) => ({
-      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
-      parts: [{ text: m.content }],
-      toolCall: m.toolCall,
-      toolResult: m.toolResult,
-    }));
-    
-    const res = await askKitaAi(history, "");
-    setIsTyping(false);
-    await processResponse(res, newMessages);
+    try {
+      const result = await aiExecuteTool(toolName, args);
+      setMessages((current) => [...current.map((item, index) => index === messageIndex ? { ...item, resolved: true, toolStatus: result.ok ? "done" as const : "failed" as const } : item), {
+        role: "assistant",
+        content: result.ok ? (result.message ?? "Perubahan berhasil disimpan.") : result.error,
+        isError: !result.ok,
+      }]);
+      if (result.ok) router.refresh();
+    } catch {
+      setMessages((current) => [...current, { role: "assistant", content: "Aksi belum tersimpan. Coba lagi.", isError: true }]);
+    } finally {
+      setIsTyping(false);
+    }
   }
 
-  async function handleCancelTool(toolName: string) {
-    setIsTyping(true);
-    const newMessages: Message[] = [
-      ...messages,
-      { role: "user", content: "Sistem: User batal.", toolResult: { name: toolName, result: "Cancelled" } }
-    ];
-    setMessages(newMessages);
-    
-    const history = newMessages.slice(1).map((m) => ({
-      role: (m.role === "assistant" ? "model" : "user") as "user" | "model",
-      parts: [{ text: m.content }],
-      toolCall: m.toolCall,
-      toolResult: m.toolResult,
-    }));
-    
-    const res = await askKitaAi(history, "");
-    setIsTyping(false);
-    await processResponse(res, newMessages);
+  function handleCancelTool(messageIndex: number) {
+    setMessages((current) => [...current.map((item, index) => index === messageIndex ? { ...item, resolved: true, toolStatus: "cancelled" as const } : item), { role: "assistant", content: "Oke, perintah dibatalkan. Tidak ada perubahan yang dibuat." }]);
   }
 
-  const markdownComponents: any = {
-    code({ node, inline, className, children, ...props }: any) {
+  const markdownComponents = {
+    code({ className, children, ...props }: React.ComponentProps<"code">) {
       const match = /language-(\w+)/.exec(className || '');
-      if (!inline && match && match[1] === 'json') {
+      if (match && match[1] === 'json') {
         try {
           const parsed = JSON.parse(String(children).replace(/\n$/, ''));
           if (parsed.type === 'financial_summary') return <FinancialSummaryCard data={parsed.data} />;
@@ -169,8 +163,7 @@ export function KitaAiWidget() {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((m, i) => {
-            if (m.toolResult) return null; // Sembunyikan pesan sistem dari UI
-
+            if (m.toolCall && m.resolved) return null;
             return (
             <div key={i} className={cn("flex w-full", m.role === "user" ? "justify-end" : "justify-start")}>
               <div
@@ -179,22 +172,24 @@ export function KitaAiWidget() {
                   m.role === "user" ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"
                 )}
               >
-                {m.toolCall ? (
+                {m.toolCall && !m.resolved ? (
                   <div className="space-y-3 text-foreground">
                     <div className="font-semibold border-b border-border pb-2 flex items-center gap-2">
                       <Sparkles className="h-4 w-4" /> Konfirmasi
                     </div>
                     <div className="text-xs">
                       Aksi: <strong className="text-primary">{m.toolCall.name}</strong>
-                      <pre className="mt-2 p-2 bg-background rounded-md border border-border text-[10px] overflow-x-auto text-foreground">
-                        {JSON.stringify(m.toolCall.args, null, 2)}
-                      </pre>
+                      <div className="mt-2 rounded-md border border-border bg-background p-2 text-[10px] text-foreground">
+                        <p>{String(m.toolCall.args.title ?? m.toolCall.args.name ?? m.toolCall.args.id ?? "Perintah")}</p>
+                        {typeof m.toolCall.args.amount === "number" ? <p>Rp{m.toolCall.args.amount.toLocaleString("id-ID")}</p> : null}
+                        {typeof m.toolCall.args.date === "string" ? <p>Tanggal {m.toolCall.args.date}</p> : null}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 pt-2">
-                      <Button size="sm" onClick={() => handleExecuteTool(m.toolCall!.name, m.toolCall!.args)} disabled={isTyping} className="h-7 text-xs px-2">
+                      <Button size="sm" onClick={() => handleExecuteTool(m.toolCall!.name, m.toolCall!.args, i)} disabled={isTyping} className="h-7 text-xs px-2">
                         <CheckCircle2 className="mr-1 h-3 w-3" /> Ya
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleCancelTool(m.toolCall!.name)} disabled={isTyping} className="h-7 text-xs px-2">
+                      <Button size="sm" variant="outline" onClick={() => handleCancelTool(i)} disabled={isTyping} className="h-7 text-xs px-2">
                         <XCircle className="mr-1 h-3 w-3" /> Batal
                       </Button>
                     </div>
