@@ -54,7 +54,7 @@ export function AccountPositionsClient({ account, allocations }: { account: Acco
       </div>
 
       {allocations.length === 0 ? (
-        <Card><EmptyState title="Belum ada pos di akun ini" description="Tambahkan pos untuk menandai sebagian saldo khusus untuk kebutuhan tertentu." action={account.is_active ? <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button><Plus className="h-4 w-4" />Tambah pos</Button>} /> : undefined} /></Card>
+        <Card><EmptyState title="Belum ada pos di akun ini" description="Tambahkan target kebutuhan. Pos baru dimulai kosong, lalu kamu tentukan sendiri nominalnya lewat Isi Pos." action={account.is_active ? <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} trigger={<Button><Plus className="h-4 w-4" />Tambah pos</Button>} /> : undefined} /></Card>
       ) : (
         <div className="account-detail-list-enter grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {allocations.map((allocation) => {
@@ -78,7 +78,7 @@ export function AccountPositionsClient({ account, allocations }: { account: Acco
                       <AccountAllocationDialog accounts={[account]} fixedAccountId={account.id} allocation={allocation} trigger={<Button variant="ghost" size="sm" disabled={!account.is_active}><Pencil className="h-3.5 w-3.5" />Ubah</Button>} />
                       <ConfirmDelete title="Hapus pos?" description="Sisa dana yang masih dicadangkan dilepas menjadi saldo tersedia. Pengeluaran yang sudah tercatat tetap mengurangi saldo akun dan tidak dikembalikan." onConfirm={() => deleteAccountAllocation(allocation.id)} trigger={<Button variant="ghost" size="sm"><Trash2 className="h-3.5 w-3.5" />Hapus</Button>} />
                     </div>
-                    {remainingNeed > 0 && account.is_active ? <FillAllocationButton allocationId={allocation.id} /> : <span className="text-xs text-muted-foreground">{remainingNeed > 0 ? "Akun tidak aktif" : "Target terisi"}</span>}
+                    {remainingNeed > 0 && account.is_active ? <FillAllocationButton allocationId={allocation.id} remainingNeed={remainingNeed} /> : <span className="text-xs text-muted-foreground">{remainingNeed > 0 ? "Akun tidak aktif" : "Target terisi"}</span>}
                   </div>
                 </CardContent>
               </Card>

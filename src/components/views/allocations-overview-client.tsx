@@ -64,7 +64,7 @@ export function AllocationsOverviewClient({
       </div>
 
       {allocations.length === 0 ? (
-        <Card><EmptyState title="Belum ada pos anggaran" description="Buat pos dari tombol di atas. Tentukan kebutuhan dan akun sumber; dana yang tersedia akan dialokasikan otomatis." action={activeAccounts.length ? <AccountAllocationDialog accounts={activeAccounts} trigger={<Button><Plus className="h-4 w-4" />Tambah pos</Button>} /> : undefined} /></Card>
+        <Card><EmptyState title="Belum ada pos anggaran" description="Buat pos dengan menentukan kebutuhan dan akun sumber. Pos baru dimulai dari nominal kosong; kamu mengisi dananya sendiri." action={activeAccounts.length ? <AccountAllocationDialog accounts={activeAccounts} trigger={<Button><Plus className="h-4 w-4" />Tambah pos</Button>} /> : undefined} /></Card>
       ) : (
         <div className="space-y-7">
           {visibleGroups.map((group) => {
@@ -110,7 +110,7 @@ export function AllocationsOverviewClient({
                               trigger={<Button variant="ghost" size="sm" aria-label={`Hapus ${allocation.category?.name ?? "pos"}`}><Trash2 className="h-3.5 w-3.5" />Hapus</Button>}
                             />
                           </div>
-                          {remainingNeedForPost > 0 && account?.is_active ? <FillAllocationButton allocationId={allocation.id} /> : <span className="text-xs text-muted-foreground">{remainingNeedForPost > 0 ? "Akun tidak aktif" : "Target terisi"}</span>}
+                          {remainingNeedForPost > 0 && account?.is_active ? <FillAllocationButton allocationId={allocation.id} remainingNeed={remainingNeedForPost} /> : <span className="text-xs text-muted-foreground">{remainingNeedForPost > 0 ? "Akun tidak aktif" : "Target terisi"}</span>}
                         </div>
                       </CardContent>
                     </Card>

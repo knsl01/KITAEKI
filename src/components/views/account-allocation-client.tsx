@@ -46,7 +46,7 @@ export function AccountAllocationDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{allocation ? "Ubah pos" : "Tambah pos"}</DialogTitle>
-          <DialogDescription>Masukkan total kebutuhan. Dana akan dicadangkan dari saldo tersedia akun tanpa mengurangi saldo aktual.</DialogDescription>
+          <DialogDescription>{allocation ? "Atur kebutuhan dan nominal yang sedang dicadangkan di pos ini." : "Tentukan kebutuhan pos. Pos dibuat kosong; isi nominalnya sendiri lewat tombol Isi Pos."} Saldo akun aktual tidak berubah saat dana dialokasikan.</DialogDescription>
         </DialogHeader>
         <form action={submit} className="space-y-4">
           {allocation ? <input type="hidden" name="allocation_id" value={allocation.id} /> : null}
@@ -67,6 +67,11 @@ export function AccountAllocationDialog({
             <Label htmlFor="allocation_target_amount">Kebutuhan / target pos</Label>
             <MoneyInput id="allocation_target_amount" name="target_amount" min={1} defaultValue={allocation?.target_amount ?? ""} placeholder="1.500.000" required />
           </div>
+          {allocation ? <div className="space-y-2">
+            <Label htmlFor="allocation_funded_amount">Dana saat ini di dalam pos</Label>
+            <MoneyInput id="allocation_funded_amount" name="allocated_amount" min={0} defaultValue={allocation.allocated_amount} placeholder="0" required />
+            <p className="text-xs text-muted-foreground">Nominal ini adalah dana yang dicadangkan, bukan pengeluaran. Kenaikan dibatasi saldo tersedia akun.</p>
+          </div> : null}
           {error ? <p role="alert" className="rounded-md bg-negative/10 px-3 py-2 text-sm text-negative">{error}</p> : null}
           <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setOpen(false)}>Batal</Button><Button type="submit" disabled={pending}>{pending && <Loader2 className="h-4 w-4 animate-spin" />}{allocation ? "Simpan" : "Tambah pos"}</Button></div>
         </form>

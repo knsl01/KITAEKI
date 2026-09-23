@@ -36,9 +36,10 @@ export function BudgetClient({ budgets }: Props) {
         action={<Button asChild><Link href="/dashboard/accounts">Kelola di Akun<ArrowRight className="h-4 w-4" /></Link></Button>}
       />
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-3">
-        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total kebutuhan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalTarget)}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalAllocated)}</p></CardContent></Card>
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total target semua Pos</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalTarget)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Sudah dialokasikan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalAllocated)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Masih dibutuhkan untuk melengkapi Pos</p><p className="tabular mt-1 text-xl font-bold text-primary">{formatCurrency(totalNeed)}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Pengeluaran aktual</p><p className="tabular mt-1 text-xl font-bold text-negative">{formatCurrency(totalSpent)}</p></CardContent></Card>
       </div>
 
@@ -71,7 +72,7 @@ export function BudgetClient({ budgets }: Props) {
         </div>
       )}
 
-      {budgets.length > 0 ? <p className="mt-4 text-xs text-muted-foreground">Sisa target yang belum terisi: {formatCurrency(totalNeed)}. Tidak ada reset atau perhitungan bulanan.</p> : null}
+      {budgets.length > 0 ? <p className="mt-4 text-xs text-muted-foreground">“Masih dibutuhkan” adalah jumlah sisa target Pos setelah dikurangi dana yang sudah dialokasikan; pengeluaran aktual ditampilkan terpisah. Pos tidak direset per bulan.</p> : null}
     </div>
   );
 }
