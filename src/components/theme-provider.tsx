@@ -18,6 +18,7 @@ export const THEMES = [
   { id: "midnight-rose", label: "Midnight Rose", swatch: "#8F2454", dark: "#160812", accent: "#FF8AB8" },
   { id: "matcha", label: "Matcha", swatch: "#527A43", dark: "#101B12", accent: "#B7EA8A" },
   { id: "amethyst-night", label: "Amethyst Night", swatch: "#6E4AA8", dark: "#100C1E", accent: "#C4A2FF" },
+  { id: "deep-black", label: "Deep Black", swatch: "#151A20", dark: "#05080B", accent: "#83D9F2" },
 ] as const;
 
 export const RADII = [
