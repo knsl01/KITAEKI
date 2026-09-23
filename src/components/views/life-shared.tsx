@@ -35,11 +35,13 @@ export function CheckButton({
   onClick,
   label,
   disabled,
+  touchTarget = false,
 }: {
   checked: boolean;
   onClick: () => void;
   label: string;
   disabled?: boolean;
+  touchTarget?: boolean;
 }) {
   return (
     <button
@@ -50,11 +52,16 @@ export function CheckButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
-        checked ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-ring"
+        "group mt-0.5 flex shrink-0 items-center justify-center rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60",
+        touchTarget ? "h-11 w-11 border-0 bg-transparent" : "h-5 w-5 border",
       )}
     >
-      {checked ? <Check className="h-3 w-3" aria-hidden /> : null}
+      <span className={cn(
+        "flex h-5 w-5 items-center justify-center rounded-full border transition-colors duration-150",
+        checked ? "border-primary bg-primary text-primary-foreground" : "border-border group-hover:border-ring",
+      )}>
+        {checked ? <Check className="h-3 w-3" aria-hidden /> : null}
+      </span>
     </button>
   );
 }
