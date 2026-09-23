@@ -272,8 +272,8 @@ function AccountCard({ account, allocations, spentByPost, pending, onToggleActiv
 
         <div className="relative z-10 flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            {accountLogo && !logoFailed ? <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 p-1.5 md:h-14 md:w-14">
-              <Image src={accountLogo} alt={`${account.name} logo`} fill sizes="(max-width: 767px) 48px, 56px" className="object-contain p-1" onError={() => setLogoFailed(true)} />
+            {accountLogo && !logoFailed ? <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 md:h-14 md:w-14">
+              <Image src={accountLogo} alt={`${account.name} logo`} fill sizes="(max-width: 767px) 48px, 56px" className="object-contain" onError={() => setLogoFailed(true)} />
             </span> : accountLogo ? <span aria-hidden className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border/70 bg-muted/40 text-xs font-semibold text-muted-foreground md:h-14 md:w-14">{brand.short}</span> : <BrandMarkTile iconKey={account.icon_key} name={account.name} className="h-12 w-12 rounded-xl text-sm md:h-14 md:w-14" />}
             <div className="min-w-0">
               <p className="truncate text-base font-semibold tracking-tight">{account.name}</p>
