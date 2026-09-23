@@ -1,252 +1,77 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import { deleteBudget, upsertBudget } from "@/app/actions/budgets";
-import { ConfirmDelete } from "@/components/confirm-delete";
+import Link from "next/link";
+import { ArrowRight, Landmark } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MoneyInput } from "@/components/ui/money-input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Select } from "@/components/ui/select";
-import { formatCurrency, lastMonths, monthLabel, percent } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import type { AccountAllocation, Category, Transaction } from "@/lib/types";
 
 type Props = {
-  month: string;
+  /** Diterima untuk kompatibilitas dengan halaman lama; Pos tidak lagi bulanan. */
+  month?: string;
   budgets: AccountAllocation[];
-  categories: Category[];
-  transactions: Pick<Transaction, "amount" | "type" | "category_id">[];
+  categories?: Category[];
+  transactions?: Pick<Transaction, "amount" | "type" | "category_id">[];
 };
 
-function BudgetDialog({ month, categories, budget, trigger }: { month: string; categories: Category[]; budget?: AccountAllocation; trigger?: React.ReactNode }) {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-
-  function onSubmit(formData: FormData) {
-    setError(null);
-    startTransition(async () => {
-      const result = await upsertBudget(formData);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      setOpen(false);
-      router.refresh();
-    });
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button>
-            <Plus className="h-4 w-4" />
-            Tambah pos
-          </Button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{budget ? "Atur pos anggaran" : "Tambah pos anggaran"}</DialogTitle>
-          <DialogDescription>
-            {budget ? "Ubah batas pos ini sesuai kebutuhan bulan berjalan." : "Satu kategori punya satu pos anggaran per bulan. Mengisi ulang kategori yang sama akan menimpa nilainya."}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="period_month" value={month} />
-
-          <div className="space-y-2">
-            <Label htmlFor="category_id">Kategori</Label>
-            <Select id="category_id" name="category_id" defaultValue={budget?.category_id ?? ""} required>
-              <option value="">Pilih kategori</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="amount">Batas bulan ini</Label>
-            <MoneyInput id="amount" name="amount" min={1} placeholder="1.500.000" defaultValue={budget?.amount ?? ""} required />
-          </div>
-
-          {error ? <p className="rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p> : null}
-
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={pending}>
-              {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {budget ? "Simpan perubahan" : "Simpan"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+function fillPercent(allocated: number, target: number) {
+  return target > 0 ? Math.min(100, Math.max(0, (allocated / target) * 100)) : 0;
 }
 
-export function BudgetClient({ month, budgets, categories, transactions }: Props) {
-  const router = useRouter();
-
-  const spentByCategory = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const t of transactions) {
-      if (!t.category_id) continue;
-      map.set(t.category_id, (map.get(t.category_id) ?? 0) + Number(t.amount));
-    }
-    return map;
-  }, [transactions]);
-  
-  const otherSpent = useMemo(() => {
-    let sum = 0;
-    const budgetedCategoryIds = new Set(budgets.map(b => b.category_id));
-    for (const t of transactions) {
-      if (!t.category_id || !budgetedCategoryIds.has(t.category_id)) {
-        sum += Number(t.amount);
-      }
-    }
-    return sum;
-  }, [transactions, budgets]);
-
-  const totalBudget = budgets.reduce((sum, b) => sum + Number(b.amount), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + (spentByCategory.get(b.category_id) ?? 0), 0) + otherSpent;
+export function BudgetClient({ budgets }: Props) {
+  const totalTarget = budgets.reduce((sum, post) => sum + Number(post.target_amount), 0);
+  const totalAllocated = budgets.reduce((sum, post) => sum + Number(post.allocated_amount), 0);
+  const totalSpent = budgets.reduce((sum, post) => sum + Number(post.spent_amount), 0);
+  const totalNeed = budgets.reduce((sum, post) => sum + Math.max(Number(post.target_amount) - Number(post.allocated_amount), 0), 0);
 
   return (
     <div>
       <PageHeader
         title="Pos Anggaran"
-        description="Atur pos-pos anggaran untuk setiap keperluan pengeluaran."
-        action={<BudgetDialog month={month} categories={categories} />}
+        description="Lihat target kebutuhan, dana yang dicadangkan, dan pengeluaran aktual."
+        action={<Button asChild><Link href="/dashboard/accounts">Kelola di Akun<ArrowRight className="h-4 w-4" /></Link></Button>}
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Select
-          value={month}
-          onChange={(e) => router.push(`/dashboard/budget?month=${e.target.value}`)}
-          className="w-auto min-w-[180px]"
-          aria-label="Pilih bulan"
-        >
-          {lastMonths(12).reverse().map((m) => (
-            <option key={m} value={m}>
-              {monthLabel(m)}
-            </option>
-          ))}
-        </Select>
+      <div className="mb-5 grid gap-3 sm:grid-cols-3">
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total kebutuhan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalTarget)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Masih dicadangkan</p><p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalAllocated)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Pengeluaran aktual</p><p className="tabular mt-1 text-xl font-bold text-negative">{formatCurrency(totalSpent)}</p></CardContent></Card>
       </div>
 
-      <Card className="mb-4">
-        <CardContent className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <p className="text-sm text-muted-foreground">Total anggaran</p>
-            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Terpakai</p>
-            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalSpent)}</p>
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Sisa</p>
-            <p className="tabular mt-1 text-xl font-bold">{formatCurrency(totalBudget - totalSpent)}</p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {budgets.length === 0 && otherSpent === 0 ? (
-        <Card>
-          <EmptyState
-            title={`Belum ada pos anggaran untuk ${monthLabel(month)}`}
-            description="Tentukan batas belanja per kategori untuk bulan ini."
-          />
-        </Card>
+      {budgets.length === 0 ? (
+        <Card><EmptyState title="Belum ada Pos" description="Pos dibuat dari kartu akun. Buka Akun untuk menambah kebutuhan dan memilih sumber dananya." action={<Button asChild><Link href="/dashboard/accounts">Buka Akun<ArrowRight className="h-4 w-4" /></Link></Button>} /></Card>
       ) : (
-        <div className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {otherSpent > 0 && (
-            <Card className="p-5">
-              <div className="flex items-start justify-between gap-2">
-                <span className="flex min-w-0 items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground" />
-                  <span className="truncate font-medium">Lain lain</span>
-                </span>
-              </div>
-              <p className="tabular mt-4 text-lg font-bold">{formatCurrency(otherSpent)}</p>
-              <p className="tabular text-xs text-muted-foreground">Pengeluaran di luar pos anggaran</p>
-              <Progress value={100} className="mt-3" barClassName="bg-muted-foreground" />
-              <p className="mt-2 text-xs text-muted-foreground">Tidak ada batas pos</p>
-            </Card>
-          )}
-          {budgets.map((budget) => {
-            const spent = spentByCategory.get(budget.category_id) ?? 0;
-            const pct = percent(spent, Number(budget.amount));
-            const over = spent > Number(budget.amount);
-
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {budgets.map((post) => {
+            const target = Number(post.target_amount);
+            const allocated = Number(post.allocated_amount);
+            const spent = Number(post.spent_amount);
+            const percent = fillPercent(allocated, target);
             return (
-              <Card key={budget.id} className="p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                      style={{ backgroundColor: budget.category?.color ?? "#B0B0B0" }}
-                    />
-                    <span className="truncate font-medium">{budget.category?.name ?? "Kategori dihapus"}</span>
-                  </span>
-                  <ConfirmDelete
-                    title="Hapus pos anggaran?"
-                    onConfirm={async () => deleteBudget(budget.id)}
-                    trigger={
-                      <Button variant="ghost" size="icon" aria-label="Hapus pos anggaran">
-                        <Trash2 className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    }
-                  />
-                  <BudgetDialog
-                    month={month}
-                    categories={categories}
-                    budget={budget}
-                    trigger={
-                      <Button variant="ghost" size="icon" aria-label={`Atur pos ${budget.category?.name ?? "anggaran"}`}>
-                        <Pencil className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    }
-                  />
-                </div>
-
-                <p className="tabular mt-4 text-lg font-bold">{formatCurrency(spent)}</p>
-                <p className="tabular text-xs text-muted-foreground">dari {formatCurrency(Number(budget.amount))}</p>
-
-                <Progress
-                  value={pct}
-                  className="mt-3"
-                  barClassName={over ? "bg-[hsl(var(--negative))]" : undefined}
-                />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {over ? `Lewat ${formatCurrency(spent - Number(budget.amount))}` : `Sisa ${formatCurrency(Number(budget.amount) - spent)}`}
-                </p>
+              <Card key={post.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0"><h2 className="truncate font-semibold">{post.category?.name ?? "Pos"}</h2><p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"><Landmark className="h-3.5 w-3.5" />{post.account?.name ?? "Pilih akun sumber di Akun"}</p></div>
+                    <span className="tabular shrink-0 text-sm font-semibold">{formatCurrency(allocated)}</span>
+                  </div>
+                  <Progress value={percent} className="mt-4 h-2" />
+                  <p className="mt-2 text-xs text-muted-foreground">{percent.toFixed(1)}% terisi dari kebutuhan {formatCurrency(target)}</p>
+                  <div className="mt-3 grid grid-cols-2 gap-3 rounded-lg bg-muted/40 p-3 text-xs">
+                    <div><p className="text-muted-foreground">Terpakai</p><p className="tabular mt-1 font-semibold text-negative">{formatCurrency(spent)}</p></div>
+                    <div className="text-right"><p className="text-muted-foreground">Sisa kebutuhan</p><p className="tabular mt-1 font-semibold">{formatCurrency(Math.max(target - allocated, 0))}</p></div>
+                  </div>
+                </CardContent>
               </Card>
             );
           })}
         </div>
       )}
+
+      {budgets.length > 0 ? <p className="mt-4 text-xs text-muted-foreground">Sisa target yang belum terisi: {formatCurrency(totalNeed)}. Tidak ada reset atau perhitungan bulanan.</p> : null}
     </div>
   );
 }
-
