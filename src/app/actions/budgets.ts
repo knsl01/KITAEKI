@@ -19,7 +19,7 @@ export async function upsertAccountAllocation(formData: FormData): Promise<Actio
   if (allocationId && !/^[0-9a-f-]{36}$/i.test(allocationId)) return fail("Pos tidak valid.");
   if (!accountId || !/^[0-9a-f-]{36}$/i.test(accountId)) return fail("Pilih akun sumber untuk pos ini.");
   if (posName && posName.length > 100) return fail("Nama pos maksimal 100 karakter.");
-  const { data: account, error: accountError } = await supabase.from("accounts").select("id, name, balance").eq("id", accountId).eq("household_id", householdId).eq("is_active", true).maybeSingle();
+  const { data: account, error: accountError } = await supabase.from("accounts").select("id, name").eq("id", accountId).eq("household_id", householdId).eq("is_active", true).maybeSingle();
   if (accountError) return fail(accountError.message);
   if (!account) return fail("Akun tidak ditemukan atau sudah dinonaktifkan.");
 
@@ -49,16 +49,12 @@ export async function upsertAccountAllocation(formData: FormData): Promise<Actio
     : { data: null, error: null };
   if (currentAllocationError) return fail(currentAllocationError.message);
 
-  const { data: accountAllocations, error: allocationsError } = await supabase
-    .from("account_allocations").select("id, allocated_amount").eq("household_id", householdId).eq("account_id", accountId);
-  if (allocationsError) return fail(allocationsError.message);
-  const otherAllocated = (accountAllocations ?? []).reduce((sum, row) => {
-    return row.id === currentAllocationId ? sum : sum + Number(row.allocated_amount);
-  }, 0);
-  const available = Math.max(Number(account.balance) - otherAllocated, 0);
-  const allocatedAmount = currentAllocation?.account_id === accountId
-    ? Math.min(Number(currentAllocation.allocated_amount), targetAmount)
-    : Math.min(targetAmount, available);
+  const allocatedRaw = formData.get("allocated_amount");
+  const allocatedAmount = allocatedRaw === null
+    ? (currentAllocation ? Math.min(Number(currentAllocation.allocated_amount), targetAmount) : 0)
+    : num(formData, "allocated_amount");
+  if (!Number.isFinite(allocatedAmount) || allocatedAmount < 0) return fail("Nominal dana di dalam pos tidak valid.");
+  if (allocatedAmount > targetAmount) return fail("Dana di dalam pos tidak boleh melebihi kebutuhan/target.");
 
   if (createCategoryName) {
     if (Number(currentAllocation?.spent_amount ?? 0) > 0) return fail("Nama pos yang sudah dipakai transaksi tidak bisa diganti.");
@@ -86,14 +82,15 @@ export async function upsertAccountAllocation(formData: FormData): Promise<Actio
   return { ok: true };
 }
 
-export async function fillAccountAllocation(id: string): Promise<ActionResult> {
+export async function fillAccountAllocation(id: string, amount: number): Promise<ActionResult> {
   const { supabase, user, householdId } = await getUserClient();
   if (!user) return fail(UNAUTH);
   if (!householdId) return fail(NO_HOUSEHOLD);
   if (!/^[0-9a-f-]{36}$/i.test(id)) return fail("Pos tidak valid.");
-  const { data, error } = await supabase.rpc("fill_account_allocation", { p_allocation_id: id });
+  if (!Number.isFinite(amount) || amount <= 0) return fail("Masukkan nominal yang ingin diisi ke pos.");
+  const { data, error } = await supabase.rpc("fill_account_allocation", { p_allocation_id: id, p_amount: amount });
   if (error) return fail(error.message);
-  if (Number(data) <= 0) return fail("Belum ada saldo tersedia untuk mengisi pos ini.");
+  if (Number(data) <= 0) return fail("Nominal belum bisa dialokasikan.");
   revalidatePath("/dashboard", "layout");
   revalidatePath("/dashboard/budget");
   revalidatePath("/dashboard/accounts");

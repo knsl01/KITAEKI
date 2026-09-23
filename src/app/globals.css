@@ -1106,6 +1106,7 @@
   -webkit-perspective: 1200px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  transition: transform .32s cubic-bezier(.22, 1, .36, 1);
 }
 .account-card-flip-inner {
   position: relative;
@@ -1153,6 +1154,28 @@
   isolation: isolate;
   box-sizing: border-box;
   border: 1px solid hsl(var(--border));
+  transition: border-color .32s ease, box-shadow .36s ease;
+}
+.account-card-shell:active { transform: scale(.992); }
+.account-card-shell:active .account-card-face {
+  border-color: hsl(var(--ring) / .58);
+  box-shadow: 0 0 0 1px hsl(var(--ring) / .16), 0 10px 24px -16px hsl(var(--ring) / .48);
+}
+.account-card-shell:focus-visible { outline: 2px solid hsl(var(--ring) / .75); outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) {
+  .account-card-shell:hover { transform: translateY(-3px); }
+  .account-card-shell:hover .account-card-face {
+    border-color: hsl(var(--ring) / .62);
+    box-shadow: 0 0 0 1px hsl(var(--ring) / .18), 0 16px 36px -18px hsl(var(--ring) / .55);
+  }
+}
+[data-theme="nebula"] .account-card-shell:active .account-card-face,
+[data-theme="nebula"] .account-card-shell:focus-visible .account-card-face {
+  border-color: hsl(var(--ring) / .72);
+  box-shadow: 0 0 0 1px hsl(var(--ring) / .22), 0 0 28px -10px hsl(var(--ring) / .64);
+}
+@media (prefers-reduced-motion: reduce) {
+  .account-card-shell, .account-card-face { transition-duration: .01ms; }
 }
 .account-card-front {
   transform: rotateY(0deg) translateZ(0.5px);

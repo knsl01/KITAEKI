@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
+import { geocodeAddress } from "@/lib/geoapify";
 
 const OWNERS = ["eki", "dinda", "shared"] as const;
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
@@ -12,18 +13,7 @@ export async function findRouteLocation(query: string): Promise<{ latitude: numb
   const value = query.trim().slice(0, 240);
   if (!user || value.length < 3) return null;
   try {
-    const response = await fetch("https://photon.komoot.io/api/?q=" + encodeURIComponent(value) + "&lang=id&limit=1", {
-      headers: { Accept: "application/json", "User-Agent": "KITA-WebApp/1.0 (route planning)" },
-      next: { revalidate: 86_400 },
-      signal: AbortSignal.timeout(7000),
-    });
-    if (!response.ok) return null;
-    const result = await response.json();
-    const pair = result.features?.[0]?.geometry?.coordinates;
-    if (!Array.isArray(pair) || pair.length !== 2) return null;
-    const longitude = Number(pair[0]), latitude = Number(pair[1]);
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
-    return { latitude, longitude };
+    return await geocodeAddress(value);
   } catch {
     return null;
   }
