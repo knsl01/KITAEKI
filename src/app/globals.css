@@ -592,6 +592,22 @@
     --positive: 145 72% 58%; --negative: 351 86% 70%; --chart-income: hsl(145 72% 58%); --chart-expense: hsl(351 86% 70%); --chart-grid: hsl(258 20% 21%); --chart-axis: hsl(258 12% 65%);
   }
 
+  /* Deep Black: deep graphite surfaces, ice-blue accents, and high-contrast finance colors. */
+  [data-theme="deep-black"] {
+    --background: 220 14% 4%; --foreground: 210 22% 94%; --card: 220 13% 9%; --card-foreground: 210 22% 94%;
+    --muted: 220 12% 13%; --muted-foreground: 215 10% 65%; --accent: 195 34% 17%; --accent-foreground: 200 35% 94%;
+    --primary: 195 82% 68%; --primary-foreground: 220 28% 8%; --secondary: 220 12% 14%; --secondary-foreground: 210 22% 94%;
+    --destructive: 2 72% 64%; --destructive-foreground: 0 0% 100%; --border: 215 13% 20%; --input: 215 13% 20%; --ring: 195 82% 68%;
+    --sidebar: 220 17% 6%; --sidebar-foreground: 210 18% 91%; --positive: 156 62% 68%; --negative: 2 78% 70%;
+    --chart-income: hsl(156 62% 68%); --chart-expense: hsl(2 78% 70%); --chart-grid: hsl(215 13% 20%); --chart-axis: hsl(215 10% 65%);
+    --chart-line: 195 82% 68%; --line-positive: 156 62% 68%; --line-negative: 2 78% 70%; --neon: 195 82% 68%; --radius: 0.9rem;
+  }
+  [data-theme="deep-black"][data-mode="dark"] {
+    --background: 220 18% 3%; --card: 220 15% 7%; --muted: 220 14% 11%; --accent: 195 36% 15%;
+    --primary: 195 88% 72%; --border: 215 14% 17%; --input: 215 14% 17%; --ring: 195 88% 72%; --sidebar: 220 20% 4%;
+    --chart-grid: hsl(215 14% 17%);
+  }
+
   /* ── Cahaya lembut untuk kartu Total saldo (dua warna per tema) ── */
   :root,
   [data-theme="sage"] { --glow-1: 148 34% 52%; --glow-2: 40 46% 68%; }
@@ -606,6 +622,7 @@
   [data-theme="midnight-rose"] { --glow-1: 336 70% 58%; --glow-2: 12 60% 66%; }
   [data-theme="matcha"] { --glow-1: 106 48% 48%; --glow-2: 72 62% 62%; }
   [data-theme="amethyst-night"] { --glow-1: 263 62% 58%; --glow-2: 305 52% 64%; }
+  [data-theme="deep-black"] { --glow-1: 195 82% 58%; --glow-2: 220 24% 46%; }
 
   [data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
   [data-theme="sage"][data-mode="dark"] { --glow-1: 146 34% 38%; --glow-2: 40 40% 40%; }
@@ -620,6 +637,7 @@
   [data-theme="midnight-rose"][data-mode="dark"] { --glow-1: 336 64% 42%; --glow-2: 12 52% 38%; }
   [data-theme="matcha"][data-mode="dark"] { --glow-1: 106 42% 34%; --glow-2: 72 52% 36%; }
   [data-theme="amethyst-night"][data-mode="dark"] { --glow-1: 263 62% 42%; --glow-2: 305 52% 38%; }
+  [data-theme="deep-black"][data-mode="dark"] { --glow-1: 195 82% 46%; --glow-2: 220 24% 38%; }
 
   /* ── Huruf: satu keluarga untuk seluruh aplikasi (Plus Jakarta Sans lewat next/font) ── */
   :root {
@@ -985,6 +1003,22 @@
     box-shadow: 0 1px 2px hsl(var(--foreground) / 0.04), 0 0 0 1px hsl(var(--ring) / 0.14), 0 16px 40px -16px hsl(var(--ring) / 0.5);
   }
 
+  /* Deep Black cards use a restrained liquid-glass finish without changing layout or content. */
+  [data-theme="deep-black"] .card-interactive,
+  [data-theme="deep-black"] .widget-card,
+  [data-theme="deep-black"] .account-card-face {
+    background-color: hsl(var(--card) / 0.74);
+    background-image: linear-gradient(135deg, hsl(var(--foreground) / 0.045), transparent 54%), radial-gradient(120% 95% at 100% 0%, hsl(var(--primary) / 0.075), transparent 60%);
+    border-color: hsl(var(--foreground) / 0.11);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.09), 0 14px 36px -26px hsl(0 0% 0% / 0.9);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+  [data-theme="deep-black"] .card-interactive:hover {
+    border-color: hsl(var(--primary) / 0.34);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12), 0 0 0 1px hsl(var(--primary) / 0.06), 0 18px 42px -24px hsl(var(--primary) / 0.2);
+  }
+
   /* Ikon ikut hidup saat tombol induknya di-hover */
   .icon-lift svg {
     transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
@@ -1001,6 +1035,36 @@
   }
   .icon-slide:hover svg {
     transform: translateX(2px);
+  }
+
+  /* Only app containers with real overflow get the desktop scrollbar treatment. */
+  @media (min-width: 768px) {
+    .kita-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: hsl(var(--primary) / 0.28) transparent;
+      scrollbar-gutter: stable;
+    }
+    .kita-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .kita-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .kita-scrollbar::-webkit-scrollbar-thumb {
+      border: 1.5px solid transparent;
+      border-radius: 999px;
+      background: hsl(var(--primary) / 0.24);
+      background-clip: padding-box;
+    }
+    .kita-scrollbar:hover {
+      scrollbar-color: hsl(var(--primary) / 0.58) transparent;
+    }
+    .kita-scrollbar:hover::-webkit-scrollbar-thumb,
+    .kita-scrollbar:active::-webkit-scrollbar-thumb {
+      background: hsl(var(--primary) / 0.58);
+      background-clip: padding-box;
+    }
   }
 }
 
