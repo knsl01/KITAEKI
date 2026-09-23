@@ -22,6 +22,12 @@ alter table public.account_allocations
   add column if not exists allocated_amount numeric(16,2) not null default 0,
   add column if not exists spent_amount numeric(16,2) not null default 0;
 
+-- Migrasi sebelumnya meninggalkan constraint NOT VALID untuk Pos lama tanpa
+-- akun. Constraint tetap memeriksa setiap UPDATE, jadi lepaskan sementara saat
+-- mengisi kolom baru lalu pasang kembali sebagai NOT VALID di bawah.
+alter table public.account_allocations
+  drop constraint if exists account_allocations_requires_account_check;
+
 with spent as (
   select allocation.id, coalesce(sum(transaction_row.amount), 0)::numeric(16,2) as spent_amount
   from public.account_allocations allocation
@@ -30,10 +36,19 @@ with spent as (
 )
 update public.account_allocations allocation
 set spent_amount = spent.spent_amount,
-    allocated_amount = greatest(allocation.target_amount - spent.spent_amount, 0),
+    allocated_amount = case
+      when allocation.account_id is null then 0
+      else greatest(allocation.target_amount - spent.spent_amount, 0)
+    end,
     updated_at = now()
 from spent
 where spent.id = allocation.id;
+
+-- Data historis tanpa akun tetap terlihat untuk disambungkan dari aplikasi;
+-- Pos baru tetap wajib memiliki akun sumber.
+alter table public.account_allocations
+  add constraint account_allocations_requires_account_check
+  check (account_id is not null) not valid;
 
 alter table public.account_allocations
   alter column target_amount set not null,
