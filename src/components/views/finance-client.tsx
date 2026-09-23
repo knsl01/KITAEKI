@@ -14,7 +14,8 @@ import { MemberExpenseChart } from "@/components/charts/member-expense-chart";
 import { MemberCashflowCompareChart } from "@/components/charts/member-cashflow-compare-chart";
 import { groupByCategory, sumTotals } from "@/lib/analytics";
 import { formatCurrency, formatDate, percent } from "@/lib/format";
-import { ACCOUNT_TYPE_LABEL, OWNER_LABEL, type Account, type Category, type MemberOwner, type RecurringTransaction, type Transaction } from "@/lib/types";
+import { ACCOUNT_TYPE_LABEL, OWNER_LABEL } from "@/lib/types";
+import type { Account, Category, MemberOwner, RecurringTransaction, Transaction } from "@/lib/types";
 
 type Props = {
   start: string;
