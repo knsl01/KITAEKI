@@ -1106,7 +1106,6 @@
   -webkit-perspective: 1200px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  isolation: isolate;
 }
 .account-card-flip-inner {
   position: relative;
@@ -1152,6 +1151,8 @@
   -webkit-backface-visibility: hidden;
   background-color: hsl(var(--card));
   isolation: isolate;
+  box-sizing: border-box;
+  border: 1px solid hsl(var(--border));
 }
 .account-card-front {
   transform: rotateY(0deg) translateZ(0.5px);

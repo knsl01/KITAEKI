@@ -251,8 +251,8 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
     }, 320);
   }
 
-  return <Card
-    className="account-card-shell relative cursor-pointer select-none overflow-hidden border-border bg-card p-0"
+  return <div
+    className="account-card-shell relative cursor-pointer select-none text-card-foreground"
     onClick={handleCardClick}
     role="link" tabIndex={0} aria-label={`${account.name}. Ketuk sekali untuk membuka daftar pos, dua kali untuk ringkasan singkat.`}
     onKeyDown={(event) => {
@@ -339,5 +339,5 @@ function AccountCard({ account, allocations, pending, onToggleActive, onDelete }
         <div data-account-card-action onClick={stop} onDoubleClick={stop} className="mt-3 flex justify-end"><Button asChild size="sm" variant="outline"><Link href={destination}>Kelola semua pos <ArrowLeft className="h-3.5 w-3.5 rotate-180" /></Link></Button></div>
       </div>
     </div>
-  </Card>;
+  </div>;
 }
