@@ -8,6 +8,7 @@ import {
   ArrowUpRight,
   BarChart3,
   Check,
+  ClipboardList,
   Gift,
   GripVertical,
   Landmark,
@@ -61,7 +62,9 @@ import {
 } from "@/lib/widgets";
 import { cn } from "@/lib/utils";
 
-const ICONS: Record<WidgetKey, LucideIcon> = {
+// `page-budget` is retained here as a compatibility icon for old generated
+// widget types/layouts, while the current registry no longer exposes that page.
+const ICONS: Record<WidgetKey, LucideIcon> & Partial<Record<"page-budget", LucideIcon>> = {
   balance: Wallet,
   income: ArrowDownLeft,
   expense: ArrowUpRight,
@@ -83,6 +86,7 @@ const ICONS: Record<WidgetKey, LucideIcon> = {
   "page-calendar": ListChecks,
   "page-routes": MapPinned,
   "page-shopping": ShoppingCart,
+  "page-budget": ClipboardList,
   "page-categories": Tags,
   "page-wishlist": Heart,
   "page-share": Target,
