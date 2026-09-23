@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ArrowLeftRight, Bot, Heart, ListChecks, MapPinned, Receipt, Repeat, Settings, ShoppingCart, Tags, Target, Wallet } from "lucide-react";
+import { ArrowLeftRight, Bot, BrainCircuit, ListChecks, MapPinned, Receipt, Repeat, Settings, ShoppingCart, Tags, Target, Wallet } from "lucide-react";
 import { BalanceHero, BalanceHeroSkeleton } from "@/components/dashboard/balance-hero";
 import { DashboardBanner, type BannerSettings } from "@/components/dashboard/banner";
 import { DashboardEditProvider, EditWidgetsButton } from "@/components/dashboard/edit-context";
@@ -8,7 +8,7 @@ import { AccountsWidget } from "@/components/dashboard/widgets/accounts-widget";
 import { CategoriesWidget } from "@/components/dashboard/widgets/categories-widget";
 import { FlowWidget, type FlowPoint } from "@/components/dashboard/widgets/flow-widget";
 import { GoalsWidget } from "@/components/dashboard/widgets/goals-widget";
-import { ShoppingWidget, TasksWidget, WishlistWidget } from "@/components/dashboard/widgets/life-widgets";
+import { ShoppingWidget, TasksWidget } from "@/components/dashboard/widgets/life-widgets";
 import { RecentWidget, type RecentRow } from "@/components/dashboard/widgets/recent-widget";
 import { StatWidget } from "@/components/dashboard/widgets/stat-widget";
 import { PageShortcutWidget } from "@/components/dashboard/widgets/page-shortcut-widget";
@@ -26,7 +26,6 @@ import {
 import type {
   Account,
   Category,
-  ItemPriority,
   MemberOwner,
   SavingsGoal,
   Transaction,
@@ -34,8 +33,6 @@ import type {
 import type { ViewKey } from "@/components/member-switcher";
 
 export const dynamic = "force-dynamic";
-
-const PRIORITY_ORDER: Record<ItemPriority, number> = { high: 0, medium: 1, low: 2 };
 
 import { getView } from "@/lib/workspace";
 
@@ -62,7 +59,6 @@ export default async function DashboardPage() {
     { data: savedWidgets },
     { data: taskRows },
     { data: shoppingRows },
-    { data: wishRows },
   ] = await Promise.all([
     supabase.from("accounts").select("*").eq("is_active", true).order("balance", { ascending: false }),
     supabase
@@ -94,12 +90,6 @@ export default async function DashboardPage() {
       .eq("is_bought", false)
       .order("created_at", { ascending: false })
       .limit(30),
-    supabase
-      .from("wishlist_items")
-      .select("id, name, price, priority, owner")
-      .eq("is_purchased", false)
-      .order("created_at", { ascending: false })
-      .limit(40),
   ]);
 
   const mine = <T extends { owner?: MemberOwner; assigned_to?: MemberOwner }>(row: T) => {
@@ -267,19 +257,6 @@ export default async function DashboardPage() {
         }))}
       />
     ),
-    wishlist: (
-      <WishlistWidget
-        items={(wishRows ?? [])
-          .filter(mine)
-          .map((w) => ({
-            id: w.id as string,
-            name: w.name as string,
-            price: w.price === null ? null : Number(w.price),
-            priority: w.priority as ItemPriority,
-          }))
-          .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])}
-      />
-    ),
     "page-ai": <PageShortcutWidget title="KITA AI" description="Tanya tentang uang dan rencana bersama." href="/dashboard/ai" icon={Bot} />,
     "page-transactions": <PageShortcutWidget title="Transaksi" description="Catat dan tinjau pemasukan, pengeluaran, dan transfer." href="/dashboard/transactions" icon={ArrowLeftRight} />,
     "page-accounts": <PageShortcutWidget title="Akun" description="Kelola rekening, e-wallet, dan saldo tunai." href="/dashboard/accounts" icon={Wallet} />,
@@ -289,8 +266,8 @@ export default async function DashboardPage() {
     "page-calendar": <PageShortcutWidget title="Calendar KITA" description="Buka agenda, tugas, dan kegiatan." href="/dashboard/calendar" icon={ListChecks} />,
     "page-routes": <PageShortcutWidget title="Rute & Rencana" description="Lihat peta dan tujuan perjalanan harian." href="/dashboard/routes" icon={MapPinned} />,
     "page-shopping": <PageShortcutWidget title="Belanja" description="Buka daftar belanja bersama." href="/dashboard/shopping" icon={ShoppingCart} />,
+    "page-nudge": <PageShortcutWidget title="Nudge" description="Lihat hal yang mungkin perlu kamu perhatikan." href="/dashboard/nudge" icon={BrainCircuit} />,
     "page-categories": <PageShortcutWidget title="Kategori" description="Kelola kategori transaksi." href="/dashboard/categories" icon={Tags} />,
-    "page-wishlist": <PageShortcutWidget title="Wishlist" description="Lihat barang yang ingin diwujudkan." href="/dashboard/wishlist" icon={Heart} />,
     "page-share": <PageShortcutWidget title="Share Story" description="Buat cerita visual untuk dibagikan." href="/dashboard/share" icon={Target} />,
     "page-settings": <PageShortcutWidget title="Pengaturan" description="Atur tampilan, profil, dan preferensi." href="/dashboard/settings" icon={Settings} />,
   };

@@ -154,19 +154,6 @@ export type ShoppingItem = {
   created_at: string;
 };
 
-export type WishlistItem = {
-  id: string;
-  owner: MemberOwner;
-  name: string;
-  price: number | null;
-  url: string | null;
-  priority: ItemPriority;
-  is_purchased: boolean;
-  purchased_on: string | null;
-  notes: string | null;
-  created_at: string;
-};
-
 export const PRIORITY_LABEL: Record<ItemPriority, string> = {
   high: "Prioritas tinggi",
   medium: "Prioritas sedang",
