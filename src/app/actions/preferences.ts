@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { fail, getUserClient, NO_HOUSEHOLD, UNAUTH, type ActionResult } from "./_shared";
 
-const THEMES = ["sage", "deep-purple", "deep-blue", "nebula", "burgundy", "ocean", "honey", "graphite", "blackpink", "midnight-rose", "matcha", "amethyst-night"] as const;
+const THEMES = ["sage", "deep-purple", "deep-blue", "nebula", "burgundy", "ocean", "honey", "graphite", "blackpink", "midnight-rose", "matcha", "amethyst-night", "deep-black"] as const;
 const MODES = ["light", "dark", "system"] as const;
 const RADII = ["sharp", "soft", "round"] as const;
 const MOBILE_NAV_PATHS = ["/dashboard", "/dashboard/ai", "/dashboard/transactions", "/dashboard/accounts", "/dashboard/finance", "/dashboard/savings", "/dashboard/recurring", "/dashboard/calendar", "/dashboard/routes", "/dashboard/shopping", "/dashboard/nudge", "/dashboard/categories", "/dashboard/share", "/dashboard/settings"] as const;
